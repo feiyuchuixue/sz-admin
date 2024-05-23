@@ -4,7 +4,7 @@
     title="代码预览"
     :destroy-on-close="true"
     :close-on-click-modal="false"
-    :close-on-press-escape="false"
+    :close-on-press-escape="true"
     width="65vw"
     top="5vh"
     append-to-body

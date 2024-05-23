@@ -4,7 +4,7 @@
     :title="`${paramsProps.title}`"
     :destroy-on-close="true"
     :close-on-click-modal="false"
-    :close-on-press-escape="false"
+    :close-on-press-escape="true"
     width="95vw"
     top="5vh"
     append-to-body
