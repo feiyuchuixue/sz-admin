@@ -175,7 +175,7 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   if (!isAdd) {
     const record = await getSysClientDetailApi({ id: row?.clientId })
     row = record?.data
-  }else {
+  } else {
     row.activeTimeout = 86400
     row.timeout = 604800
   }

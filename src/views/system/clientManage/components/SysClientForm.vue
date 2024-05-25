@@ -19,17 +19,17 @@
         <template #label>
           <el-space :size="4">
             <span>clientId</span>
-            <el-tooltip effect="dark" content="唯一标识串，用于token的生成。针对不同端生成不同类型的token。多端尽量不要使用相同token" placement="top">
+            <el-tooltip
+              effect="dark"
+              content="唯一标识串，用于token的生成。针对不同端生成不同类型的token。多端尽量不要使用相同token"
+              placement="top"
+            >
               <i :class="'iconfont icon-yiwen'"></i>
             </el-tooltip>
           </el-space>
           <span>&nbsp;:</span>
         </template>
-        <el-input
-          disabled
-          v-model="paramsProps.row.clientId"
-          clearable
-        ></el-input>
+        <el-input disabled v-model="paramsProps.row.clientId" clearable></el-input>
       </el-form-item>
       <el-form-item label="客户端名称" prop="clientKey">
         <el-input
@@ -49,17 +49,17 @@
           </el-space>
           <span>&nbsp;:</span>
         </template>
-        <el-input
-          disabled
-          v-model="paramsProps.row.clientSecret"
-          clearable
-        ></el-input>
+        <el-input disabled v-model="paramsProps.row.clientSecret" clearable></el-input>
       </el-form-item>
       <el-form-item label="授权类型" prop="grantTypeCd">
         <template #label>
           <el-space :size="4">
             <span>授权类型</span>
-            <el-tooltip effect="dark" content="选择认证策略strategy，如PasswordStrategy。多选支持后续完善" placement="top">
+            <el-tooltip
+              effect="dark"
+              content="选择认证策略strategy，如PasswordStrategy。多选支持后续完善"
+              placement="top"
+            >
               <i :class="'iconfont icon-yiwen'"></i>
             </el-tooltip>
           </el-space>
@@ -80,7 +80,6 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备类型" prop="deviceTypeCd">
-
         <el-select v-model="paramsProps.row.deviceTypeCd" clearable placeholder="请选择设备类型">
           <el-option
             v-for="item in optionsStore.getDictOptions('device_type')"
@@ -94,7 +93,11 @@
         <template #label>
           <el-space :size="4">
             <span>token活跃超时时间</span>
-            <el-tooltip effect="dark" content="指定此次登录 token 最低活跃频率，单位：秒。如果用户在活跃时间内未作任何操作将踢出登录。对应sa-token activeTimeout。" placement="top">
+            <el-tooltip
+              effect="dark"
+              content="指定此次登录 token 最低活跃频率，单位：秒。如果用户在活跃时间内未作任何操作将踢出登录。对应sa-token activeTimeout。"
+              placement="top"
+            >
               <i :class="'iconfont icon-yiwen'"></i>
             </el-tooltip>
           </el-space>
@@ -111,7 +114,11 @@
         <template #label>
           <el-space :size="4">
             <span>token活跃超时时间</span>
-            <el-tooltip effect="dark" content="指定此次登录 token 有效期，单位：秒。token的最大有效期。对应sa-token timeout" placement="top">
+            <el-tooltip
+              effect="dark"
+              content="指定此次登录 token 有效期，单位：秒。token的最大有效期。对应sa-token timeout"
+              placement="top"
+            >
               <i :class="'iconfont icon-yiwen'"></i>
             </el-tooltip>
           </el-space>

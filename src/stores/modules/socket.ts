@@ -9,7 +9,7 @@ import { ElMessageBox } from 'element-plus'
 
 const socketUrl = import.meta.env.VITE_SOCKET_URL
 
-const MAX_RECONNECT_COUNT = 3
+const MAX_RECONNECT_COUNT = 10
 
 /**
  * 使用socket
@@ -69,15 +69,22 @@ export const useSocketStore = defineStore('socket', () => {
 
   const _onClose = () => {
     socket.value = null
-    // 重连
-    if (canReconnect.value && reconnectCount.value < MAX_RECONNECT_COUNT) {
-      // 增加一次重连次数
-      reconnectCount.value++
-      // 重新连接
-      setTimeout(() => {
-        open()
-      }, reconnectCount.value * 5000)
+    if (canReconnect.value) {
+      handleReconnect()
     }
+  }
+
+  const handleReconnect = () => {
+    let timeout
+    if (reconnectCount.value < MAX_RECONNECT_COUNT) {
+      timeout = Math.min(10000 * Math.pow(2, reconnectCount.value), 30000) // 指数退避算法
+    } else {
+      timeout = 60000 // 超过最大次数次后，每分钟重试一次
+    }
+    setTimeout(() => {
+      reconnectCount.value++
+      open()
+    }, timeout)
   }
 
   /**

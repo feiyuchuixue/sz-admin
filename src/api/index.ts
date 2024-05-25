@@ -7,7 +7,7 @@ import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL, CODE_USER_FAIL } from '@/ap
 import type { IResultData } from '@/api/interface'
 import { useUserStore } from '@/stores/modules/user'
 import { useAuthStore } from '@/stores/modules/auth'
-// import { useSocketStore } from '@/stores/modules/socket'
+import { useSocketStore } from '@/stores/modules/socket'
 import { ElMessage } from 'element-plus'
 
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -59,7 +59,7 @@ class RequestHttp {
       (response) => {
         const { data } = response
         const userStore = useUserStore()
-        //const socketStore = useSocketStore()
+        const socketStore = useSocketStore()
         const authStore = useAuthStore()
         //tryHideFullScreenLoading()
         // 登陆失效
@@ -67,7 +67,7 @@ class RequestHttp {
           userStore.clear()
           authStore.clear()
           // 关闭socket
-          //socketStore.close()
+          socketStore.close()
 
           router.replace(LOGIN_URL)
           ElMessage.error(data.message)

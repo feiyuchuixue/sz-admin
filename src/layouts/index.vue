@@ -12,7 +12,7 @@ import LayoutClassic from '@/layouts/LayoutClassic/index.vue'
 import LayoutTransverse from '@/layouts/LayoutTransverse/index.vue'
 import LayoutColumns from '@/layouts/LayoutColumns/index.vue'
 import { useAppStore } from '@/stores/modules/app'
-// import { useSocketStore } from '@/stores/modules/socket'
+import { useSocketStore } from '@/stores/modules/socket'
 
 defineOptions({
   name: 'Layout'
@@ -29,8 +29,8 @@ const appStore = useAppStore()
 const layout = computed(() => appStore.layout)
 
 // 开启socket
-/*const socketStore = useSocketStore()
-socketStore.open()*/
+const socketStore = useSocketStore()
+socketStore.open()
 </script>
 
 <style scoped lang="scss">
