@@ -29,6 +29,7 @@ const symbolId = computed(() => `#${props.prefix}-${props.name}`)
 
 const iconStyle = computed(() => ({
   width: `${props.width}px`,
-  height: `${props.height}px`
+  height: `${props.height}px`,
+  fill: 'var(--color)'
 }))
 </script>
