@@ -33,6 +33,7 @@
       <template #operation="{ row }">
         <el-button
           v-auth="'sys.client.update'"
+          v-if="row.isLock === 'F'"
           type="primary"
           link
           :icon="EditPen"
@@ -42,6 +43,7 @@
         </el-button>
         <el-button
           v-auth="'sys.client.remove'"
+          v-if="row.isLock === 'F'"
           type="primary"
           link
           :icon="Delete"
@@ -79,7 +81,7 @@ const proTableRef = ref<ProTableInstance>()
 
 // 表格配置项
 const columns: ColumnProps<ISysClient.Row>[] = [
-  { type: 'selection', width: 80 },
+  { type: 'selection', width: 80, selectable: (row) => row.isLock !== 'T' },
   { prop: 'clientId', label: 'ClientId' },
   { prop: 'clientKey', label: '客户端名称' },
   { prop: 'clientSecret', label: '客户端秘钥' },

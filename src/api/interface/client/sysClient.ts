@@ -38,5 +38,6 @@ export namespace ISysClient {
     clientStatusCd?: string
     version?: number
     remark?: string
+    isLock?: string
   }
 }
