@@ -11,7 +11,11 @@
         >
           <template #label>
             <el-icon v-show="item.icon && tabsIcon" class="tabs-icon">
-              <component :is="item.icon"></component>
+              <SvgIcon
+                  v-if="item.icon.startsWith('svg-')"
+                  :name="item.icon.substring(4)"
+              />
+              <component v-else :is="item.icon"></component>
             </el-icon>
             {{ item.title }}
           </template>
@@ -33,7 +37,7 @@ import MoreButton from './components/MoreButton.vue'
 import { useAppStore } from '@/stores/modules/app'
 import type { TabsMenuProps } from '@/stores/interface/tabs'
 import type { TabPaneName, TabsPaneContext } from 'element-plus'
-
+import SvgIcon from '@/components/SvgIcon/index.vue'
 defineOptions({
   name: 'Tabs'
 })
