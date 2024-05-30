@@ -7,6 +7,8 @@ import router from '@/router'
 import { ref } from 'vue'
 import { ElMessageBox } from 'element-plus'
 
+// 是否使用socket 当 import.meta.env.VITE_SOCKET_URL 不为空时，启用websocket
+const useSocket = !!import.meta.env.VITE_SOCKET_URL
 const socketUrl = import.meta.env.VITE_SOCKET_URL
 
 const MAX_RECONNECT_COUNT = 10
@@ -91,6 +93,7 @@ export const useSocketStore = defineStore('socket', () => {
    * 初始化开启socket
    */
   const open = () => {
+    if (!useSocket) return
     if (socket.value) return
     const userStore = useUserStore()
     // 建立WebSocket连接
@@ -110,6 +113,7 @@ export const useSocketStore = defineStore('socket', () => {
    * 关闭socket
    */
   const close = () => {
+    if (!useSocket) return
     if (!socket.value) return
     canReconnect.value = false
     reconnectCount.value = 0
