@@ -18,7 +18,11 @@
             @click="changeSubMenu(item)"
           >
             <el-icon>
-              <component :is="item.meta.icon"></component>
+              <SvgIcon
+                v-if="item.meta.icon.startsWith('svg-')"
+                :name="item.meta.icon.substring(4)"
+              />
+              <component v-else :is="item.meta.icon"></component>
             </el-icon>
             <span class="title">{{ item.meta.title }}</span>
           </div>
@@ -63,7 +67,7 @@ import ToolBarLeft from '@/layouts/components/Header/ToolBarLeft.vue'
 import ToolBarRight from '@/layouts/components/Header/ToolBarRight.vue'
 import SubMenu from '@/layouts/components/Menu/SubMenu.vue'
 import { useAppStore } from '@/stores/modules/app'
-
+import SvgIcon from '@/components/SvgIcon/index.vue'
 defineOptions({
   name: 'LayoutColumns'
 })

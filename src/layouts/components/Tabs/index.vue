@@ -11,10 +11,7 @@
         >
           <template #label>
             <el-icon v-show="item.icon && tabsIcon" class="tabs-icon">
-              <SvgIcon
-                  v-if="item.icon.startsWith('svg-')"
-                  :name="item.icon.substring(4)"
-              />
+              <SvgIcon v-if="item.icon.startsWith('svg-')" :name="item.icon.substring(4)" />
               <component v-else :is="item.icon"></component>
             </el-icon>
             {{ item.title }}

@@ -16,7 +16,11 @@
           >
             <template #title>
               <el-icon>
-                <component :is="subItem.meta?.icon"></component>
+                <SvgIcon
+                  v-if="subItem.meta?.icon.startsWith('svg-')"
+                  :name="subItem.meta?.icon.substring(4)"
+                />
+                <component v-else :is="subItem.meta?.icon"></component>
               </el-icon>
               <span>{{ subItem.meta.title }}</span>
             </template>
@@ -29,7 +33,11 @@
             @click="handleClickMenu(subItem)"
           >
             <el-icon>
-              <component :is="subItem.meta?.icon"></component>
+              <SvgIcon
+                v-if="subItem.meta?.icon.startsWith('svg-')"
+                :name="subItem.meta?.icon.substring(4)"
+              />
+              <component v-else :is="subItem.meta?.icon"></component>
             </el-icon>
             <template #title>
               <span>{{ subItem.meta.title }}</span>
@@ -50,7 +58,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Main from '@/layouts/components/Main/index.vue'
 import ToolBarRight from '@/layouts/components/Header/ToolBarRight.vue'
 import SubMenu from '@/layouts/components/Menu/SubMenu.vue'
-
+import SvgIcon from '@/components/SvgIcon/index.vue'
 defineOptions({
   name: 'LayoutTransverse'
 })
