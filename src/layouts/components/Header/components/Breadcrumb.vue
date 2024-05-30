@@ -5,7 +5,11 @@
         <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item.path">
           <div class="el-breadcrumb__inner is-link" @click="onBreadcrumbClick(item, index)">
             <el-icon v-show="item.meta.icon && appStore.breadcrumbIcon" class="breadcrumb-icon">
-              <component :is="item.meta.icon"></component>
+              <SvgIcon
+                v-if="item.meta.icon.startsWith('svg-')"
+                :name="item.meta.icon.substring(4)"
+              />
+              <component v-else :is="item.meta.icon"></component>
             </el-icon>
             <span class="breadcrumb-title">{{ item.meta.title }}</span>
           </div>
@@ -22,7 +26,7 @@ import { ArrowRight } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/modules/auth'
 import { HOME_URL } from '@/config'
 import { useAppStore } from '@/stores/modules/app'
-
+import SvgIcon from '@/components/SvgIcon/index.vue'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
