@@ -20,6 +20,8 @@ export const CHANNEL_DEFAULT: string = 'DEFAULTS'
 
 export const CHANNEL_KICK_OFF: string = 'KICK_OFF'
 
+export const UPGRADE_CHANNEL: string = 'UPGRADE_CHANNEL'
+
 /**
  * 是否选项
  * @type {[Options,Options]}

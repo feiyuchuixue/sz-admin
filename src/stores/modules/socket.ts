@@ -1,7 +1,7 @@
 import { useUserStore } from '@/stores/modules/user'
 import { defineStore } from 'pinia'
 import mittBus from '@/utils/mittBus'
-import { CHANNEL_DEFAULT, CHANNEL_KICK_OFF } from '@/config/consts'
+import { CHANNEL_DEFAULT, CHANNEL_KICK_OFF, UPGRADE_CHANNEL } from '@/config/consts'
 import { LOGIN_URL } from '@/config'
 import router from '@/router'
 import { ref } from 'vue'
@@ -56,6 +56,20 @@ export const useSocketStore = defineStore('socket', () => {
             }
           })
           break
+        case UPGRADE_CHANNEL:
+          close()
+          // 1.清除 Token
+          userStore.setToken('')
+          ElMessageBox.alert(res.data + '！', '温馨提示', {
+            confirmButtonText: '确定',
+            type: 'warning',
+            callback: () => {
+              // 2.重定向到登陆页
+              router.replace(LOGIN_URL)
+            }
+          })
+          break
+
         default:
           mittBus.emit(`socket.${res.channel}`, res.data)
       }
