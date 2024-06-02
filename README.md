@@ -1,7 +1,7 @@
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Sz-Admin</h1>
 <h4 align="center">基于SpringBoot3、Vue3的轻量级脚手架</h4>
 <p align="center">
-<a><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"></a>
+<a href="https://github.com/feiyuchuixue/sz-boot-parent/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"></a>
 </p>
 
 # 简介
@@ -91,4 +91,4 @@
 
 ## 参与讨论
 
-<img alt="代码生成配置1" src="https://minio.szadmin.cn/public/img/wechat.webp"/>
+<img alt="加入群聊" src="https://minio.szadmin.cn/public/img/wechat.webp"/>
