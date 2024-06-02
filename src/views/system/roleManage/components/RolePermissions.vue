@@ -122,6 +122,9 @@ const handleSubmit = async () => {
   try {
     const checkedKeys = treeRef.value!.getCheckedKeys()
     const halfCheckedKeys = treeRef.value!.getHalfCheckedKeys()
+    if (paramsProps.value.row.id === 1 && import.meta.env.VITE_PREVIEW) {
+      return ElMessage.warning({ message: '预览环境，禁止修改超级管理员权限，请谅解！' })
+    }
     await paramsProps.value.api!({
       roleId: paramsProps.value.row.id,
       menuIds: [...checkedKeys, ...halfCheckedKeys]

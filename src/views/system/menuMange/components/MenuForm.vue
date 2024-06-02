@@ -270,6 +270,9 @@ const ruleFormRef = ref()
 const handleSubmit = () => {
   ruleFormRef.value!.validate(async (valid: boolean) => {
     if (!valid) return
+    if (import.meta.env.VITE_PREVIEW) {
+      return ElMessage.warning({ message: '预览环境，禁止编辑菜单，请谅解！' })
+    }
     try {
       await paramsProps.value.api!(paramsProps.value.row)
       ElMessage.success({ message: `${paramsProps.value.title}成功！` })

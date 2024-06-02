@@ -197,7 +197,6 @@ const codeGene = (row: IGenerator.Info) => {
       codeGenerator(row.tableName).then((res) => {
         generatorVisible.value = true
         generatorCodeInfos.value = res.data
-        console.log('生成', res.data)
         ElMessage.success({ message: '生成成功！' })
       })
     })

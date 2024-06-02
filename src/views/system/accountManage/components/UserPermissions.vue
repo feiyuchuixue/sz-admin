@@ -79,6 +79,9 @@ const getInfo = (userId: number) => {
 
 const handleSubmit = async () => {
   try {
+    if (import.meta.env.VITE_PREVIEW && paramsProps.value.row.id === 1) {
+      return ElMessage.warning({ message: '预览环境，禁止修改超级管理员角色，请谅解！' })
+    }
     await paramsProps.value.api!({
       userId: paramsProps.value.row.id,
       roleIds: selectIds.value

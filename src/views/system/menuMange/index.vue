@@ -189,6 +189,9 @@ const presort = (row: any = {}, pid: number) => {
 }
 // 删除信息
 const deleteInfo = async (params: Menu.MenuOptions) => {
+  if (import.meta.env.VITE_PREVIEW) {
+    return ElMessage.warning({ message: '预览环境，禁止删除菜单，请谅解！' })
+  }
   await useHandleData(
     deleteMenu,
     { ids: [params.id] },

@@ -51,6 +51,7 @@
         </el-button>
         <el-button
           v-auth="'sys.menu.delete_btn'"
+          v-if="row.id !== 1"
           type="primary"
           link
           :icon="Delete"
@@ -82,7 +83,7 @@ defineOptions({
 
 // 表格配置项
 const columns: ColumnProps<IRole.Info>[] = [
-  { type: 'selection', width: 80 },
+  { type: 'selection', width: 80, selectable: (row) => row.id !== 1 },
   { prop: 'id', label: '编号', width: 150 },
   { prop: 'roleName', label: '角色名称' },
   { prop: 'remark', label: '备注' },

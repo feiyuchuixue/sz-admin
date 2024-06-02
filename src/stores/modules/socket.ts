@@ -6,7 +6,7 @@ import { LOGIN_URL } from '@/config'
 import router from '@/router'
 import { ref } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import {useAuthStore} from "@/stores/modules/auth";
+import { useAuthStore } from '@/stores/modules/auth'
 
 // 是否使用socket 当 import.meta.env.VITE_SOCKET_URL 不为空时，启用websocket
 const useSocket = !!import.meta.env.VITE_SOCKET_URL
@@ -48,8 +48,8 @@ export const useSocketStore = defineStore('socket', () => {
         case CHANNEL_KICK_OFF:
           close()
           // 1.清除 Token
-          userStore.clear();
-          authStore.clear();
+          userStore.clear()
+          authStore.clear()
           ElMessageBox.alert('您已经被强制踢下线了！', '温馨提示', {
             confirmButtonText: '确定',
             type: 'warning',
@@ -62,8 +62,8 @@ export const useSocketStore = defineStore('socket', () => {
         case UPGRADE_CHANNEL:
           close()
           // 1.清除 Token
-          userStore.clear();
-          authStore.clear();
+          userStore.clear()
+          authStore.clear()
 
           ElMessageBox.alert(res.data + '！', '温馨提示', {
             confirmButtonText: '确定',
