@@ -1,58 +1,58 @@
 <template>
   <div class="main-box">
     <DeptTree
-      label="name"
-      title="部门列表"
-      :request-api="getUserDeptTree"
-      :default-value="initParam.deptId"
-      @change="changeDeptTree"
-      ref="deptTreeRef"
+        label="name"
+        title="部门列表"
+        :request-api="getUserDeptTree"
+        :default-value="initParam.deptId"
+        @change="changeDeptTree"
+        ref="deptTreeRef"
     />
     <div class="table-box">
       <ProTable
-        ref="proTableRef"
-        title="用户列表"
-        :indent="20"
-        :columns="columns"
-        :search-columns="searchColumns"
-        :request-api="getTableList"
-        :search-col="4"
-        :init-param="initParam"
-        :border="false"
-        :loading-time="200"
+          ref="proTableRef"
+          title="用户列表"
+          :indent="20"
+          :columns="columns"
+          :search-columns="searchColumns"
+          :request-api="getTableList"
+          :search-col="4"
+          :init-param="initParam"
+          :border="false"
+          :loading-time="200"
       >
         <!-- 表格 header 按钮 -->
         <template #tableHeader="scope">
           <el-button
-            v-auth="'sys.user.create_btn'"
-            type="primary"
-            :icon="CirclePlus"
-            @click="openUserAdd('新增用户')"
+              v-auth="'sys.user.create_btn'"
+              type="primary"
+              :icon="CirclePlus"
+              @click="openUserAdd('新增用户')"
           >
             新增用户
           </el-button>
           <el-button
-            v-auth="'sys.user.delete_btn'"
-            type="danger"
-            :icon="Delete"
-            plain
-            :disabled="!scope.isSelected"
-            @click="batchDelete(scope.selectedListIds)"
+              v-auth="'sys.user.delete_btn'"
+              type="danger"
+              :icon="Delete"
+              plain
+              :disabled="!scope.isSelected"
+              @click="batchDelete(scope.selectedListIds)"
           >
             批量删除
           </el-button>
           <el-button type="info" plain :disabled="!scope.isSelected" @click="settingDept(scope)">
             <el-icon class="el-icon--left">
-              <SvgIcon name="org" />
+              <SvgIcon name="org"/>
             </el-icon>
             &nbsp;&nbsp; 设置部门
           </el-button>
           <el-button
-            type="info"
-            :icon="Unlock"
-            plain
-            :disabled="!scope.isSelected"
-            @click="unlock(scope.selectedListIds)"
+              type="info"
+              :icon="Unlock"
+              plain
+              :disabled="!scope.isSelected"
+              @click="unlock(scope.selectedListIds)"
           >
             解锁
           </el-button>
@@ -71,10 +71,10 @@
 
         <template #deptInfo="{ row }">
           <el-tag
-            class="user-item"
-            v-for="tag in formatInfo(row.deptInfo)"
-            :key="tag.id"
-            type="info"
+              class="user-item"
+              v-for="tag in formatInfo(row.deptInfo)"
+              :key="tag.id"
+              type="info"
           >
             {{ tag.name }}
           </el-tag>
@@ -82,10 +82,10 @@
 
         <template #roleInfo="{ row }">
           <el-tag
-            class="user-item"
-            v-for="tag in formatInfo(row.roleInfo)"
-            :key="tag.id"
-            type="info"
+              class="user-item"
+              v-for="tag in formatInfo(row.roleInfo)"
+              :key="tag.id"
+              type="info"
           >
             {{ tag.name }}
           </el-tag>
@@ -94,26 +94,26 @@
         <template #operation="{ row }">
           <div class="btn-group">
             <el-button
-              v-auth="'sys.user.update_btn'"
-              type="primary"
-              link
-              :icon="EditPen"
-              @click="openUserEdit('编辑用户', row)"
+                v-auth="'sys.user.update_btn'"
+                type="primary"
+                link
+                :icon="EditPen"
+                @click="openUserEdit('编辑用户', row)"
             >
               编辑
             </el-button>
             <el-button
-              v-auth="'sys.user.unlock_btn'"
-              type="primary"
-              :icon="Unlock"
-              link
-              @click="unlock(row.id)"
+                v-auth="'sys.user.unlock_btn'"
+                type="primary"
+                :icon="Unlock"
+                link
+                @click="unlock(row.id)"
             >
               解锁
             </el-button>
             <div
-              class="el-dropdown"
-              v-auth="[
+                class="el-dropdown"
+                v-auth="[
                 {
                   type: 'or',
                   conditions: [
@@ -126,7 +126,7 @@
               ]"
             >
               <el-dropdown trigger="click">
-                <el-button type="primary" link :icon="DArrowRight">更多 </el-button>
+                <el-button type="primary" link :icon="DArrowRight">更多</el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <div v-auth="'sys.user.role_set_btn'">
@@ -137,7 +137,7 @@
                     <div v-auth="'sys.user.dept_set_btn'">
                       <el-dropdown-item type="primary" @click="settingDept(row)">
                         <el-icon>
-                          <SvgIcon name="org" />
+                          <SvgIcon name="org"/>
                         </el-icon>
                         设置部门
                       </el-dropdown-item>
@@ -159,10 +159,10 @@
           </div>
         </template>
       </ProTable>
-      <UserAdd ref="userAddRef" />
-      <UserEdit ref="userEditRef" />
-      <UserPermissions ref="userPermissionsRef" />
-      <UserDeptForm ref="userDeptFormRef" @submit="refreshDeptTree" />
+      <UserAdd ref="userAddRef"/>
+      <UserEdit ref="userEditRef"/>
+      <UserPermissions ref="userPermissionsRef"/>
+      <UserDeptForm ref="userDeptFormRef" @submit="refreshDeptTree"/>
     </div>
   </div>
 </template>
@@ -179,7 +179,7 @@ import {
 } from '@element-plus/icons-vue'
 import ProTable from '@/components/ProTable/index.vue'
 import DeptTree from '@/views/system/accountManage/components/DeptTree.vue'
-import { useHandleData } from '@/hooks/useHandleData'
+import {useHandleData} from '@/hooks/useHandleData'
 import {
   addUser,
   deleteUser,
@@ -191,17 +191,20 @@ import {
   resetPassword,
   getUserDetailApi
 } from '@/api/modules/system/user'
-import { useOptionsStore } from '@/stores/modules/options'
+import {useOptionsStore} from '@/stores/modules/options'
 import UserAdd from '@/views/system/accountManage/components/UserAdd.vue'
 import UserEdit from '@/views/system/accountManage/components/UserEdit.vue'
 import UserPermissions from '@/views/system/accountManage/components/UserPermissions.vue'
-import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface'
-import type { IUser } from '@/api/interface/system/user'
-import type { IRole } from '@/api/interface/system/role'
-import { reactive, ref } from 'vue'
+import type {ColumnProps, ProTableInstance, SearchProps} from '@/components/ProTable/interface'
+import type {IUser} from '@/api/interface/system/user'
+import type {IRole} from '@/api/interface/system/role'
+import {reactive, ref} from 'vue'
 import SvgIcon from '@/components/SvgIcon/index.vue'
 import UserDeptForm from '@/views/system/accountManage/components/UserDeptForm.vue'
-import { ElMessage } from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {ITeacherStatistics} from "@/api/interface/teacher/teacherStatistics";
+import {useDownload} from "@/hooks/useDownload";
+import {exportTeacherStatisticsExcelApi} from "@/api/modules/teacher/teacherStatistics";
 
 defineOptions({
   name: 'accountManage'
@@ -211,10 +214,10 @@ const optionsStore = useOptionsStore()
 
 // 表格配置项
 const columns: ColumnProps<IRole.Info>[] = [
-  { type: 'selection', width: 55, selectable: (row) => row.id !== 1 },
-  { prop: 'username', label: '账户', width: 150, align: 'left' },
-  { prop: 'nickname', label: '昵称', width: 150, align: 'left' },
-  { prop: 'phone', label: '手机号', width: 120 },
+  {type: 'selection', width: 55, selectable: (row) => row.id !== 1},
+  {prop: 'username', label: '账户', width: 150, align: 'left'},
+  {prop: 'nickname', label: '昵称', width: 150, align: 'left'},
+  {prop: 'phone', label: '手机号', width: 120},
   {
     prop: 'deptInfo',
     label: '部门'
@@ -229,15 +232,15 @@ const columns: ColumnProps<IRole.Info>[] = [
     tag: true,
     enum: optionsStore.getDictOptions('account_status'),
     width: 80,
-    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' }
+    fieldNames: {label: 'codeName', value: 'id', tagType: 'callbackShowStyle'}
   },
-  { prop: 'createTime', label: '创建时间', width: 165 },
-  { prop: 'operation', label: '操作', width: 260, fixed: 'right' }
+  {prop: 'createTime', label: '创建时间', width: 165},
+  {prop: 'operation', label: '操作', width: 260, fixed: 'right'}
 ]
 
 const searchColumns: SearchProps[] = [
-  { prop: 'username', label: '账户', el: 'input' },
-  { prop: 'phone', label: '手机号', el: 'input' },
+  {prop: 'username', label: '账户', el: 'input'},
+  {prop: 'phone', label: '手机号', el: 'input'},
   {
     prop: 'isThisDeep',
     label: '直属部门',
@@ -259,7 +262,7 @@ const userAddRef = ref<InstanceType<typeof UserAdd>>()
 const openUserAdd = (title: string) => {
   const params: View.DefaultParams = {
     title,
-    row: { age: 0 },
+    row: {age: 0},
     api: addUser,
     getTableList: proTableRef.value?.getTableList
   }
@@ -268,10 +271,10 @@ const openUserAdd = (title: string) => {
 
 const userEditRef = ref<InstanceType<typeof UserEdit>>()
 const openUserEdit = async (title: string, row: any = {}) => {
-  const { data } = await getUserDetailApi({ id: row.id })
+  const {data} = await getUserDetailApi({id: row.id})
   const params: View.DefaultParams = {
     title,
-    row: { ...data },
+    row: {...data},
     api: editUser,
     getTableList: proTableRef.value?.getTableList
   }
@@ -293,14 +296,14 @@ const deptTreeRef = ref<InstanceType<typeof DeptTree>>()
 
 // 删除信息
 const deleteInfo = async (params: IUser.Info) => {
-  await useHandleData(deleteUser, { ids: [params.id] }, `删除【${params.username}】用户`)
+  await useHandleData(deleteUser, {ids: [params.id]}, `删除【${params.username}】用户`)
   proTableRef.value?.getTableList()
   refreshDeptTree()
 }
 
 // 批量删除信息
 const batchDelete = async (ids: string[]) => {
-  await useHandleData(deleteUser, { ids }, '删除所选用户信息')
+  await useHandleData(deleteUser, {ids}, '删除所选用户信息')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()
   refreshDeptTree()
@@ -336,25 +339,27 @@ const settingDept = (record: any) => {
 
 const unlock = async (id: string | string[]) => {
   if (Array.isArray(id)) {
-    await unlockUser({ ids: id })
+    await unlockUser({ids: id})
   } else {
-    await unlockUser({ ids: [id] })
+    await unlockUser({ids: [id]})
   }
   ElMessage.success(`解锁成功！`)
 }
 
 const resetPwd = async (row: any) => {
-  const param = { id: row?.id }
-  await resetPassword(param)
-  proTableRef.value?.getTableList()
-  ElMessage.success({
-    message: `账户 [` + row.username + `] 重置密码成功！`,
-    duration: 5000,
-    showClose: true
+  const param = {id: row?.id}
+  ElMessageBox.confirm('您确认要重置账户 [' + row.username + '] 密码?', '温馨提示', {type: 'warning'}).then(async () => {
+    await resetPassword(param)
+    proTableRef.value?.getTableList()
+    ElMessage.success({
+      message: `账户 [` + row.username + `] 重置密码成功！`,
+      duration: 5000,
+      showClose: true
+    })
   })
 }
 
-const initParam = reactive({ deptId: -1 })
+const initParam = reactive({deptId: -1})
 
 const selectTreeId = ref<number[]>([])
 const changeDeptTree = (val: number) => {
