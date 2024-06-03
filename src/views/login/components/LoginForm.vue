@@ -38,8 +38,8 @@
       登录
     </el-button>
   </div>
-  <div v-if="isPreview()" style="margin-top: 20px;color: var(--el-color-warning);">
-  <span>如无法登陆请联系作者：feiyuchuixue@163.com</span>
+  <div v-if="isPreview()" style="margin-top: 20px; color: var(--el-color-warning)">
+    <span>如无法登陆请联系作者：feiyuchuixue@163.com</span>
   </div>
 </template>
 
@@ -134,10 +134,9 @@ onMounted(() => {
   }
 })
 
-const isPreview =() =>{
+const isPreview = () => {
   return import.meta.env.VITE_PREVIEW
 }
-
 </script>
 
 <style scoped lang="scss">
