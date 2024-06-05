@@ -143,6 +143,9 @@ const ruleFormRef = ref()
 const handleSubmit = () => {
   ruleFormRef.value!.validate(async (valid: boolean) => {
     if (!valid) return
+    if (import.meta.env.VITE_PREVIEW) {
+      return ElMessage.warning({ message: '预览环境，禁止编辑用户信息，请谅解！' })
+    }
     try {
       const data = paramsProps.value.row
       await paramsProps.value.api!(data)
