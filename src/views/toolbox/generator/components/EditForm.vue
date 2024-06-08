@@ -98,19 +98,26 @@
       <div v-show="active === 1" style="margin: 0 20px">
         <h4 class="form-header h4">选择模版</h4>
         <div class="form-type">
-          <el-radio-group v-model="generatorInfo.generateType" size="large">
-            <el-radio-button label="前端+后端" value="all" />
+          <el-radio-group v-model="generatorInfo.generateType" size="large" @change="changeRadio">
+            <el-radio-button label="全量" value="all" />
             <el-radio-button label="后端" value="server" />
             <el-radio-button label="接口" value="service" />
+            <el-radio-button label="数据库" value="db" />
           </el-radio-group>
           <div class="tip custom-block">
-            <p>{{ typeContent[generatorInfo.generateType] }}</p>
+            <p style="color: var(--el-color-info)">
+              Tip： {{ typeContent[generatorInfo.generateType].tooltip }}
+            </p>
+            <p>{{ typeContent[generatorInfo.generateType].text }}</p>
           </div>
           <el-col :span="24">
-            <el-form-item label="Excel：" prop="type">
+            <el-form-item
+              prop="type"
+              v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'"
+            >
               <template #label>
                 <el-space :size="4">
-                  <span>Excel</span>
+                  <span>Excel支持</span>
                   <el-tooltip effect="dark" content="是否支持列表的导入导出" placement="top">
                     <i :class="'iconfont icon-yiwen'"></i>
                   </el-tooltip>
@@ -590,6 +597,7 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
   menuInitType: '1',
   btnPermissionType: '1'
 })
+const isShowExcel = ref<boolean>(true)
 
 // 表格配置项
 const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
@@ -728,11 +736,33 @@ const acceptParams = (params: View.DefaultParams) => {
   visible.value = true
 }
 
-const typeContent = ref({
-  all: 'Controller、Service、Mapper、DTO、PO、VO、前端',
-  server: 'Controller、Service、Mapper、DTO、PO、VO',
-  service: 'Service、Mapper、PO、VO'
-} as { [key: string]: string })
+const typeContent = ref<{
+  [key: string]: {
+    tooltip: string
+    text: string
+  }
+}>({
+  all: {
+    tooltip: '【增删改查】 所有组件，包括后端服务和前端视图',
+    text: 'Controller、Service、Mapper、DTO、PO、VO、 | views (vue)、interface (vue)、module (vue)'
+  },
+  server: {
+    tooltip: '【增删改查】 后端服务组件，不包括前端视图',
+    text: 'Controller、Service、Mapper、DTO、PO、VO'
+  },
+  service: {
+    tooltip: '服务层组件',
+    text: 'Service、Mapper、PO'
+  },
+  db: {
+    tooltip: '数据库交互组件，包括数据模型和映射配置',
+    text: 'PO、Mapper'
+  }
+})
+
+const changeRadio = (val: string) => {
+  isShowExcel.value = val === 'all' || val === 'server'
+}
 
 defineExpose({
   acceptParams
