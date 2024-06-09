@@ -4,6 +4,7 @@ import {defineConfig, ConfigEnv, UserConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import {createSvgIconsPlugin} from "vite-plugin-svg-icons";
+const path = require('node:path');
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}: ConfigEnv): UserConfig => {
@@ -24,7 +25,8 @@ export default defineConfig(({mode}: ConfigEnv): UserConfig => {
     ],
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        'package.json': path.resolve(__dirname, 'package.json')
       }
     },
     css: {
