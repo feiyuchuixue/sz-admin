@@ -482,7 +482,11 @@
           </el-row>
           <el-row>
             <el-col :span="24">
-              <el-form-item label="生成按钮权限" prop="btnPermissionType">
+              <el-form-item
+                label="生成按钮权限"
+                prop="btnPermissionType"
+                v-show="generatorInfo.menuInitType === '1'"
+              >
                 <template #label>
                   <el-space :size="4">
                     <span>生成按钮权限</span>

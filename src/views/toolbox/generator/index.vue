@@ -154,6 +154,7 @@ const refreshData = () => {
 }
 
 const editFormRef = ref<InstanceType<typeof EditForm>>()
+// 编辑
 const openEditDialog = (title: string, row = {}) => {
   const params: View.DefaultParams = {
     title,
@@ -162,6 +163,7 @@ const openEditDialog = (title: string, row = {}) => {
   }
   editFormRef.value?.acceptParams(params)
 }
+// 代码生成
 const codeGene = (row: IGenerator.Info) => {
   if (!isLocalEnv()) {
     ElMessage.warning({ message: '生成代码仅在dev或local环境可用！！' })
@@ -215,7 +217,7 @@ const download = (row: IGenerator.Info) => {
     '.zip'
   )
 }
-
+// 删除
 const delGene = (row: IGenerator.Info) => {
   ElMessageBox.confirm('您是否确认删除?', '温馨提示', {
     confirmButtonText: '确定',
@@ -228,7 +230,7 @@ const delGene = (row: IGenerator.Info) => {
     })
   })
 }
-
+//批量删除
 const delGeneBatch = useDebounceFn(() => {
   const ids = proTableRef.value!.selectedListIds
   if (ids.length <= 0) {
@@ -241,6 +243,7 @@ const delGeneBatch = useDebounceFn(() => {
   })
 })
 
+// 预览
 const previewRef = ref()
 const previewGene = (row: IGenerator.Info) => {
   const param = {
