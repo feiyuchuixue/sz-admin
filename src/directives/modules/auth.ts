@@ -17,11 +17,20 @@ const auth: Directive = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
     const { value } = binding
     const authStore = useAuthStore()
-    const currentPageRoles = authStore.authButtonListGet ?? []
+    const currentBtnPermissions = authStore.authButtonListGet ?? []
+    const currentPageRoles: string[] = authStore.authRoleListGet ?? []
+
+    const ADMIN_ROLE = 'admin'
+    const ADMIN_BYPASS = import.meta.env.VITE_ADMIN_BYPASS_PERMISSION === 'true'
+
+    // 如果配置允许对admin用户放行，并且当前用户角色包含admin，则放行
+    if (ADMIN_BYPASS && currentPageRoles.includes(ADMIN_ROLE)) {
+      return
+    }
 
     // 处理基础的单条件认证
     if (typeof value === 'string') {
-      if (!currentPageRoles.includes(value)) {
+      if (!currentBtnPermissions.includes(value)) {
         el.remove()
       }
       return
@@ -33,7 +42,7 @@ const auth: Directive = {
       value[0].type === 'and' &&
       Array.isArray(value[0].conditions)
     ) {
-      if (!value[0].conditions.every((item: string) => currentPageRoles.includes(item))) {
+      if (!value[0].conditions.every((item: string) => currentBtnPermissions.includes(item))) {
         el.remove()
       }
       return
@@ -46,7 +55,7 @@ const auth: Directive = {
       value[0].type === 'or' &&
       Array.isArray(value[0].conditions)
     ) {
-      if (!value[0].conditions.some((item: string) => currentPageRoles.includes(item))) {
+      if (!value[0].conditions.some((item: string) => currentBtnPermissions.includes(item))) {
         el.remove()
       }
       return

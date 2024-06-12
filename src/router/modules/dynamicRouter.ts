@@ -21,6 +21,7 @@ export const initDynamicRouter = async () => {
     // 1.获取菜单列表 && 按钮权限列表 && 字典列表
     await authStore.getAuthMenuList()
     await authStore.getAuthButtonList()
+    await authStore.getAuthRoleList()
     optionsStore.setReloadOptions()
     await optionsStore.getAllDictList()
     await authStore.setLoaded()

@@ -28,3 +28,8 @@ export const getAuthButtonListApi = () => {
 export const logoutApi = () => {
   return http.post(ADMIN_MODULE + `/auth/logout`)
 }
+
+// 获取用户角色
+export const getAuthRoleListApi = () => {
+  return http.get<string[]>(ADMIN_MODULE + `/sys-menu/user/roles`, {}, { loading: false })
+}
