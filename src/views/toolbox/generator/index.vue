@@ -12,8 +12,7 @@
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
         <el-button type="info" :icon="Upload" @click="openImport" v-auth="'generator.import'">
-          导入</el-button
-        >
+          导入</el-button>
         <el-button
           type="danger"
           :icon="Delete"
@@ -33,8 +32,7 @@
           @click="previewGene(row)"
           v-auth="'generator.preview'"
         >
-          预览</el-button
-        >
+          预览</el-button>
         <el-button
           type="primary"
           link
@@ -51,8 +49,7 @@
           @click="delGene(row)"
           v-auth="'generator.remove'"
         >
-          删除</el-button
-        >
+          删除</el-button>
         <el-button type="primary" link @click="download(row)" v-auth="'generator.zip'">
           <el-icon class="el-icon--right">
             <SvgIcon name="zip" />
@@ -83,8 +80,7 @@
     >
       <div class="tip custom-block">
         <template v-for="item in generatorCodeInfos" :key="item">
-          <el-text type="info" class="el-text-code" size="small" line-clamp="2"> {{ item }}</el-text
-          ><br />
+          <el-text type="info" class="el-text-code" size="small" line-clamp="2"> {{ item }}</el-text><br />
         </template>
       </div>
       <template #footer>
