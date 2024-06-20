@@ -39,13 +39,13 @@ export default defineConfig(({mode}: ConfigEnv): UserConfig => {
     server: {
       host: "0.0.0.0",
       port: Number(env.VITE_PORT),
-      open: env.VITE_OPEN === "true",
+      // open: env.VITE_OPEN === "true",
       proxy: {
         "/api": {
           target: env.VITE_API_URL,
           changeOrigin: true,
           ws: true,
-          rewrite: path => path.replace(new RegExp(`^/api`), ""),
+          rewrite: (path) => path.replace(/^\/api/, ''),
           // https is require secure=false
           ...(/^https:\/\//.test(env.VITE_API_URL) ? {secure: false} : {})
         }

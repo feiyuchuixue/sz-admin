@@ -71,8 +71,8 @@ const loginRules = reactive({
 
 const loading = ref(false)
 const loginForm = reactive({
-  username: '',
-  password: '',
+  username: 'admin',
+  password: 'sz123456',
   clientId: '',
   grantType: ''
 })
