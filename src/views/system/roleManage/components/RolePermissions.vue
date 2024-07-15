@@ -7,6 +7,8 @@
     draggable
     @close="reset"
     append-to-body
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
   >
     <el-form label-width="100px" label-suffix=" :" @submit.enter.prevent="handleSubmit">
       <el-form-item>
