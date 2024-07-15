@@ -17,6 +17,9 @@ export const useTabsStore = defineStore(
       if (tabsMenuList.value.every((item) => item.path !== tabItem.path)) {
         tabsMenuList.value.push(tabItem)
       }
+      if (!keepAliveStore.keepAliveName.includes(tabItem.name) && tabItem.isKeepAlive) {
+        keepAliveStore.addKeepAliveName(tabItem.name)
+      }
     }
 
     // Remove Tabs
