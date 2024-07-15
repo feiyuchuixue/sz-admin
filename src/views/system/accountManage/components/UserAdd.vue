@@ -19,6 +19,15 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="账户" prop="username">
+            <template #label>
+              <el-space :size="2">
+                <span>账户</span>
+                <el-tooltip effect="dark" content="字母、数字和下划线，用于登录。" placement="top">
+                  <i :class="'iconfont icon-yiwen'"></i>
+                </el-tooltip>
+              </el-space>
+              <span>&nbsp;:</span>
+            </template>
             <el-input
               v-model="paramsProps.row.username"
               placeholder="请填写账户"
@@ -102,7 +111,6 @@
 </template>
 
 <script setup lang="ts">
-/*import { useOptionsStore } from '@/stores/modules/options'*/
 import SimplifyUpload from '@/components/SimplifyUpload/index.vue'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
@@ -110,11 +118,12 @@ import { ElMessage } from 'element-plus'
 defineOptions({
   name: 'UserAdd'
 })
-
-/*const optionsStore = useOptionsStore()*/
-
 const rules = reactive({
-  username: [{ required: true, message: '请填写账户' }]
+  username: [
+    { required: true, message: '用户名是必填项', trigger: 'blur' },
+    { min: 3, max: 32, message: '用户名长度应在3到32个字符之间', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
+  ]
 })
 
 const visible = ref(false)
@@ -127,7 +136,6 @@ const paramsProps = ref<View.DefaultParams>({
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
-  console.log('接收传参===', params)
   paramsProps.value = params
   visible.value = true
 }
