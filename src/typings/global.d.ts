@@ -21,6 +21,7 @@ declare namespace Menu {
     isFull: string
     isAffix: string
     isKeepAlive: string
+    useDataScope: string
   }
 }
 

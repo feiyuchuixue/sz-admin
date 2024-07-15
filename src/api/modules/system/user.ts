@@ -2,7 +2,7 @@ import http from '@/api'
 import { ADMIN_MODULE } from '@/api/helper/prefix'
 import type { IUser } from '@/api/interface/system/user'
 import type { IPage } from '@/api/interface'
-import type { ISysDept } from '@/api/interface/system/sysDept'
+import type { ISysDept } from '@/api/interface/system/dept'
 
 /**
  * 获取用户列表
@@ -117,4 +117,22 @@ export const unlockUser = (params: { ids: string[] }) => {
 export const getUserDetailApi = (params: { id: string }) => {
   const { id } = params
   return http.get<IUser.Info>(ADMIN_MODULE + `/sys-user/${id}`)
+}
+
+/**
+ * 获取用户数据角色
+ * @param params
+ * @returns {*}
+ */
+export const getDataUserRole = (params: { userId: number }) => {
+  return http.get<IUser.RoleData>(ADMIN_MODULE + `/sys-user/datarole`, params)
+}
+
+/**
+ * 设置用户数据角色
+ * @param params
+ * @returns {*}
+ */
+export const setUserDataRole = (params: IUser.RoleForm) => {
+  return http.put(ADMIN_MODULE + `/sys-user/datarole`, params)
 }

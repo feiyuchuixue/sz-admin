@@ -3,8 +3,7 @@
     v-model="visible"
     :title="`${paramsProps.title}-${paramsProps.row?.roleName}`"
     :destroy-on-close="true"
-    width="580px"
-    draggable
+    width="600px"
     @close="reset"
     append-to-body
     :close-on-click-modal="false"
@@ -15,6 +14,7 @@
         <el-checkbox v-model="isExpand" @change="changeExpand">展开/折叠</el-checkbox>
         <el-checkbox v-model="isNodeAll" @change="changeNodeAll">全选/全不选</el-checkbox>
         <el-checkbox v-model="isCheckStrictly">父子联动</el-checkbox>
+        <el-checkbox v-model="isShowPermissions">权限标识</el-checkbox>
       </el-form-item>
       <el-form-item label="权限">
         <el-tree
@@ -26,7 +26,20 @@
           :check-strictly="!isCheckStrictly"
           :props="treeProps"
           empty-text="加载中，请稍候"
-        />
+        >
+          <template #default="{ node, data }">
+            <span class="custom-tree-node">
+              <span>{{ node.label }}</span>
+              <el-tag
+                v-if="data.permissions && isShowPermissions"
+                style="margin-left: 10px"
+                size="small"
+              >
+                {{ data.permissions }}
+              </el-tag>
+            </span>
+          </template>
+        </el-tree>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -53,6 +66,7 @@ const treeProps = {
 const isExpand = ref(true)
 const isNodeAll = ref(false)
 const isCheckStrictly = ref(true)
+const isShowPermissions = ref(false)
 
 const treeRef = ref()
 

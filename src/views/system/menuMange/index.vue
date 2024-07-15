@@ -20,9 +20,9 @@
         >
           新增菜单
         </el-button>
-        <el-button type="info" :icon="Sort" @click="changeExpand"> 展开/折叠 </el-button>
+        <el-button type="info" :icon="Sort" @click="changeExpand"> 展开/折叠</el-button>
       </template>
-      <!-- 菜单图标 -->
+      <!-- 图标 -->
       <template #icon="scope">
         <el-icon :size="18" v-if="scope.row.meta.icon">
           <SvgIcon
@@ -32,6 +32,17 @@
           <component v-else :is="scope.row.meta.icon"></component>
         </el-icon>
       </template>
+      <template #useDataScope="scope">
+        <el-switch
+          v-if="scope.row.menuTypeCd == '1002002'"
+          v-model="scope.row.meta.useDataScope"
+          :active-value="'T'"
+          :inactive-value="'F'"
+          :loading="switchLoading"
+          :before-change="() => changeDataScope(scope.row)"
+        />
+      </template>
+
       <!-- 菜单操作 -->
       <template #operation="{ row }">
         <el-button
@@ -89,7 +100,8 @@ import {
   editMenu,
   exportMenuSql,
   getMenuInfo,
-  getMenuList
+  getMenuList,
+  chaneDataRole
 } from '@/api/modules/system/menu'
 import MenuForm from '@/views/system/menuMange/components/MenuForm.vue'
 import { useHandleData } from '@/hooks/useHandleData'
@@ -99,7 +111,7 @@ import type { IMenu } from '@/api/interface/system/menu'
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface'
 import HighCode from '@/components/HighCode/index.vue'
 import { computed, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import SvgIcon from '@/components/SvgIcon/index.vue'
 
 defineOptions({
@@ -134,10 +146,15 @@ const columns: ColumnProps<Menu.MenuOptions>[] = [
   { prop: 'name', label: '路由名称' },
   { prop: 'path', label: '路由地址' },
   { prop: 'component', label: '组件路径' },
+  {
+    prop: 'useDataScope',
+    label: '数据权限支持',
+    width: 100
+  },
   { prop: 'permissions', label: '权限', tag: true, width: 200 },
   { prop: 'operation', label: '操作', width: 300, fixed: 'right' }
 ]
-
+const switchLoading = ref(false)
 // 打开 drawer(新增、查看、编辑)
 const menuFormRef = ref<InstanceType<typeof MenuForm>>()
 const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
@@ -214,6 +231,51 @@ const sqlDialTitle = computed(() => {
 const changeExpand = () => {
   defaultExpandAllKey.value = !defaultExpandAllKey.value
   proTableRef.value?.refresh()
+}
+const changeDataScope = (params: Menu.MenuOptions) => {
+  switchLoading.value = true
+  const menuId = params.id
+  if (import.meta.env.VITE_PREVIEW && menuId == '85b54322630f43a39296488a5e76ba16') {
+    switchLoading.value = false
+    ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' })
+    return false
+  }
+  const handleSuccess = (resolve: (value: boolean | PromiseLike<boolean>) => void) => {
+    setTimeout(() => {
+      switchLoading.value = false
+      ElMessage.success('切换数据权限成功')
+      resolve(true)
+    }, 200)
+  }
+
+  const handleError = (reject: (reason?: any) => void) => {
+    setTimeout(() => {
+      switchLoading.value = false
+      reject()
+    }, 200)
+  }
+
+  return new Promise((resolve, reject) => {
+    if (params.meta.useDataScope === 'T') {
+      ElMessageBox.confirm(
+        `您确认要关闭菜单 [${params.meta.title}] 数据权限支持吗? 此操作有可能导致数据权限失效 ！！`,
+        '温馨提示',
+        { type: 'warning' }
+      )
+        .then(() => {
+          chaneDataRole({ id: menuId })
+            .then(() => handleSuccess(resolve))
+            .catch(() => handleError(reject))
+        })
+        .catch(() => {
+          switchLoading.value = false
+        })
+    } else {
+      chaneDataRole({ id: menuId })
+        .then(() => handleSuccess(resolve))
+        .catch(() => handleError(reject))
+    }
+  })
 }
 </script>
 <style scoped lang="scss">

@@ -204,6 +204,9 @@ const getTableList = (params: ITeacherStatistics.Query) => {
 }
 const formatParams = (params: ITeacherStatistics.Query) => {
   let newParams = JSON.parse(JSON.stringify(params))
+  newParams.checkTime && (newParams.checkTimeStart = newParams.checkTime[0])
+  newParams.checkTime && (newParams.checkTimeEnd = newParams.checkTime[1])
+  delete newParams.checkTime
   return newParams
 }
 // 打开 drawer(新增、查看、编辑)
