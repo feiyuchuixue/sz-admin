@@ -51,4 +51,16 @@ export namespace ISysDept {
     userIds: number[]
     deptIds: number[]
   }
+
+  export interface Dept {
+    deptLists: DeptTree[]
+    selectIds: number[]
+  }
+
+  export interface DeptTree {
+    id: number
+    pid: number
+    name: string
+    children: DeptTree[]
+  }
 }

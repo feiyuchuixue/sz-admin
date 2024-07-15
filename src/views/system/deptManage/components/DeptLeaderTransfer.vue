@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ISysDept } from '@/api/interface/system/sysDept'
+import type { ISysDept } from '@/api/interface/system/dept'
 import { ref } from 'vue'
 
 defineOptions({
