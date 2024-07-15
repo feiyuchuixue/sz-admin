@@ -9,7 +9,7 @@ import { ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/modules/auth'
 
 // 是否使用socket 当 import.meta.env.VITE_SOCKET_URL 不为空时，启用websocket
-const useSocket = !!import.meta.env.VITE_SOCKET_URL
+const useSocket = !import.meta.env.VITE_SOCKET_URL
 const socketUrl = import.meta.env.VITE_SOCKET_URL
 
 const MAX_RECONNECT_COUNT = 10
