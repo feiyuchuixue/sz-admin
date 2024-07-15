@@ -64,13 +64,13 @@ const preloadImage = (url: string): Promise<void> => {
 }
 
 const getLogo = async () => {
-  const logo = userStore.userInfo.logo || '@/assets/images/avatar.gif'
+  const logo = userStore.userInfo.logo || '/src/assets/images/avatar.gif'
   try {
     await preloadImage(logo)
     avatarSrc.value = logo
   } catch (error) {
     console.error(`Error loading image: ${logo}`)
-    avatarSrc.value = '@/assets/images/avatar.gif' // 默认头像地址
+    avatarSrc.value = '/src/assets/images/avatar.gif' // 默认头像地址
   }
 }
 
