@@ -15,6 +15,21 @@
       :model="paramsProps.row"
       @submit.enter.prevent="handleSubmit"
     >
+      <el-form-item label="业务类型" prop="type">
+        <el-select
+          v-model="paramsProps.row.type"
+          :disabled="!isAdd"
+          clearable
+          placeholder="请选择业务字典类型"
+        >
+          <el-option
+            v-for="item in dictBusinessType"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="字典名称" prop="typeName">
         <el-input
           v-model="paramsProps.row.typeName"
@@ -49,16 +64,18 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { dictBusinessType } from '@/config/consts'
 
 defineOptions({
   name: 'dictTypeForm'
 })
 
 const rules = reactive({
+  type: [{ required: true, message: '请选择业务字典类型' }],
   typeCode: [{ required: true, message: '请填写字典类型' }],
   typeName: [{ required: true, message: '请填写字典名称' }]
 })
-
+const isAdd = ref(true)
 const visible = ref(false)
 const paramsProps = ref<View.DefaultParams>({
   title: '',
@@ -71,6 +88,7 @@ const paramsProps = ref<View.DefaultParams>({
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params
   visible.value = true
+  isAdd.value = params?.isAdd
 }
 
 // 提交数据（新增/编辑）
