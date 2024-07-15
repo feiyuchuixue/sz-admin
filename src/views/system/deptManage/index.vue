@@ -54,7 +54,6 @@
           删除
         </el-button>
       </template>
-
       <template #leaderInfo="{ row }">
         <el-tag
           class="user-item"
@@ -80,11 +79,11 @@ import {
   updateSysDeptApi,
   getSysDeptListApi,
   getSysDeptDetailApi
-} from '@/api/modules/system/sysDept'
+} from '@/api/modules/system/dept'
 import { useHandleData } from '@/hooks/useHandleData'
 import SysDeptForm from '@/views/system/deptManage/components/SysDeptForm.vue'
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface'
-import type { ISysDept } from '@/api/interface/system/sysDept'
+import type { ISysDept } from '@/api/interface/system/dept'
 
 defineOptions({
   name: 'SysDeptView'

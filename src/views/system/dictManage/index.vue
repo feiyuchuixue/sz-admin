@@ -11,8 +11,7 @@
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
         <el-button type="primary" :icon="CirclePlus" @click="openAddEdit('新增字典类型')">
-          新增字典类型</el-button
-        >
+          新增字典类型</el-button>
         <el-button
           type="danger"
           :icon="Delete"
