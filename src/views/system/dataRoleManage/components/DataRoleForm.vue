@@ -33,7 +33,7 @@
               clearable
               placeholder="请选择数据权限"
               @change="changeDataScope"
-              :disabled="true"
+              :disabled="isLock"
             >
               <el-option
                 v-for="item in optionsStore.getDictOptions('data_scope')"
