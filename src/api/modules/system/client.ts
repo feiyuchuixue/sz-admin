@@ -1,7 +1,7 @@
 import http from '@/api'
 import { ADMIN_MODULE } from '@/api/helper/prefix'
 import type { IPage } from '@/api/interface'
-import type { ISysClient } from '@/api/interface/client/sysClient'
+import type { ISysClient } from '@/api/interface/system/client'
 /**
  * 查询列表
  * @param params

@@ -67,4 +67,10 @@ export namespace IUser {
     oldPwd: string
     newPwd: string
   }
+
+  export interface Options {
+    id: number
+    username: string
+    nickname: string
+  }
 }

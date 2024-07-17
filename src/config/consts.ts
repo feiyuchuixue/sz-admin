@@ -37,6 +37,23 @@ export const yesNoOptions: Options[] = [
   }
 ]
 
+export const dictBusinessType: Options[] = [
+  {
+    label: '业务字典',
+    value: 'business'
+  },
+  {
+    label: '系统字典',
+    value: 'system'
+  }
+]
+
+export const dictBusinessTypeLabel = (value: string): string => {
+  const item = dictBusinessType.find((item) => item.value === value)
+
+  return item?.label || ''
+}
+
 /**
  * 是否选项label显示
  * @param value

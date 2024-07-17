@@ -120,7 +120,8 @@
                     'sys.user.unlock_btn',
                     'sys.user.role_set_btn',
                     'sys.user.delete_btn',
-                    'sys.user.dept_set_btn'
+                    'sys.user.dept_set_btn',
+                    'sys.user.data_scope_btn'
                   ]
                 }
               ]"
@@ -152,6 +153,18 @@
                         删除
                       </el-dropdown-item>
                     </div>
+                    <div v-auth="'sys.user.data_role_set_btn'">
+                      <el-dropdown-item
+                        type="primary"
+                        v-if="row.id !== 1"
+                        @click="openUserDataPermissions('设置数据角色', row)"
+                      >
+                        <el-icon class="el-icon--left">
+                          <SvgIcon name="scope" />
+                        </el-icon>
+                        设置数据角色
+                      </el-dropdown-item>
+                    </div>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -163,6 +176,7 @@
       <UserEdit ref="userEditRef" />
       <UserPermissions ref="userPermissionsRef" />
       <UserDeptForm ref="userDeptFormRef" @submit="refreshDeptTree" />
+      <UserDataPermissions ref="userDataPermissionsRef" />
     </div>
   </div>
 </template>
@@ -189,7 +203,8 @@ import {
   setUserRole,
   unlockUser,
   resetPassword,
-  getUserDetailApi
+  getUserDetailApi,
+  setUserDataRole
 } from '@/api/modules/system/user'
 import { useOptionsStore } from '@/stores/modules/options'
 import UserAdd from '@/views/system/accountManage/components/UserAdd.vue'
@@ -202,6 +217,7 @@ import { reactive, ref } from 'vue'
 import SvgIcon from '@/components/SvgIcon/index.vue'
 import UserDeptForm from '@/views/system/accountManage/components/UserDeptForm.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import UserDataPermissions from '@/views/system/accountManage/components/UserDataPermissions.vue'
 defineOptions({
   name: 'accountManage'
 })
@@ -292,6 +308,9 @@ const deptTreeRef = ref<InstanceType<typeof DeptTree>>()
 
 // 删除信息
 const deleteInfo = async (params: IUser.Info) => {
+  if (import.meta.env.VITE_PREVIEW) {
+    return ElMessage.warning({ message: '预览环境，禁止删除，请谅解！' })
+  }
   await useHandleData(deleteUser, { ids: [params.id] }, `删除【${params.username}】用户`)
   proTableRef.value?.getTableList()
   refreshDeptTree()
@@ -393,6 +412,19 @@ const formatInfo = (info: string): { id: string; name: string }[] => {
 
 const refreshDeptTree = () => {
   deptTreeRef.value?.refresh()
+}
+
+// 设置数据角色
+const userDataPermissionsRef = ref<InstanceType<typeof UserDataPermissions>>()
+const openUserDataPermissions = (title: string, row = {}) => {
+  const params = {
+    title,
+    row: row,
+    api: setUserDataRole,
+    getTableList: proTableRef.value?.getTableList
+  }
+  userDataPermissionsRef.value?.acceptParams(params)
+  proTableRef.value?.getTableList()
 }
 </script>
 

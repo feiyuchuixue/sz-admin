@@ -22,7 +22,13 @@
           <el-button
             type="primary"
             :icon="CirclePlus"
-            @click="openAddEdit('新增字典', { sysDictTypeId: info?.id, sort: 1 })"
+            @click="
+              openAddEdit(
+                '新增字典',
+                { sysDictTypeId: info?.id, sort: 1, callbackShowStyle: 'primary' },
+                true
+              )
+            "
           >
             新增字典
           </el-button>
@@ -38,15 +44,15 @@
         </template>
 
         <template #isShow="{ row }">
-          <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'">{{
-            yesNoOptionsLabel(row?.isShow)
-          }}</el-tag>
+          <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'"
+            >{{ yesNoOptionsLabel(row?.isShow) }}
+          </el-tag>
         </template>
 
         <template #callbackShowStyle="{ row }">
-          <el-tag :type="row.callbackShowStyle">{{
-            tagsTypeOptionsLabel(row?.callbackShowStyle)
-          }}</el-tag>
+          <el-tag :type="row.callbackShowStyle"
+            >{{ tagsTypeOptionsLabel(row?.callbackShowStyle) }}
+          </el-tag>
         </template>
 
         <template #operation="{ row }">

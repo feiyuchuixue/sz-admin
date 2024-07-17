@@ -66,12 +66,12 @@ import {
   updateSysClientApi,
   getSysClientListApi,
   getSysClientDetailApi
-} from '@/api/modules/client/sysClient'
+} from '@/api/modules/system/client'
 import { useHandleData } from '@/hooks/useHandleData'
 import SysClientForm from '@/views/system/clientManage/components/SysClientForm.vue'
 import { useOptionsStore } from '@/stores/modules/options'
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface'
-import type { ISysClient } from '@/api/interface/client/sysClient'
+import type { ISysClient } from '@/api/interface/system/client'
 import { ref } from 'vue'
 defineOptions({
   name: 'SysClientView'

@@ -60,12 +60,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { type ElForm, ElMessage } from 'element-plus'
-import type { ISysDept } from '@/api/interface/system/sysDept'
-import { getMenuTree, getSysDeptLeaderApi } from '@/api/modules/system/sysDept'
+import type { ISysDept } from '@/api/interface/system/dept'
+import { getMenuTree, getSysDeptLeaderApi } from '@/api/modules/system/dept'
 import DeptLeaderTransfer from '@/views/system/deptManage/components/DeptLeaderTransfer.vue'
-
 defineOptions({
   name: 'SysDeptForm'
 })
@@ -76,10 +75,8 @@ const treeProps = {
 }
 
 const deptLeaderTransferRef = ref<InstanceType<typeof DeptLeaderTransfer>>()
-
 const allLeaders = ref<ISysDept.Leader[]>([])
 const selectLeaderIds = ref<number[]>([])
-
 const leaders = computed(() => {
   return allLeaders.value.filter((item) => selectLeaderIds.value.includes(item.id))
 })
@@ -106,9 +103,7 @@ const loadLeaderInfo = () => {
 
 const rules = reactive({
   name: [{ required: true, message: '请填写部门名称' }],
-  pid: [{ required: true, message: '请选择上级部门' }],
-  isLock: [{ required: true, message: '请填写是否锁定' }],
-  delFlag: [{ required: true, message: '请填写删除标识' }]
+  pid: [{ required: true, message: '请选择上级部门' }]
 })
 
 const visible = ref(false)

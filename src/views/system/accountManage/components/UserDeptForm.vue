@@ -55,8 +55,8 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { type ElForm, ElMessage } from 'element-plus'
-import type { ISysDept } from '@/api/interface/system/sysDept'
-import { getMenuTree } from '@/api/modules/system/sysDept'
+import type { ISysDept } from '@/api/interface/system/dept'
+import { getMenuTree } from '@/api/modules/system/dept'
 import { bindUserDeptApi } from '@/api/modules/system/user'
 
 defineOptions({
@@ -109,6 +109,11 @@ const emit = defineEmits(['submit'])
 // 提交数据（新增/编辑）
 const ruleFormRef = ref<InstanceType<typeof ElForm>>()
 const handleSubmit = () => {
+  paramsProps.value.selectIds
+  const containsAny = [1, 2, 3, 4, 5, 6].some((id) => paramsProps.value.selectIds.includes(id))
+  if (import.meta.env.VITE_PREVIEW && containsAny) {
+    return ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' })
+  }
   ruleFormRef.value!.validate(async (valid) => {
     if (!valid) return
     try {

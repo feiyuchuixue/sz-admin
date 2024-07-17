@@ -30,6 +30,12 @@
         </el-button>
       </template>
 
+      <template #type="{ row }">
+        <el-tag :type="row.type === 'system' ? 'primary' : 'info'">{{
+          dictBusinessTypeLabel(row?.type)
+        }}</el-tag>
+      </template>
+
       <template #isShow="{ row }">
         <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'">{{
           yesNoOptionsLabel(row?.isShow)
@@ -66,7 +72,12 @@
 import { CirclePlus, Delete, EditPen } from '@element-plus/icons-vue'
 import ProTable from '@/components/ProTable/index.vue'
 import { addDictType, deleteDictType, editDictType, getDictType } from '@/api/modules/system/dict'
-import { yesNoOptions, yesNoOptionsLabel } from '@/config/consts'
+import {
+  dictBusinessType,
+  dictBusinessTypeLabel,
+  yesNoOptions,
+  yesNoOptionsLabel
+} from '@/config/consts'
 import DictTypeForm from '@/views/system/dictManage/components/DictTypeForm.vue'
 import { useHandleData } from '@/hooks/useHandleData'
 import DictData from '@/views/system/dictManage/components/DictData.vue'
@@ -84,6 +95,7 @@ const columns: ColumnProps<IDict.DictType>[] = [
   { prop: 'id', label: '编号', width: 100 },
   { prop: 'typeName', label: '名称' },
   { prop: 'typeCode', label: '类型', width: 200 },
+  { prop: 'type', label: '业务类型', enum: dictBusinessType, width: 120 },
   { prop: 'isShow', label: '显示', enum: yesNoOptions, width: 80 },
   { prop: 'remark', label: '备注' },
   { prop: 'createTime', label: '创建时间' },
@@ -105,11 +117,15 @@ const getTableList = (params: IDict.DictTypeQuery) => getDictType(params)
 // 打开 drawer(新增、查看、编辑)
 const dictTypeRef = ref<InstanceType<typeof DictTypeForm>>()
 const openAddEdit = (title: string, row = {}, isAdd = true) => {
+  if (isAdd) {
+    row = { type: 'business' }
+  }
   const params: View.DefaultParams = {
     title,
     row: { ...row },
     api: isAdd ? addDictType : editDictType,
-    getTableList: proTableRef.value?.getTableList
+    getTableList: proTableRef.value?.getTableList,
+    isAdd: isAdd
   }
   dictTypeRef.value?.acceptParams(params)
 }

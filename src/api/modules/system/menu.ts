@@ -75,3 +75,13 @@ export const getBtnExits = (params: IMenu.PermissionQuery) => {
 export const exportMenuSql = (params: { ids: string[] }) => {
   return http.post<string>(ADMIN_MODULE + `/sys-menu/sql/export`, params)
 }
+
+/**
+ * 修改菜单数据权限
+ * @param params
+ * @returns {*}
+ */
+export const chaneDataRole = (params: { id: string }) => {
+  const { id } = params
+  return http.put(ADMIN_MODULE + `/sys-menu/datarole/change/${id}`)
+}
