@@ -1,45 +1,45 @@
 <template>
   <el-dialog
-    v-model="visible"
-    :title="`${paramsProps.title}`"
-    :destroy-on-close="true"
-    :close-on-press-escape="false"
-    :close-on-click-modal="false"
-    width="800px"
+      v-model="visible"
+      :title="`${paramsProps.title}`"
+      :destroy-on-close="true"
+      :close-on-press-escape="false"
+      :close-on-click-modal="false"
+      width="800px"
   >
     <el-form
-      ref="ruleFormRef"
-      label-width="100px"
-      label-suffix=" :"
-      :rules="rules"
-      :model="paramsProps.row"
-      @submit.enter.prevent="handleSubmit"
+        ref="ruleFormRef"
+        label-width="100px"
+        label-suffix=" :"
+        :rules="rules"
+        :model="paramsProps.row"
+        @submit.enter.prevent="handleSubmit"
     >
       <el-row>
         <el-col :span="12">
           <el-form-item label="角色名称" prop="roleName">
             <el-input
-              v-model="paramsProps.row.roleName"
-              placeholder="请填写角色名称"
-              clearable
-              :disabled="isLock"
+                v-model="paramsProps.row.roleName"
+                placeholder="请填写角色名称"
+                clearable
+                :disabled="isLock"
             ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="数据权限" prop="dataScopeCd">
             <el-select
-              v-model="paramsProps.row.dataScopeCd"
-              clearable
-              placeholder="请选择数据权限"
-              @change="changeDataScope"
-              :disabled="isLock"
+                v-model="paramsProps.row.dataScopeCd"
+                clearable
+                placeholder="请选择数据权限"
+                @change="changeDataScope"
+                :disabled="isLock"
             >
               <el-option
-                v-for="item in optionsStore.getDictOptions('data_scope')"
-                :key="item.id"
-                :label="item.codeName"
-                :value="item.id"
+                  v-for="item in optionsStore.getDictOptions('data_scope')"
+                  :key="item.id"
+                  :label="item.codeName"
+                  :value="item.id"
               />
             </el-select>
           </el-form-item>
@@ -53,9 +53,9 @@
                 <el-space :size="4">
                   <span>菜单列表</span>
                   <el-tooltip
-                    effect="dark"
-                    content="展示[菜单管理]中属性[数据权限支持]选中状态的记录"
-                    placement="top"
+                      effect="dark"
+                      content="展示[菜单管理]中属性[数据权限支持]选中状态的记录"
+                      placement="top"
                   >
                     <i :class="'iconfont icon-yiwen'"></i>
                   </el-tooltip>
@@ -64,14 +64,14 @@
             </template>
             <div class="tree-container">
               <el-tree
-                :data="menuLists"
-                show-checkbox
-                ref="menuTreeRef"
-                node-key="id"
-                :props="menuTreeProps"
-                empty-text="加载中，请稍候"
-                :default-expand-all="isMenuExpand"
-                :check-strictly="!isMenuCheckStrictly"
+                  :data="menuLists"
+                  show-checkbox
+                  ref="menuTreeRef"
+                  node-key="id"
+                  :props="menuTreeProps"
+                  empty-text="加载中，请稍候"
+                  :default-expand-all="isMenuExpand"
+                  :check-strictly="!isMenuCheckStrictly"
               />
             </div>
           </el-card>
@@ -79,17 +79,17 @@
         <el-col :span="12">
           <el-form-item label="用户维度" prop="userOptions" v-if="isCustom">
             <el-select
-              v-model="paramsProps.row.userOptions"
-              clearable
-              multiple
-              filterable
-              placeholder="请选择用户"
+                v-model="paramsProps.row.userOptions"
+                clearable
+                multiple
+                filterable
+                placeholder="请选择用户"
             >
               <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
+                  v-for="item in userOptions"
+                  :key="item.id"
+                  :label="item.nickname"
+                  :value="item.id"
               />
             </el-select>
           </el-form-item>
@@ -99,20 +99,20 @@
                 <span>部门维度</span>
               </div>
             </template>
-            <el-checkbox v-model="isDeptExpand" @change="changeDeptExpand">展开/折叠 </el-checkbox>
+            <el-checkbox v-model="isDeptExpand" @change="changeDeptExpand">展开/折叠</el-checkbox>
             <el-checkbox v-model="isDeptCheckStrictly">父子联动</el-checkbox>
             <el-divider content-position="right" border-style="dashed">工具栏</el-divider>
             <div class="tree-container">
               <div>
                 <el-tree
-                  :data="deptLists"
-                  show-checkbox
-                  ref="deptTreeRef"
-                  node-key="id"
-                  :props="deptTreeProps"
-                  empty-text="加载中，请稍候"
-                  :default-expand-all="isDeptExpand"
-                  :check-strictly="!isDeptCheckStrictly"
+                    :data="deptLists"
+                    show-checkbox
+                    ref="deptTreeRef"
+                    node-key="id"
+                    :props="deptTreeProps"
+                    empty-text="加载中，请稍候"
+                    :default-expand-all="isDeptExpand"
+                    :check-strictly="!isDeptCheckStrictly"
                 />
               </div>
             </div>
@@ -128,12 +128,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, nextTick } from 'vue'
-import { type CheckboxValueType, ElForm, ElMessage } from 'element-plus'
-import { useOptionsStore } from '@/stores/modules/options'
-import type { IRole } from '@/api/interface/system/role'
-import type { ISysDept } from '@/api/interface/system/dept'
-import type { IUser } from '@/api/interface/system/user'
+import {ref, reactive, nextTick} from 'vue'
+import {type CheckboxValueType, ElForm, ElMessage} from 'element-plus'
+import {useOptionsStore} from '@/stores/modules/options'
+import type {IRole} from '@/api/interface/system/role'
+import type {ISysDept} from '@/api/interface/system/dept'
+import type {IUser} from '@/api/interface/system/user'
 
 defineOptions({
   name: 'SysDataRoleForm'
@@ -171,8 +171,8 @@ const changeDataScope = (value: number) => {
   paramsProps.value.row.userOptions = []
 }
 const rules = reactive({
-  roleName: [{ required: true, message: '请填写角色名称' }],
-  dataScope: [{ required: true, message: '请选择数据权限' }]
+  roleName: [{required: true, message: '请填写角色名称'}],
+  dataScope: [{required: true, message: '请选择数据权限'}]
 })
 
 const visible = ref(false)
@@ -192,9 +192,13 @@ const acceptParams = (params: View.DefaultParams) => {
   userOptions.value = params.meta.userOptions
   if (paramsProps.value.row.dataScopeCd) {
     isCustom.value = paramsProps.value.row.dataScopeCd == 1006005
+  } else {
+    isCustom.value = false
   }
   if (paramsProps.value.row.isLock) {
     isLock.value = paramsProps.value.row.isLock == 'T'
+  } else {
+    isLock.value = false
   }
   if (paramsProps.value.row.selectMenuIds && paramsProps.value.row.selectMenuIds.length > 0) {
     selectMenuIds.value = paramsProps.value.row.selectMenuIds
@@ -247,7 +251,7 @@ const handleSubmit = () => {
       paramsProps.value.row.selectMenuIds = selectMenuKeys
       paramsProps.value.row.selectDeptIds = selectDeptKeys
       await paramsProps.value.api!(paramsProps.value.row)
-      ElMessage.success({ message: `${paramsProps.value.title}成功！` })
+      ElMessage.success({message: `${paramsProps.value.title}成功！`})
       paramsProps.value.getTableList!()
       visible.value = false
     } catch (error) {
