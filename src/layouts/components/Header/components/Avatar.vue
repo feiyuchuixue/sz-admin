@@ -44,6 +44,7 @@ import PasswordDialog from './PasswordDialog.vue'
 import { Edit, SwitchButton, User } from '@element-plus/icons-vue'
 import { useSocketStore } from '@/stores/modules/socket'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import defaultAvatar from '@/assets/images/avatar.gif'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -64,13 +65,13 @@ const preloadImage = (url: string): Promise<void> => {
 }
 
 const getLogo = async () => {
-  const logo = userStore.userInfo.logo || '/src/assets/images/avatar.gif'
+  const logo = userStore.userInfo.logo || defaultAvatar
   try {
     await preloadImage(logo)
     avatarSrc.value = logo
   } catch (error) {
     console.error(`Error loading image: ${logo}`)
-    avatarSrc.value = '/src/assets/images/avatar.gif' // 默认头像地址
+    avatarSrc.value = defaultAvatar // 默认头像地址
   }
 }
 
