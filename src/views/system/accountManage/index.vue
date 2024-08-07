@@ -172,7 +172,7 @@
           </div>
         </template>
       </ProTable>
-      <UserAdd ref="userAddRef" />
+      <UserAdd ref="userAddRef" @submit="refreshDeptTree" />
       <UserEdit ref="userEditRef" />
       <UserPermissions ref="userPermissionsRef" />
       <UserDeptForm ref="userDeptFormRef" @submit="refreshDeptTree" />

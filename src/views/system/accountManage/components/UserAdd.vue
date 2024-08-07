@@ -140,6 +140,8 @@ const acceptParams = (params: View.DefaultParams) => {
   visible.value = true
 }
 
+const emit = defineEmits(['submit'])
+
 // 提交数据（新增/编辑）
 const ruleFormRef = ref()
 const handleSubmit = () => {
@@ -149,6 +151,7 @@ const handleSubmit = () => {
       await paramsProps.value.api!(paramsProps.value.row)
       ElMessage.success({ message: `${paramsProps.value.title}成功！` })
       paramsProps.value.getTableList!()
+      emit('submit')
       visible.value = false
     } catch (error) {
       console.log(error)
