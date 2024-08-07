@@ -1,0 +1,102 @@
+/* 语法高亮 */
+.hljs-container {
+    position: relative;
+    display: flex;
+    width: max-content;
+    padding: 30px 1em 0 0;
+    overflow-x: hidden;
+    font-size: 14px;
+    line-height: 24px;
+    text-align: left;
+    background: #21252b;
+    
+    pre {
+        flex: 1;
+    }
+}
+
+/** 3个点 */
+.hljs-container::before {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    width: 12px;
+    height: 12px;
+    overflow: visible;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 12px;
+    white-space: nowrap;
+    text-indent: 75px;
+    background-color: #fc625d;
+    border-radius: 16px;
+    box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
+    content: attr(codetype);
+}
+
+/** 滚动条 */
+:deep(.hljs) {
+    overflow-x: auto;
+}
+
+:deep(.hljs::-webkit-scrollbar) {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+:deep(.hljs::-webkit-scrollbar-thumb) {
+    height: 30px !important;
+    background: #d1d8e6;
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 19px;
+    opacity: 0.8;
+}
+
+:deep(.hljs::-webkit-scrollbar-thumb:hover) {
+    background: #a5b3cf;
+    background-clip: content-box;
+    border: 2px solid transparent;
+}
+
+:deep(.hljs::-webkit-scrollbar-track-piece) {
+    width: 30px;
+    height: 30px;
+    background: #333;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+}
+
+/** 行数样式 */
+.hljs-code-number {
+    padding: 17px 10px 0;
+    color: #d1d8e6;
+    font-size: 12px;
+    list-style: none;
+}
+
+/** 复制样式 */
+.hljs-copy {
+    width: auto;
+    height: 30px;
+    line-height: 30px;
+    position: absolute;
+    top: 0;
+    right: 5px;
+    color: #d7d7e1;
+    cursor: pointer;
+    user-select: none;
+    background-color: #333;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  
+    &:hover {
+      background-color: #555;
+    }
+  
+    .sql-box {
+      text-align: unset;
+    }
+  }
