@@ -639,7 +639,7 @@ import { getDictTypeOptions } from '@/api/modules/system/dict'
 import type { IDict } from '@/api/interface/system/dict'
 import type { IMenu } from '@/api/interface/system/menu'
 import { getMenuTree } from '@/api/modules/system/menu'
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 
 defineOptions({
@@ -666,7 +666,28 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
 const isShowExcel = ref<boolean>(true)
 
 // 表格配置项
-const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
+// const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
+//   { type: 'sort', width: 100, label: '拖拽排序' },
+//   { prop: 'columnName', label: '字段列名' },
+//   { prop: 'columnComment', label: '字段描述' },
+//   { prop: 'columnType', label: '物理类型' },
+//   { prop: 'javaType', label: 'Java类型' },
+//   { prop: 'isPk', label: '主键', width: 60 },
+//   { prop: 'isIncrement', label: '自增', width: 60 },
+//   { prop: 'isUniqueValid', label: '唯一', width: 80 },
+//   { prop: 'isRequired', label: '必填', width: 60 },
+//   { prop: 'isLogicDel', label: '逻辑删除', width: 120 },
+//   { prop: 'isInsert', label: '插入', width: 80 },
+//   { prop: 'isEdit', label: '编辑', width: 80 },
+//   { prop: 'isList', label: '列表', width: 80 },
+//   { prop: 'isQuery', label: '查询', width: 80 },
+//   { prop: 'isImport', label: '导入', width: 80 },
+//   { prop: 'isExport', label: '导出', width: 80 },
+//   { prop: 'queryType', label: '查询方式' },
+//   { prop: 'htmlType', label: '显示类型' },
+//   { prop: 'dictType', label: '字典类型' }
+// ]
+const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
   { type: 'sort', width: 100, label: '拖拽排序' },
   { prop: 'columnName', label: '字段列名' },
   { prop: 'columnComment', label: '字段描述' },
@@ -686,7 +707,7 @@ const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
   { prop: 'queryType', label: '查询方式' },
   { prop: 'htmlType', label: '显示类型' },
   { prop: 'dictType', label: '字典类型' }
-]
+])
 
 const active = ref(1)
 const visible = ref(false)
@@ -752,6 +773,27 @@ const getInfo = () => {
     generatorInfo.value = res.data.generatorInfo
   })
 }
+
+// 更新列属性的通用函数
+const updateColumns = (newValue: string, propToUpdate: string) => {
+  const existingColumn = columns.value.find(col => col.prop === propToUpdate);
+
+  if (existingColumn) {
+    existingColumn.isShow = newValue === '1';
+  }
+};
+
+// 监听多个属性的变化，并执行相同的更新逻辑
+watchEffect(() => {
+  try {
+    updateColumns(generatorInfo.value.hasImport, 'isImport');
+    updateColumns(generatorInfo.value.hasExport, 'isExport');
+    // 如果有其他类似的属性，也可以在这里进行处理
+  } catch (error) {
+    console.error('Error in watchEffect:', error);
+    // 根据实际情况进行错误处理，如显示错误提示、回滚变更等
+  }
+});
 
 const baseFormRef = ref()
 const generatorFormRef = ref()
