@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { DocumentCopy } from '@element-plus/icons-vue'
-import vCode from './line';
+import vCode from './line'
 
 defineOptions({
   name: 'HighCode'

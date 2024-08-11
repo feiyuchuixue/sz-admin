@@ -776,24 +776,24 @@ const getInfo = () => {
 
 // 更新列属性的通用函数
 const updateColumns = (newValue: string, propToUpdate: string) => {
-  const existingColumn = columns.value.find(col => col.prop === propToUpdate);
+  const existingColumn = columns.value.find((col) => col.prop === propToUpdate)
 
   if (existingColumn) {
-    existingColumn.isShow = newValue === '1';
+    existingColumn.isShow = newValue === '1'
   }
-};
+}
 
 // 监听多个属性的变化，并执行相同的更新逻辑
 watchEffect(() => {
   try {
-    updateColumns(generatorInfo.value.hasImport, 'isImport');
-    updateColumns(generatorInfo.value.hasExport, 'isExport');
+    updateColumns(generatorInfo.value.hasImport, 'isImport')
+    updateColumns(generatorInfo.value.hasExport, 'isExport')
     // 如果有其他类似的属性，也可以在这里进行处理
   } catch (error) {
-    console.error('Error in watchEffect:', error);
+    console.error('Error in watchEffect:', error)
     // 根据实际情况进行错误处理，如显示错误提示、回滚变更等
   }
-});
+})
 
 const baseFormRef = ref()
 const generatorFormRef = ref()
