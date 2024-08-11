@@ -90,3 +90,11 @@ export const getAllDict = () => {
 export const getDictTypeOptions = () => {
   return http.get<IDict.DictType[]>(ADMIN_MODULE + `/sys-dict-type/selectOptionsType`)
 }
+
+/**
+ * 导出字典sql
+ * @param params
+ */
+export const exportDictSql = (params: { ids: string[] }) => {
+  return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params)
+}
