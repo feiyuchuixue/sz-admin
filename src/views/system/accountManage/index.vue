@@ -274,7 +274,7 @@ const userAddRef = ref<InstanceType<typeof UserAdd>>()
 const openUserAdd = (title: string) => {
   const params: View.DefaultParams = {
     title,
-    row: { age: 0 },
+    row: { deptId: initParam.deptId },
     api: addUser,
     getTableList: proTableRef.value?.getTableList
   }
