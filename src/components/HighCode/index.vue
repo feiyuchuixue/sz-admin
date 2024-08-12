@@ -1,19 +1,15 @@
 <template>
-  <div class="hljs-container" :codetype="title" v-code>
-    <!-- <div class="hljs-header">
-      <div class="hljs-language">{{ title }}</div>
+  <div class="hljs-container">
+    <div class="hljs-header" :codetype="title">
       <div class="hljs-copy" @click="handleCopy">
         <el-button type="primary" link @click="handleCopy" :icon="DocumentCopy" class="hljs-copy">
           {{ copyButtonText }}
         </el-button>
       </div>
-    </div> -->
-    <div class="hljs-copy" @click="handleCopy">
-      <el-button type="primary" link @click="handleCopy" :icon="DocumentCopy" class="hljs-copy">
-        {{ copyButtonText }}
-      </el-button>
     </div>
-    <highlightjs :language="language" :autodetect="false" :code="code"></highlightjs>
+    <div class="hljs-wrapper" v-code>
+      <highlightjs :language="language" :autodetect="false" :code="code"></highlightjs>
+    </div>
   </div>
 </template>
 <script setup lang="ts">

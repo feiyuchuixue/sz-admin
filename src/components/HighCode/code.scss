@@ -2,13 +2,42 @@
 .hljs-container {
     position: relative;
     display: flex;
+    flex-direction: column;
     width: max-content;
-    padding: 30px 1em 0 0;
+    // padding: 30px 1em 0 0;
     overflow-x: hidden;
     font-size: 14px;
     line-height: 24px;
     text-align: left;
     background: #21252b;
+
+    .hljs-header {
+        width: 100%;
+        background-color: #21252b;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 100;
+      }
+
+    .hljs-wrapper {
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    /** 行数样式 */
+    .hljs-code-number {
+        padding: 17px 10px 0;
+        color: #d1d8e6;
+        font-size: 12px;
+        list-style: none;
+        background: #21252b;
+        position: sticky;
+        left: 0;
+    }
     
     pre {
         flex: 1;
@@ -16,7 +45,7 @@
 }
 
 /** 3个点 */
-.hljs-container::before {
+.hljs-container .hljs-header::before {
     position: absolute;
     top: 10px;
     left: 15px;
@@ -69,32 +98,16 @@
     display: none;
 }
 
-/** 行数样式 */
-.hljs-code-number {
-    padding: 17px 10px 0;
-    color: #d1d8e6;
-    font-size: 12px;
-    list-style: none;
-}
-
 /** 复制样式 */
 .hljs-copy {
     width: auto;
     height: 30px;
-    line-height: 30px;
-    position: absolute;
-    top: 0;
-    right: 5px;
     color: #d7d7e1;
     cursor: pointer;
     user-select: none;
-    background-color: #333;
     border-radius: 4px;
     transition: background-color 0.3s;
-  
-    &:hover {
-      background-color: #555;
-    }
+    margin: 0 2px;
   
     .sql-box {
       text-align: unset;
