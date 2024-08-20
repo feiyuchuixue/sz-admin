@@ -383,7 +383,6 @@ const changeDeptTree = (val: number) => {
   if (val) {
     selectTreeId.value = [val]
     initParam.deptId = val
-    proTableRef.value?.getTableList()
     proTableRef.value?.clearSelection()
   }
 }
