@@ -110,36 +110,61 @@
             </p>
             <p>{{ typeContent[generatorInfo.generateType].text }}</p>
           </div>
-          <el-col :span="24">
-            <el-form-item
-              prop="type"
+          <el-row>
+            <el-col
+              :span="3"
               v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'"
             >
-              <template #label>
-                <el-space :size="4">
-                  <span>Excel支持</span>
-                  <el-tooltip effect="dark" content="是否支持列表的导入导出" placement="top">
-                    <i :class="'iconfont icon-yiwen'"></i>
-                  </el-tooltip>
-                </el-space>
-                <span>&nbsp;:</span>
-              </template>
-              <el-checkbox
-                label="导入"
-                name="type"
-                v-model="generatorInfo.hasImport"
-                true-value="1"
-                false-value="0"
-              />
-              <el-checkbox
-                label="导出"
-                name="type"
-                v-model="generatorInfo.hasExport"
-                true-value="1"
-                false-value="0"
-              />
-            </el-form-item>
-          </el-col>
+              <el-form-item prop="type">
+                <template #label>
+                  <el-space :size="4">
+                    <span>Excel支持</span>
+                    <el-tooltip effect="dark" content="是否支持列表的导入导出" placement="top">
+                      <i :class="'iconfont icon-yiwen'"></i>
+                    </el-tooltip>
+                  </el-space>
+                  <span>&nbsp;:</span>
+                </template>
+                <el-checkbox
+                  label="导入"
+                  name="type"
+                  v-model="generatorInfo.hasImport"
+                  true-value="1"
+                  false-value="0"
+                />
+                <el-checkbox
+                  label="导出"
+                  name="type"
+                  v-model="generatorInfo.hasExport"
+                  true-value="1"
+                  false-value="0"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="3">
+              <el-form-item prop="type">
+                <template #label>
+                  <el-space :size="4">
+                    <span>自动填充</span>
+                    <el-tooltip
+                      effect="dark"
+                      content="对create、update操作进行自动填充。需遵循约定。"
+                      placement="top"
+                    >
+                      <i :class="'iconfont icon-yiwen'"></i>
+                    </el-tooltip>
+                  </el-space>
+                  <span>&nbsp;:</span>
+                </template>
+                <el-checkbox
+                  name="type"
+                  v-model="generatorInfo.isAutofill"
+                  true-value="1"
+                  false-value="0"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
         </div>
         <h4 class="form-header h4">配置字段</h4>
         <div style="padding: 0 18px 0 10px">
@@ -165,6 +190,20 @@
                 </el-tooltip>
               </el-space>
             </template>
+
+            <template #isLogicDelHeader="scope">
+              {{ scope?.column.label }}
+              <el-space :size="2" class="column-table-header-yiwen">
+                <el-tooltip
+                  effect="dark"
+                  content="逻辑删除标识，需配合mf配置 deleted-value-of-logic-delete 、normal-value-of-logic-delete 使用。sz-admin中默认设置其属性为T、F"
+                  placement="top"
+                >
+                  <i :class="'iconfont icon-yiwen'"></i>
+                </el-tooltip>
+              </el-space>
+            </template>
+
             <template #isInsertHeader="scope">
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
@@ -274,6 +313,10 @@
               <el-checkbox v-model="row.isRequired" true-value="1" false-value="0" />
             </template>
 
+            <template #isLogicDel="{ row }">
+              <el-checkbox v-model="row.isLogicDel" true-value="1" false-value="0" />
+            </template>
+
             <template #isInsert="{ row }">
               <el-checkbox v-model="row.isInsert" true-value="1" false-value="0" />
             </template>
@@ -295,11 +338,20 @@
             </template>
 
             <template #isExport="{ row }">
-              <el-checkbox v-model="row.isExport" true-value="1" false-value="0" />
+              <el-checkbox
+                v-if="row.isList == '1'"
+                v-model="row.isExport"
+                true-value="1"
+                false-value="0"
+              />
             </template>
 
             <template #queryType="{ row }">
-              <el-select v-model="row.queryType" filterable>
+              <el-select
+                v-if="row.isLogicDel == '0' && row.isQuery == '1'"
+                v-model="row.queryType"
+                filterable
+              >
                 <el-option
                   v-for="item in queryTypeOptions"
                   :key="item.value"
@@ -310,7 +362,11 @@
             </template>
 
             <template #htmlType="{ row }">
-              <el-select v-model="row.htmlType" filterable>
+              <el-select
+                v-if="row.isLogicDel == '0' && row.isQuery == '1'"
+                v-model="row.htmlType"
+                filterable
+              >
                 <el-option
                   v-for="item in htmlTypeOptions"
                   :key="item.value"
@@ -321,7 +377,12 @@
             </template>
 
             <template #dictType="{ row }">
-              <el-select v-model="row.dictType" clearable filterable>
+              <el-select
+                v-if="row.isLogicDel == '0' && row.isQuery == '1' && row.htmlType == 'select'"
+                v-model="row.dictType"
+                clearable
+                filterable
+              >
                 <el-option
                   v-for="item in dictTypeOptions"
                   :key="item.typeCode"
@@ -427,7 +488,7 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="12">
+            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
               <el-form-item label="是否生成菜单" prop="menuInitType">
                 <template #label>
                   <el-space :size="4">
@@ -448,7 +509,7 @@
                 </el-radio-group>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
               <el-form-item
                 label="上级菜单"
                 prop="parentMenuId"
@@ -481,7 +542,7 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="24">
+            <el-col :span="24" v-if="generatorInfo.generateType == 'all'">
               <el-form-item
                 label="生成按钮权限"
                 prop="btnPermissionType"
@@ -531,7 +592,7 @@
               </el-form-item>
             </el-col>
 
-            <el-col :span="12">
+            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
               <el-form-item label="web项目路径" prop="pathWeb">
                 <template #label>
                   <el-space :size="4">
@@ -578,7 +639,7 @@ import { getDictTypeOptions } from '@/api/modules/system/dict'
 import type { IDict } from '@/api/interface/system/dict'
 import type { IMenu } from '@/api/interface/system/menu'
 import { getMenuTree } from '@/api/modules/system/menu'
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 
 defineOptions({
@@ -599,12 +660,34 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
   pathWeb: '',
   generateType: 'all',
   menuInitType: '1',
-  btnPermissionType: '1'
+  btnPermissionType: '1',
+  isAutofill: '1'
 })
 const isShowExcel = ref<boolean>(true)
 
 // 表格配置项
-const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
+// const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
+//   { type: 'sort', width: 100, label: '拖拽排序' },
+//   { prop: 'columnName', label: '字段列名' },
+//   { prop: 'columnComment', label: '字段描述' },
+//   { prop: 'columnType', label: '物理类型' },
+//   { prop: 'javaType', label: 'Java类型' },
+//   { prop: 'isPk', label: '主键', width: 60 },
+//   { prop: 'isIncrement', label: '自增', width: 60 },
+//   { prop: 'isUniqueValid', label: '唯一', width: 80 },
+//   { prop: 'isRequired', label: '必填', width: 60 },
+//   { prop: 'isLogicDel', label: '逻辑删除', width: 120 },
+//   { prop: 'isInsert', label: '插入', width: 80 },
+//   { prop: 'isEdit', label: '编辑', width: 80 },
+//   { prop: 'isList', label: '列表', width: 80 },
+//   { prop: 'isQuery', label: '查询', width: 80 },
+//   { prop: 'isImport', label: '导入', width: 80 },
+//   { prop: 'isExport', label: '导出', width: 80 },
+//   { prop: 'queryType', label: '查询方式' },
+//   { prop: 'htmlType', label: '显示类型' },
+//   { prop: 'dictType', label: '字典类型' }
+// ]
+const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
   { type: 'sort', width: 100, label: '拖拽排序' },
   { prop: 'columnName', label: '字段列名' },
   { prop: 'columnComment', label: '字段描述' },
@@ -614,6 +697,7 @@ const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
   { prop: 'isIncrement', label: '自增', width: 60 },
   { prop: 'isUniqueValid', label: '唯一', width: 80 },
   { prop: 'isRequired', label: '必填', width: 60 },
+  { prop: 'isLogicDel', label: '逻辑删除', width: 120 },
   { prop: 'isInsert', label: '插入', width: 80 },
   { prop: 'isEdit', label: '编辑', width: 80 },
   { prop: 'isList', label: '列表', width: 80 },
@@ -623,7 +707,7 @@ const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
   { prop: 'queryType', label: '查询方式' },
   { prop: 'htmlType', label: '显示类型' },
   { prop: 'dictType', label: '字典类型' }
-]
+])
 
 const active = ref(1)
 const visible = ref(false)
@@ -689,6 +773,27 @@ const getInfo = () => {
     generatorInfo.value = res.data.generatorInfo
   })
 }
+
+// 更新列属性的通用函数
+const updateColumns = (newValue: string, propToUpdate: string) => {
+  const existingColumn = columns.value.find((col) => col.prop === propToUpdate)
+
+  if (existingColumn) {
+    existingColumn.isShow = newValue === '1'
+  }
+}
+
+// 监听多个属性的变化，并执行相同的更新逻辑
+watchEffect(() => {
+  try {
+    updateColumns(generatorInfo.value.hasImport, 'isImport')
+    updateColumns(generatorInfo.value.hasExport, 'isExport')
+    // 如果有其他类似的属性，也可以在这里进行处理
+  } catch (error) {
+    console.error('Error in watchEffect:', error)
+    // 根据实际情况进行错误处理，如显示错误提示、回滚变更等
+  }
+})
 
 const baseFormRef = ref()
 const generatorFormRef = ref()

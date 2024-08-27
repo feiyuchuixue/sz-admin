@@ -110,7 +110,6 @@
           <el-form-item label="权限" prop="permissions">
             <el-input
               v-model="paramsProps.row.permissions"
-              @blur="checkBtnExists"
               placeholder="请填写权限"
               clearable
             ></el-input>
@@ -168,7 +167,7 @@ import { getBtnExits, getMenuTree } from '@/api/modules/system/menu'
 import type { IMenu } from '@/api/interface/system/menu'
 import type { FormItemRule } from 'element-plus/es/components/form/src/types'
 import { ref, watch } from 'vue'
-import { ElMessage, ElNotification } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 defineOptions({
   name: 'menuForm'
@@ -217,10 +216,12 @@ watch(
           ruleData['name'] = [{ required: true, message: '请填写路由名称' }]
           ruleData['path'] = [{ required: true, message: '请填写路由地址' }]
           ruleData['component'] = [{ required: true, message: '请填写组件路径' }]
+          ruleData['permissions'] = [{ validator: validatePermission, trigger: 'blur' }]
         }
         break
+      case MENU_BTN:
+        ruleData['permissions'] = [{ validator: validatePermission, trigger: 'blur' }]
     }
-
     rules.value = ruleData
 
     if (ruleFormRef.value) {
@@ -228,6 +229,16 @@ watch(
     }
   }
 )
+
+const validatePermission = (rule: any, value: any, callback: any) => {
+  getBtnExits({ permissions: value, id: paramsProps.value.row?.id }).then((res) => {
+    if (res.data.permissionCount > 0) {
+      callback(new Error('权限已存在!'))
+    } else {
+      callback()
+    }
+  })
+}
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
@@ -243,23 +254,6 @@ const loadParentMenus = () => {
     parentMenus.value = res.data
   })
 }
-
-const checkBtnExists = () => {
-  const permissions = paramsProps.value.row?.permissions
-  if (!permissions) return
-  getBtnExits({ permissions: permissions, id: paramsProps.value.row?.id }).then((res) => {
-    if (res.data.permissionCount > 0) {
-      ElNotification({
-        title: '权限已存在',
-        type: 'warning',
-        duration: 3000
-      })
-    }
-  })
-}
-
-// loadParentMenus()
-
 const treeProps = {
   label: 'title',
   value: 'id'

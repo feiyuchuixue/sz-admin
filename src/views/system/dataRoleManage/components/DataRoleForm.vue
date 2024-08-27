@@ -33,7 +33,7 @@
               clearable
               placeholder="请选择数据权限"
               @change="changeDataScope"
-              :disabled="true"
+              :disabled="isLock"
             >
               <el-option
                 v-for="item in optionsStore.getDictOptions('data_scope')"
@@ -46,10 +46,30 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="11" style="margin-left: 15px">
+        <el-col>
+          <el-form-item label="用户维度" prop="userOptions" v-if="isCustom">
+            <el-select
+              v-model="paramsProps.row.userOptions"
+              clearable
+              multiple
+              filterable
+              placeholder="请选择用户"
+            >
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row v-if="isCustom">
+        <el-col :span="11" style="margin-left: 30px">
           <el-card shadow="never">
             <template #header>
-              <div class="card-header">
+              <div class="card-header min-header">
                 <el-space :size="4">
                   <span>菜单列表</span>
                   <el-tooltip
@@ -77,31 +97,18 @@
           </el-card>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="用户维度" prop="userOptions" v-if="isCustom">
-            <el-select
-              v-model="paramsProps.row.userOptions"
-              clearable
-              multiple
-              filterable
-              placeholder="请选择用户"
-            >
-              <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
           <el-card shadow="never" style="margin-left: 25px">
             <template #header>
-              <div class="card-header">
+              <div class="card-header min-header">
                 <span>部门维度</span>
+                <div>
+                  <el-checkbox v-model="isDeptExpand" @change="changeDeptExpand"
+                    >展开/折叠</el-checkbox
+                  >
+                  <el-checkbox v-model="isDeptCheckStrictly">父子联动</el-checkbox>
+                </div>
               </div>
             </template>
-            <el-checkbox v-model="isDeptExpand" @change="changeDeptExpand">展开/折叠 </el-checkbox>
-            <el-checkbox v-model="isDeptCheckStrictly">父子联动</el-checkbox>
-            <el-divider content-position="right" border-style="dashed">工具栏</el-divider>
             <div class="tree-container">
               <div>
                 <el-tree
@@ -115,6 +122,38 @@
                   :check-strictly="!isDeptCheckStrictly"
                 />
               </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+      <el-row v-else>
+        <el-col>
+          <el-card shadow="never">
+            <template #header>
+              <div class="card-header">
+                <el-space :size="4">
+                  <span>菜单列表</span>
+                  <el-tooltip
+                    effect="dark"
+                    content="展示[菜单管理]中属性[数据权限支持]选中状态的记录"
+                    placement="top"
+                  >
+                    <i :class="'iconfont icon-yiwen'"></i>
+                  </el-tooltip>
+                </el-space>
+              </div>
+            </template>
+            <div class="tree-container">
+              <el-tree
+                :data="menuLists"
+                show-checkbox
+                ref="menuTreeRef"
+                node-key="id"
+                :props="menuTreeProps"
+                empty-text="加载中，请稍候"
+                :default-expand-all="isMenuExpand"
+                :check-strictly="!isMenuCheckStrictly"
+              />
             </div>
           </el-card>
         </el-col>
@@ -192,9 +231,13 @@ const acceptParams = (params: View.DefaultParams) => {
   userOptions.value = params.meta.userOptions
   if (paramsProps.value.row.dataScopeCd) {
     isCustom.value = paramsProps.value.row.dataScopeCd == 1006005
+  } else {
+    isCustom.value = false
   }
   if (paramsProps.value.row.isLock) {
     isLock.value = paramsProps.value.row.isLock == 'T'
+  } else {
+    isLock.value = false
   }
   if (paramsProps.value.row.selectMenuIds && paramsProps.value.row.selectMenuIds.length > 0) {
     selectMenuIds.value = paramsProps.value.row.selectMenuIds
@@ -206,7 +249,11 @@ const acceptParams = (params: View.DefaultParams) => {
     })
   }
 
-  if (paramsProps.value.row.selectDeptIds && paramsProps.value.row.selectDeptIds.length > 0) {
+  if (
+    isCustom.value &&
+    paramsProps.value.row.selectDeptIds &&
+    paramsProps.value.row.selectDeptIds.length > 0
+  ) {
     selectDeptIds.value = paramsProps.value.row.selectDeptIds
     nextTick(() => {
       selectDeptIds.value.forEach((item) => {
@@ -228,19 +275,15 @@ const handleSubmit = () => {
     }
     try {
       const selectMenuKeys = menuTreeRef.value!.getCheckedKeys()
-      const selectDeptKeys = deptTreeRef.value!.getCheckedKeys()
-      if (paramsProps.value.row?.dataScopeCd == '1006005') {
-        if (selectMenuKeys.length < 1) {
-          ElMessage.error('请选择有效的数据。菜单列表不能为空')
-          return
-        }
+      let selectDeptKeys = []
+      if (selectMenuKeys.length < 1) {
+        ElMessage.error('请选择有效的数据。菜单列表不能为空')
+        return
+      }
+      if (isCustom.value) {
+        selectDeptKeys = deptTreeRef.value!.getCheckedKeys()
         if (selectDeptKeys.length < 1 && paramsProps.value.row?.userOptions.length < 1) {
           ElMessage.error('请选择有效的数据。用户纬度和部门纬度至少有一个不能为空')
-          return
-        }
-      } else {
-        if (selectMenuKeys.length < 1 || selectDeptKeys.length < 1) {
-          ElMessage.error('请选择有效的数据。菜单列表和部门纬度不能为空')
           return
         }
       }
@@ -268,7 +311,11 @@ defineExpose({
 
 <style scoped lang="scss">
 .tree-container {
-  height: 400px;
+  height: 300px;
   overflow-y: scroll;
+}
+
+.min-header {
+  min-height: 50px;
 }
 </style>

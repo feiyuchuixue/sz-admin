@@ -86,6 +86,7 @@ export namespace IGenerator {
     generateType: string
     menuInitType: string
     btnPermissionType: string
+    isAutofill: string
   }
 
   export interface PreviewInfo {

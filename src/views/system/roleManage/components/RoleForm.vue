@@ -17,12 +17,20 @@
     >
       <el-form-item label="角色名称" prop="roleName">
         <el-input
+          :disabled="paramsProps.row.isLock == 'T'"
           v-model="paramsProps.row.roleName"
           placeholder="请填写角色名称"
           clearable
         ></el-input>
       </el-form-item>
-
+      <el-form-item label="标识" prop="permissions">
+        <el-input
+          :disabled="paramsProps.row.isLock == 'T'"
+          v-model="paramsProps.row.permissions"
+          placeholder="请填写标识"
+          clearable
+        ></el-input>
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input
           v-model="paramsProps.row.remark"

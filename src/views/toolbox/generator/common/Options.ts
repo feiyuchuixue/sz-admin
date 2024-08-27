@@ -76,6 +76,10 @@ export const htmlTypeOptions: Options[] = [
     value: 'input'
   },
   {
+    label: 'input-number',
+    value: 'input-number'
+  },
+  {
     label: 'textarea',
     value: 'textarea'
   },
@@ -84,35 +88,35 @@ export const htmlTypeOptions: Options[] = [
     value: 'select'
   },
   {
-    label: 'radio',
-    value: 'radio'
+    label: 'radio-group [未完待续]',
+    value: 'radio-group'
   },
   {
-    label: 'checkbox',
+    label: 'checkbox [未完待续]',
     value: 'checkbox'
   },
   {
-    label: 'datetime',
+    label: 'datetime ',
     value: 'datetime'
   },
   {
-    label: 'date',
+    label: 'date [未完待续]',
     value: 'date'
   },
   {
-    label: 'time',
+    label: 'time [未完待续]',
     value: 'time'
   },
   {
-    label: 'imageUpload',
+    label: 'imageUpload [未完待续]',
     value: 'imageUpload'
   },
   {
-    label: 'fileUpload',
+    label: 'fileUpload [未完待续]',
     value: 'fileUpload'
   },
   {
-    label: 'editor',
+    label: 'editor [未完待续]',
     value: 'editor'
   }
 ]

@@ -1,19 +1,21 @@
 <template>
   <div class="hljs-container">
-    <div class="hljs-header">
-      <div class="hljs-language">{{ title }}</div>
+    <div class="hljs-header" :codetype="title">
       <div class="hljs-copy" @click="handleCopy">
         <el-button type="primary" link @click="handleCopy" :icon="DocumentCopy" class="hljs-copy">
           {{ copyButtonText }}
         </el-button>
       </div>
     </div>
-    <highlightjs :language="language" :autodetect="false" :code="code"></highlightjs>
+    <div class="hljs-wrapper" v-code>
+      <highlightjs :language="language" :autodetect="false" :code="code"></highlightjs>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
 import { DocumentCopy } from '@element-plus/icons-vue'
+import vCode from './line'
 
 defineOptions({
   name: 'HighCode'
@@ -57,5 +59,5 @@ const handleCopy = async () => {
 </script>
 
 <style lang="scss" scoped>
-@import './index.scss';
+// @import './index.scss';
 </style>

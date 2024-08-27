@@ -172,7 +172,7 @@
           </div>
         </template>
       </ProTable>
-      <UserAdd ref="userAddRef" />
+      <UserAdd ref="userAddRef" @submit="refreshDeptTree" />
       <UserEdit ref="userEditRef" />
       <UserPermissions ref="userPermissionsRef" />
       <UserDeptForm ref="userDeptFormRef" @submit="refreshDeptTree" />
@@ -274,7 +274,7 @@ const userAddRef = ref<InstanceType<typeof UserAdd>>()
 const openUserAdd = (title: string) => {
   const params: View.DefaultParams = {
     title,
-    row: { age: 0 },
+    row: { deptId: initParam.deptId },
     api: addUser,
     getTableList: proTableRef.value?.getTableList
   }
@@ -383,7 +383,6 @@ const changeDeptTree = (val: number) => {
   if (val) {
     selectTreeId.value = [val]
     initParam.deptId = val
-    proTableRef.value?.getTableList()
     proTableRef.value?.clearSelection()
   }
 }

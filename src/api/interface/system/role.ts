@@ -18,6 +18,8 @@ export namespace IRole {
     delFlag: string
     createTime: string
     updateTime: string
+    isLock?: string
+    permissions?: string
   }
 
   export interface Menu {

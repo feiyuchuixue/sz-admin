@@ -83,16 +83,20 @@ defineOptions({
 
 // 表格配置项
 const columns: ColumnProps<IRole.Info>[] = [
-  { type: 'selection', width: 80, selectable: (row) => row.id !== 1 },
-  { prop: 'id', label: '编号', width: 150 },
+  { type: 'selection', width: 80, selectable: (row) => row.isLock !== 'T' },
+  { prop: 'id', label: '编号', width: 80 },
   { prop: 'roleName', label: '角色名称' },
+  { prop: 'permissions', label: '标识' },
   { prop: 'remark', label: '备注' },
   { prop: 'createTime', label: '创建时间' },
   { prop: 'updateTime', label: '修改时间' },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
 ]
 // 表格配置项
-const searchColumns: SearchProps[] = [{ prop: 'roleName', label: '角色名称', el: 'input' }]
+const searchColumns: SearchProps[] = [
+  { prop: 'roleName', label: '角色名称', el: 'input' },
+  { prop: 'permissions', label: '标识', el: 'input' }
+]
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTableRef = ref<ProTableInstance>()
