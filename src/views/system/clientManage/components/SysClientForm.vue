@@ -113,7 +113,7 @@
       <el-form-item label="token固定超时" prop="timeout">
         <template #label>
           <el-space :size="4">
-            <span>token活跃超时时间</span>
+            <span>token固定超时</span>
             <el-tooltip
               effect="dark"
               content="指定此次登录 token 有效期，单位：秒。token的最大有效期。对应sa-token timeout"
