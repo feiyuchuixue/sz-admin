@@ -383,12 +383,18 @@
                 clearable
                 filterable
               >
-                <el-option
-                  v-for="item in dictTypeOptions"
-                  :key="item.typeCode"
-                  :label="item.typeName"
-                  :value="item.typeCode"
-                />
+                <el-option-group
+                  v-for="group in dictTypeOptions"
+                  :key="group.label"
+                  :label="group.label"
+                >
+                  <el-option
+                    v-for="item in group.options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-option-group>
               </el-select>
             </template>
           </ProTable>
@@ -718,11 +724,30 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 })
 
-const dictTypeOptions = ref<IDict.DictType[]>([])
+const dictTypeOptions = ref<IDict.DictCategory[]>([])
 const getDictTypes = () => {
   getDictTypeOptions().then((res) => {
-    dictTypeOptions.value = res.data
+    dictTypeOptions.value = processDictionary(res.data)
   })
+}
+
+// 字典分组处理逻辑
+const processDictionary = (data: IDict.DictType[]): IDict.DictCategory[] => {
+  const categorizedDict = data.reduce<{
+    [key: string]: IDict.DictCategory
+  }>((acc, item) => {
+    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName };
+    const category = item.isDynamic ? '动态字典' : '静态字典';
+
+    if (!acc[category]) {
+      acc[category] = { label: category, options: [] };
+    }
+    acc[category].options.push(option);
+
+    return acc;
+  }, {});
+
+  return Object.values(categorizedDict);
 }
 
 getDictTypes()
@@ -902,5 +927,9 @@ defineExpose({
 .column-table-header-yiwen {
   line-height: 1;
   font-weight: normal;
+}
+
+:deep(.el-select-group .el-select-dropdown__item) {
+  padding-left: 32px;
 }
 </style>
