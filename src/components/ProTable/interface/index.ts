@@ -67,6 +67,7 @@ export interface SearchProps extends Partial<Record<BreakPoint, Responsive>> {
   render?: (scope: SearchRenderScope) => VNode // 自定义搜索内容渲染（tsx语法）
   prop?: string
   fieldNames?: FieldNamesProps // 指定 label && value && children 的 key 值
+  enum?: EnumProps[] | Ref<EnumProps[]> | ((params?: any) => Promise<any>) // 枚举字典
 }
 
 export type FieldNamesProps = {
