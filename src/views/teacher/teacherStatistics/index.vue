@@ -157,6 +157,7 @@ const searchColumns: SearchProps[] = [
     prop: 'teacherCommonType',
     label: '讲师区分类型',
     el: 'select',
+    enum: optionsStore.getDictOptions('account_status'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
