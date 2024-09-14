@@ -9,9 +9,8 @@ import { ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/modules/auth'
 
 // 是否使用socket 当 import.meta.env.VITE_SOCKET_URL 不为空时，启用websocket
-const useSocket = !import.meta.env.VITE_SOCKET_URL
+const useSocket = Object.prototype.hasOwnProperty.call(import.meta.env, 'VITE_SOCKET_URL')
 const socketUrl = import.meta.env.VITE_SOCKET_URL
-
 const MAX_RECONNECT_COUNT = 10
 
 /**
@@ -115,6 +114,7 @@ export const useSocketStore = defineStore('socket', () => {
     if (!useSocket) return
     if (socket.value) return
     const userStore = useUserStore()
+    console.log('socketUrl',socketUrl)
     // 建立WebSocket连接
     const webSocket = new WebSocket(socketUrl, [userStore.token])
 
