@@ -96,8 +96,8 @@ const login = () => {
 
       // 2.添加动态路由
       await initDynamicRouter()
-      optionsStore.setReloadOptions()
-      await optionsStore.getAllDictList()
+/*      optionsStore.setReloadOptions()
+      await optionsStore.getAllDictList()*/
 
       // 3.清空 tabs、keepAlive 数据
       tabsStore.closeMultipleTab()
