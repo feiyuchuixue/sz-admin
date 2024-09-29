@@ -14,8 +14,11 @@ export const useTabsStore = defineStore(
 
     // Add Tabs
     async function addTabs(tabItem: TabsMenuProps) {
-      if (tabsMenuList.value.every((item) => item.path !== tabItem.path)) {
+      const index = tabsMenuList.value.findIndex((item) => item.path === tabItem.path)
+      if (index === -1) {
         tabsMenuList.value.push(tabItem)
+      } else {
+        tabsMenuList.value.splice(index, 1, tabItem)
       }
       if (!keepAliveStore.keepAliveName.includes(tabItem.name) && tabItem.isKeepAlive) {
         keepAliveStore.addKeepAliveName(tabItem.name)
