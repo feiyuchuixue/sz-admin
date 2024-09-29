@@ -53,7 +53,7 @@ import { useTabsStore } from '@/stores/modules/tabs'
 import { useKeepAliveStore } from '@/stores/modules/keepAlive'
 import { CircleClose, Lock, User, UserFilled } from '@element-plus/icons-vue'
 import { initDynamicRouter } from '@/router/modules/dynamicRouter'
-import { useOptionsStore } from '@/stores/modules/options'
+//import { useOptionsStore } from '@/stores/modules/options'
 import { onMounted, reactive, ref } from 'vue'
 import { ElNotification } from 'element-plus'
 
@@ -61,7 +61,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const tabsStore = useTabsStore()
 const keepAliveStore = useKeepAliveStore()
-const optionsStore = useOptionsStore()
+//const optionsStore = useOptionsStore()
 
 const loginFormRef = ref()
 const loginRules = reactive({
@@ -96,7 +96,7 @@ const login = () => {
 
       // 2.添加动态路由
       await initDynamicRouter()
-/*      optionsStore.setReloadOptions()
+      /*      optionsStore.setReloadOptions()
       await optionsStore.getAllDictList()*/
 
       // 3.清空 tabs、keepAlive 数据

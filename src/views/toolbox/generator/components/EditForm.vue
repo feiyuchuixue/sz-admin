@@ -736,18 +736,18 @@ const processDictionary = (data: IDict.DictType[]): IDict.DictCategory[] => {
   const categorizedDict = data.reduce<{
     [key: string]: IDict.DictCategory
   }>((acc, item) => {
-    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName };
-    const category = item.isDynamic ? '动态字典' : '静态字典';
+    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName }
+    const category = item.isDynamic ? '动态字典' : '静态字典'
 
     if (!acc[category]) {
-      acc[category] = { label: category, options: [] };
+      acc[category] = { label: category, options: [] }
     }
-    acc[category].options.push(option);
+    acc[category].options.push(option)
 
-    return acc;
-  }, {});
+    return acc
+  }, {})
 
-  return Object.values(categorizedDict);
+  return Object.values(categorizedDict)
 }
 
 getDictTypes()

@@ -35,14 +35,14 @@ export namespace IDict {
 
   // 字典分类option
   export interface DictOption {
-    value: string;
-    label: string;
+    value: string
+    label: string
   }
 
   // 字典分类类型
   export interface DictCategory {
-    label: string;
-    options: DictOption[];
+    label: string
+    options: DictOption[]
   }
 
   // 字典列表查询
