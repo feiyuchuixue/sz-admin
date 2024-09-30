@@ -4,7 +4,7 @@
       <transition-group name="breadcrumb">
         <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item.path">
           <div class="el-breadcrumb__inner is-link" @click="onBreadcrumbClick(item, index)">
-            <el-icon v-show="item.meta.icon && appStore.breadcrumbIcon" class="breadcrumb-icon">
+            <el-icon v-if="item.meta.icon && appStore.breadcrumbIcon" class="breadcrumb-icon">
               <SvgIcon
                 v-if="item.meta.icon.startsWith('svg-')"
                 :name="item.meta.icon.substring(4)"
@@ -27,6 +27,7 @@ import { useAuthStore } from '@/stores/modules/auth'
 import { HOME_URL } from '@/config'
 import { useAppStore } from '@/stores/modules/app'
 import SvgIcon from '@/components/SvgIcon/index.vue'
+import { MENU_DIR } from '@/config/consts'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -53,7 +54,8 @@ const breadcrumbList = computed(() => {
 
 // Click Breadcrumb
 const onBreadcrumbClick = (item: Menu.MenuOptions, index: number) => {
-  if (index !== breadcrumbList.value.length - 1) router.push(item.path)
+  if (index !== breadcrumbList.value.length - 1 && item.menuTypeCd !== MENU_DIR)
+    router.push(item.path)
 }
 </script>
 
