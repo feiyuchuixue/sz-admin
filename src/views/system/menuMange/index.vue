@@ -280,7 +280,6 @@ const changeDataScope = (params: Menu.MenuOptions) => {
 </script>
 <style scoped lang="scss">
 .sql-box {
-  text-align: center;
   margin: 0 auto;
   width: 90%;
   max-height: 60vh;
