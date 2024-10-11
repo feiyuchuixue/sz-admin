@@ -1,14 +1,14 @@
 import axios from 'axios'
-import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
+import type {AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig} from 'axios'
 
 import router from '@/router'
-import { LOGIN_URL } from '@/config'
-import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL, CODE_USER_FAIL } from '@/api/helper'
-import type { IResultData } from '@/api/interface'
-import { useUserStore } from '@/stores/modules/user'
-import { useAuthStore } from '@/stores/modules/auth'
-import { useSocketStore } from '@/stores/modules/socket'
-import { ElMessage } from 'element-plus'
+import {LOGIN_URL} from '@/config'
+import {checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL, CODE_USER_FAIL} from '@/api/helper'
+import type {IResultData} from '@/api/interface'
+import {useUserStore} from '@/stores/modules/user'
+import {useAuthStore} from '@/stores/modules/auth'
+import {useSocketStore} from '@/stores/modules/socket'
+import {ElMessage} from 'element-plus'
 
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   loading?: boolean
@@ -18,8 +18,8 @@ export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 const config = {
   // 默认地址请求地址，可在 .env.** 文件中修改
   baseURL: import.meta.env.VITE_API_URL as string,
-  // 设置超时时间
-  timeout: 30000
+  // 设置超时时间，默认超时时间60s
+  timeout: import.meta.env.VITE_APP_HTTP_TIMEOUT as number || 60000,
   // 跨域时候允许携带凭证
   // withCredentials: true
 }
@@ -57,7 +57,7 @@ class RequestHttp {
      */
     this.service.interceptors.response.use(
       (response) => {
-        const { data } = response
+        const {data} = response
         const userStore = useUserStore()
         const socketStore = useSocketStore()
         const authStore = useAuthStore()
@@ -82,7 +82,7 @@ class RequestHttp {
         return data
       },
       async (error) => {
-        const { response } = error
+        const {response} = error
         // tryHideFullScreenLoading()
         // 请求超时 && 网络错误单独判断，没有 response
         if (error.message.indexOf('timeout') !== -1) {
@@ -108,7 +108,7 @@ class RequestHttp {
    * @description 常用请求方法封装
    */
   get<T>(url: string, params: object = {}, _object = {}): Promise<IResultData<T>> {
-    return this.service.get(url, { params, ..._object })
+    return this.service.get(url, {params, ..._object})
   }
 
   post<T>(url: string, params: object = {}, _object = {}): Promise<IResultData<T>> {
@@ -120,15 +120,15 @@ class RequestHttp {
   }
 
   delete<T>(url: string, data: object = {}, _object = {}): Promise<IResultData<T>> {
-    return this.service.delete(url, { data, ..._object })
+    return this.service.delete(url, {data, ..._object})
   }
 
   download(url: string, params = {}, _object = {}): Promise<BlobPart> {
-    return this.service.post(url, params, { ..._object, responseType: 'blob' })
+    return this.service.post(url, params, {..._object, responseType: 'blob'})
   }
 
   template(url: string, params = {}, _object = {}): Promise<BlobPart> {
-    return this.service.get(url, { params, ..._object, responseType: 'blob' })
+    return this.service.get(url, {params, ..._object, responseType: 'blob'})
   }
 
   upload<T>(url: string, params = {}, _object = {}): Promise<IResultData<T>> {
