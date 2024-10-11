@@ -102,7 +102,9 @@
               <div class="card-header min-header">
                 <span>部门维度</span>
                 <div>
-                  <el-checkbox v-model="isDeptExpand" @change="changeDeptExpand">展开/折叠</el-checkbox>
+                  <el-checkbox v-model="isDeptExpand" @change="changeDeptExpand"
+                    >展开/折叠</el-checkbox
+                  >
                   <el-checkbox v-model="isDeptCheckStrictly">父子联动</el-checkbox>
                 </div>
               </div>

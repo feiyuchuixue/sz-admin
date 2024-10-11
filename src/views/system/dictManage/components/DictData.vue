@@ -44,12 +44,14 @@
         </template>
 
         <template #isShow="{ row }">
-          <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'">{{ yesNoOptionsLabel(row?.isShow) }}
+          <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'"
+            >{{ yesNoOptionsLabel(row?.isShow) }}
           </el-tag>
         </template>
 
         <template #callbackShowStyle="{ row }">
-          <el-tag :type="row.callbackShowStyle">{{ tagsTypeOptionsLabel(row?.callbackShowStyle) }}
+          <el-tag :type="row.callbackShowStyle"
+            >{{ tagsTypeOptionsLabel(row?.callbackShowStyle) }}
           </el-tag>
         </template>
 
