@@ -159,7 +159,7 @@ const deleteInfo = async (params: IDict.Dict) => {
 }
 
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   if (import.meta.env.VITE_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除所选字典，请谅解！' })
   }

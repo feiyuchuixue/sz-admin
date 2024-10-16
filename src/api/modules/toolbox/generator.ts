@@ -24,7 +24,7 @@ export const getGeneratorSchemaList = (params: IPageQuery) => {
  * 导入指定表
  * @param params
  */
-export const importGenerator = (params: { tableName: string[] }) => {
+export const importGenerator = (params: { tableName: (string | number)[] }) => {
   return http.post(ADMIN_MODULE + `/generator/import`, params)
 }
 
@@ -56,7 +56,7 @@ export const codeGenerator = (tableName: string) => {
  * 删除导入的表
  * @param params
  */
-export const deleteGenerator = (params: { tableNames: string[] }) => {
+export const deleteGenerator = (params: { tableNames: (string | number)[] }) => {
   return http.delete(ADMIN_MODULE + `/generator`, params)
 }
 

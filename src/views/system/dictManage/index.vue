@@ -160,7 +160,7 @@ const deleteInfo = async (params: IDict.DictType) => {
 }
 
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(deleteDictType, { ids }, '删除所选字典类型信息')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()

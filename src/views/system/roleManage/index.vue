@@ -132,7 +132,7 @@ const deleteInfo = async (params: IRole.Info) => {
 }
 
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(deleteRole, { ids }, '删除所选角色信息')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()

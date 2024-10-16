@@ -119,7 +119,7 @@ const deleteInfo = async (params: ISysDataRole.Row) => {
   proTableRef.value?.getTableList()
 }
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(removeSysDataRoleApi, { ids }, '删除所选数据权限')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()

@@ -34,7 +34,7 @@ export const updateSysClientApi = (params: ISysClient.Form) => {
  * @param params
  * @returns {*}
  */
-export const removeSysClientApi = (params: { ids: string[] }) => {
+export const removeSysClientApi = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-client`, params)
 }
 
@@ -43,7 +43,7 @@ export const removeSysClientApi = (params: { ids: string[] }) => {
  * @param params
  * @returns {*}
  */
-export const getSysClientDetailApi = (params: { id: string }) => {
+export const getSysClientDetailApi = (params: { id: number }) => {
   const { id } = params
   return http.get<ISysClient.Row>(ADMIN_MODULE + `/sys-client/${id}`)
 }

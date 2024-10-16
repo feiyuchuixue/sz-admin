@@ -35,7 +35,7 @@ export const editRole = (params: IRole.Form) => {
  * @param params
  * @returns {*}
  */
-export const deleteRole = (params: { ids: string[] }) => {
+export const deleteRole = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-role`, params)
 }
 

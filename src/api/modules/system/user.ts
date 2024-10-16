@@ -36,7 +36,7 @@ export const editUser = (params: IUser.Form) => {
  * @param params
  * @returns {*}
  */
-export const deleteUser = (params: { ids: string[] }) => {
+export const deleteUser = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-user`, params)
 }
 
@@ -105,7 +105,7 @@ export const getUserDeptTree = () => {
  * @param params
  * @returns {*}
  */
-export const unlockUser = (params: { ids: string[] }) => {
+export const unlockUser = (params: { ids: (string | number)[] }) => {
   return http.post(ADMIN_MODULE + `/sys-user/unlock`, params)
 }
 

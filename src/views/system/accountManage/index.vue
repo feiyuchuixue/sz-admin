@@ -317,7 +317,7 @@ const deleteInfo = async (params: IUser.Info) => {
 }
 
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(deleteUser, { ids }, '删除所选用户信息')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()
@@ -352,7 +352,7 @@ const settingDept = (record: any) => {
   }
 }
 
-const unlock = async (id: string | string[]) => {
+const unlock = async (id: (string | number)[]) => {
   if (Array.isArray(id)) {
     await unlockUser({ ids: id })
   } else {

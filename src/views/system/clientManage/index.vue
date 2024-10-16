@@ -202,7 +202,7 @@ const deleteInfo = async (params: ISysClient.Row) => {
 }
 
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(removeSysClientApi, { ids }, '删除所选客户端管理')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()

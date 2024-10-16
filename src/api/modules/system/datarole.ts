@@ -34,7 +34,7 @@ export const updateSysDataRoleApi = (params: ISysDataRole.Form) => {
  * @param params
  * @returns {*}
  */
-export const removeSysDataRoleApi = (params: { ids: number[] }) => {
+export const removeSysDataRoleApi = (params: { ids: (string | number)[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-data-role`, params)
 }
 

@@ -35,7 +35,7 @@ export const editDictType = (params: IDict.DictType) => {
  * @param params
  * @returns {*}
  */
-export const deleteDictType = (params: { ids: string[] }) => {
+export const deleteDictType = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-dict-type`, params)
 }
 
@@ -71,7 +71,7 @@ export const editDictData = (params: IDict.Dict) => {
  * @param params
  * @returns {*}
  */
-export const deleteDictData = (params: { ids: string[] }) => {
+export const deleteDictData = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-dict`, params)
 }
 
@@ -95,6 +95,6 @@ export const getDictTypeOptions = () => {
  * 导出字典sql
  * @param params
  */
-export const exportDictSql = (params: { ids: string[] }) => {
+export const exportDictSql = (params: { ids: number[] }) => {
   return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params)
 }

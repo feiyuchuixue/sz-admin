@@ -99,7 +99,7 @@ const deleteInfo = async (params: IConfig.Info) => {
 }
 
 // 批量删除信息
-const batchDelete = async (ids: string[]) => {
+const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(deleteConfig, { ids }, '删除所选参数')
   proTableRef.value?.clearSelection()
   proTableRef.value?.getTableList()

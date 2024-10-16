@@ -35,6 +35,6 @@ export const editConfig = (params: IConfig.Form) => {
  * @param params
  * @returns {*}
  */
-export const deleteConfig = (params: { ids: string[] }) => {
+export const deleteConfig = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-config`, params)
 }
