@@ -86,7 +86,7 @@ const columns: ColumnProps<IRole.Info>[] = [
   { type: 'selection', width: 80, selectable: (row) => row.isLock !== 'T' },
   { prop: 'id', label: '编号', width: 80 },
   { prop: 'roleName', label: '角色名称' },
-  { prop: 'permissions', label: '标识' },
+  { prop: 'permissions', tag: true, label: '标识' },
   { prop: 'remark', label: '备注' },
   { prop: 'createTime', label: '创建时间' },
   { prop: 'updateTime', label: '修改时间' },
