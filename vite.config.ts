@@ -32,6 +32,7 @@ export default defineConfig(({mode}: ConfigEnv): UserConfig => {
     css: {
       preprocessorOptions: {
         scss: {
+          silenceDeprecations: ['legacy-js-api'],
           additionalData: `@use "@/styles/element/index.scss" as *;`
         }
       }
