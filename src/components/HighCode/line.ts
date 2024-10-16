@@ -19,7 +19,6 @@ const buildLineNumber = (el: any) => {
   if (codeNumber) {
     el.removeChild(codeNumber)
   }
-  console.log('codeNumber', codeNumber)
   //插入行数
   let ul = document.createElement('ul')
   for (let i = 1; i <= size; i++) {

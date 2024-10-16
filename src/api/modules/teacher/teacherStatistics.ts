@@ -35,7 +35,7 @@ export const updateTeacherStatisticsApi = (params: ITeacherStatistics.Form) => {
  * @param params
  * @returns {*}
  */
-export const removeTeacherStatisticsApi = (params: { ids: number[] }) => {
+export const removeTeacherStatisticsApi = (params: { ids: (string | number)[] }) => {
   return http.delete(ADMIN_MODULE + `/teacher-statistics`, params)
 }
 
