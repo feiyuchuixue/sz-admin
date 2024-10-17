@@ -1,6 +1,6 @@
 {
-  "name": "vite-project",
-  "version": "0.7.11",
+  "name": "sz-admin",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "dev": "vite",
