@@ -6,10 +6,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import PackageJson from 'package.json'
+import PackageJson from 'package.json';
 const getVersion = () => {
-  return PackageJson.version
-}
+  return PackageJson.version;
+};
 </script>
 <style scoped lang="scss">
 @import './index.scss';

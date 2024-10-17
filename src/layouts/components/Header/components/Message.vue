@@ -3,7 +3,7 @@
     <el-popover placement="bottom" :width="310" trigger="click">
       <template #reference>
         <el-badge :value="5" class="item">
-          <i :class="'iconfont icon-xiaoxi'" class="toolBar-icon"></i>
+          <i :class="'iconfont icon-xiaoxi'" class="toolBar-icon" />
         </el-badge>
       </template>
       <el-tabs v-model="activeName">
@@ -64,9 +64,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const activeName = ref('first')
+const activeName = ref('first');
 </script>
 
 <style scoped lang="scss">

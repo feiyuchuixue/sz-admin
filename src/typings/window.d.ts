@@ -1,8 +1,8 @@
 declare global {
   interface Navigator {
-    msSaveOrOpenBlob: (blob: Blob, fileName: string) => void
-    browserLanguage: string
+    msSaveOrOpenBlob: (blob: Blob, fileName: string) => void;
+    browserLanguage: string;
   }
 }
 
-export {}
+export {};

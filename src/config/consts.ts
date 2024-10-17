@@ -1,26 +1,26 @@
-import type { Options } from '@/config/typings'
+import type { Options } from '@/config/typings';
 
 /**
  * 目录
  * @type {string}
  */
-export const MENU_DIR: string = '1002001'
+export const MENU_DIR: string = '1002001';
 /**
  * 菜单
  * @type {string}
  */
-export const MENU_PAGE: string = '1002002'
+export const MENU_PAGE: string = '1002002';
 /**
  * 按钮
  * @type {string}
  */
-export const MENU_BTN: string = '1002003'
+export const MENU_BTN: string = '1002003';
 
-export const CHANNEL_DEFAULT: string = 'DEFAULTS'
+export const CHANNEL_DEFAULT: string = 'DEFAULTS';
 
-export const CHANNEL_KICK_OFF: string = 'KICK_OFF'
+export const CHANNEL_KICK_OFF: string = 'KICK_OFF';
 
-export const UPGRADE_CHANNEL: string = 'UPGRADE_CHANNEL'
+export const UPGRADE_CHANNEL: string = 'UPGRADE_CHANNEL';
 
 /**
  * 是否选项
@@ -35,7 +35,7 @@ export const yesNoOptions: Options[] = [
     label: '否',
     value: 'F'
   }
-]
+];
 
 export const dictBusinessType: Options[] = [
   {
@@ -46,13 +46,13 @@ export const dictBusinessType: Options[] = [
     label: '系统字典',
     value: 'system'
   }
-]
+];
 
 export const dictBusinessTypeLabel = (value: string): string => {
-  const item = dictBusinessType.find((item) => item.value === value)
+  const item = dictBusinessType.find(item => item.value === value);
 
-  return item?.label || ''
-}
+  return item?.label || '';
+};
 
 /**
  * 是否选项label显示
@@ -60,10 +60,10 @@ export const dictBusinessTypeLabel = (value: string): string => {
  * @returns {string}
  */
 export const yesNoOptionsLabel = (value: string): string => {
-  const item = yesNoOptions.find((item) => item.value === value)
+  const item = yesNoOptions.find(item => item.value === value);
 
-  return item?.label || ''
-}
+  return item?.label || '';
+};
 
 /**
  * 标签类型
@@ -95,7 +95,7 @@ export const tagsTypeOptions: Options[] = [
     label: 'Danger',
     value: 'danger'
   }
-]
+];
 
 /**
  * 标签类型 显示文本
@@ -103,7 +103,7 @@ export const tagsTypeOptions: Options[] = [
  * @returns {string|string}
  */
 export const tagsTypeOptionsLabel = (value: string): string => {
-  const item = tagsTypeOptions.find((item) => item.value === value)
+  const item = tagsTypeOptions.find(item => item.value === value);
 
-  return item?.label || ''
-}
+  return item?.label || '';
+};

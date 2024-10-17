@@ -10,59 +10,49 @@
  *
  *
  */
-import { useAuthStore } from '@/stores/modules/auth'
-import type { Directive, DirectiveBinding } from 'vue'
+import { useAuthStore } from '@/stores/modules/auth';
+import type { Directive, DirectiveBinding } from 'vue';
 
 const auth: Directive = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
-    const { value } = binding
-    const authStore = useAuthStore()
-    const currentBtnPermissions = authStore.authButtonListGet ?? []
-    const currentPageRoles: string[] = authStore.authRoleListGet ?? []
+    const { value } = binding;
+    const authStore = useAuthStore();
+    const currentBtnPermissions = authStore.authButtonListGet ?? [];
+    const currentPageRoles: string[] = authStore.authRoleListGet ?? [];
 
-    const ADMIN_ROLE = 'admin'
-    const ADMIN_BYPASS = import.meta.env.VITE_ADMIN_BYPASS_PERMISSION === 'true'
+    const ADMIN_ROLE = 'admin';
+    const ADMIN_BYPASS = import.meta.env.VITE_ADMIN_BYPASS_PERMISSION === 'true';
 
     // 如果配置允许对admin用户放行，并且当前用户角色包含admin，则放行
     if (ADMIN_BYPASS && currentPageRoles.includes(ADMIN_ROLE)) {
-      return
+      return;
     }
 
     // 处理基础的单条件认证
     if (typeof value === 'string') {
       if (!currentBtnPermissions.includes(value)) {
-        el.remove()
+        el.remove();
       }
-      return
+      return;
     }
     // 处理 AND 条件的权限认证
-    if (
-      Array.isArray(value) &&
-      value.length === 1 &&
-      value[0].type === 'and' &&
-      Array.isArray(value[0].conditions)
-    ) {
+    if (Array.isArray(value) && value.length === 1 && value[0].type === 'and' && Array.isArray(value[0].conditions)) {
       if (!value[0].conditions.every((item: string) => currentBtnPermissions.includes(item))) {
-        el.remove()
+        el.remove();
       }
-      return
+      return;
     }
 
     // 处理 OR 条件的权限认证
-    if (
-      Array.isArray(value) &&
-      value.length === 1 &&
-      value[0].type === 'or' &&
-      Array.isArray(value[0].conditions)
-    ) {
+    if (Array.isArray(value) && value.length === 1 && value[0].type === 'or' && Array.isArray(value[0].conditions)) {
       if (!value[0].conditions.some((item: string) => currentBtnPermissions.includes(item))) {
-        el.remove()
+        el.remove();
       }
-      return
+      return;
     }
     // 如果传入的条件不符合以上任何一种格式，则移除元素
-    el.remove()
+    el.remove();
   }
-}
+};
 
-export default auth
+export default auth;

@@ -1,41 +1,41 @@
-import type { IPageQuery } from '@/api/interface'
+import type { IPageQuery } from '@/api/interface';
 
 export namespace IRole {
   export interface Query extends IPageQuery {
-    roleName?: string
+    roleName?: string;
   }
 
   export interface Form {
-    id?: number
-    roleName: string
-    remark: string
+    id?: number;
+    roleName: string;
+    remark: string;
   }
 
   export interface Info {
-    id: number
-    roleName: string
-    remark: string
-    delFlag: string
-    createTime: string
-    updateTime: string
-    isLock?: string
-    permissions?: string
+    id: number;
+    roleName: string;
+    remark: string;
+    delFlag: string;
+    createTime: string;
+    updateTime: string;
+    isLock?: string;
+    permissions?: string;
   }
 
   export interface Menu {
-    menuLists: MenuTree[]
-    selectIds: string[]
+    menuLists: MenuTree[];
+    selectIds: string[];
   }
 
   export interface MenuTree {
-    id: string
-    pid: string
-    title: string
-    children: MenuTree[]
+    id: string;
+    pid: string;
+    title: string;
+    children: MenuTree[];
   }
 
   export interface MenuForm {
-    menuIds: string[]
-    roleId: number
+    menuIds: string[];
+    roleId: number;
   }
 }

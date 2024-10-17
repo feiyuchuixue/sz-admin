@@ -37,30 +37,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/modules/auth'
-import Main from '@/layouts/components/Main/index.vue'
-import SubMenu from '@/layouts/components/Menu/SubMenu.vue'
-import ToolBarLeft from '@/layouts/components/Header/ToolBarLeft.vue'
-import ToolBarRight from '@/layouts/components/Header/ToolBarRight.vue'
-import { useAppStore } from '@/stores/modules/app'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/modules/auth';
+import Main from '@/layouts/components/Main/index.vue';
+import SubMenu from '@/layouts/components/Menu/SubMenu.vue';
+import ToolBarLeft from '@/layouts/components/Header/ToolBarLeft.vue';
+import ToolBarRight from '@/layouts/components/Header/ToolBarRight.vue';
+import { useAppStore } from '@/stores/modules/app';
 
 defineOptions({
   name: 'LayoutClassic'
-})
+});
 
-const title = import.meta.env.VITE_APP_TITLE
+const title = import.meta.env.VITE_APP_TITLE;
 
-const route = useRoute()
-const authStore = useAuthStore()
-const appStore = useAppStore()
-const accordion = computed(() => appStore.accordion)
-const isCollapse = computed(() => appStore.isCollapse)
-const menuList = computed(() => authStore.showMenuListGet)
-const activeMenu = computed(
-  () => (route.meta.activeMenu ? route.meta.activeMenu : route.path) as string
-)
+const route = useRoute();
+const authStore = useAuthStore();
+const appStore = useAppStore();
+const accordion = computed(() => appStore.accordion);
+const isCollapse = computed(() => appStore.isCollapse);
+const menuList = computed(() => authStore.showMenuListGet);
+const activeMenu = computed(() => (route.meta.activeMenu ? route.meta.activeMenu : route.path) as string);
 </script>
 
 <style scoped lang="scss">

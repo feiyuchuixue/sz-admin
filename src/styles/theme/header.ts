@@ -1,4 +1,4 @@
-import type { Theme } from '@/hooks/interface'
+import type { Theme } from '@/hooks/interface';
 
 export const headerTheme: Record<Theme.ThemeType, { [key: string]: string }> = {
   light: {
@@ -22,4 +22,4 @@ export const headerTheme: Record<Theme.ThemeType, { [key: string]: string }> = {
     '--el-header-text-color-regular': '#cfd3dc',
     '--el-header-border-color': '#414243'
   }
-}
+};

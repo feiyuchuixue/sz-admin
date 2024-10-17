@@ -18,46 +18,46 @@
 </template>
 
 <script setup lang="ts">
-import { previewCode } from '@/api/modules/toolbox/generator'
-import type { IGenerator } from '@/api/interface/toolbox/generator'
-import type { IResultData } from '@/api/interface'
-import HighCode from '@/components/HighCode/index.vue'
-import { ref } from 'vue'
+import { previewCode } from '@/api/modules/toolbox/generator';
+import type { IGenerator } from '@/api/interface/toolbox/generator';
+import type { IResultData } from '@/api/interface';
+import HighCode from '@/components/HighCode/index.vue';
+import { ref } from 'vue';
 
 defineOptions({
   name: 'Preview'
-})
-const activeName = ref('')
-const visible = ref(false)
-const codeList = ref<IGenerator.PreviewInfo[]>([])
+});
+const activeName = ref('');
+const visible = ref(false);
+const codeList = ref<IGenerator.PreviewInfo[]>([]);
 
 // 父组件传过来的参数
 const parameter = ref<PreviewParameterProps>({
   tableName: ''
-})
+});
 
 // 接收父组件参数
 const acceptParams = (params: PreviewParameterProps) => {
-  parameter.value = { ...parameter.value, ...params }
-  getCode()
-  visible.value = true
-}
+  parameter.value = { ...parameter.value, ...params };
+  getCode();
+  visible.value = true;
+};
 
 export interface PreviewParameterProps {
-  tableName: string
+  tableName: string;
 }
 
 const getCode = () => {
   previewCode(parameter.value.tableName).then((info: IResultData<IGenerator.PreviewInfo[]>) => {
-    codeList.value = info.data
-    visible.value = true
-    activeName.value = info?.data[0].alias || ''
-  })
-}
+    codeList.value = info.data;
+    visible.value = true;
+    activeName.value = info?.data[0].alias || '';
+  });
+};
 
 defineExpose({
   acceptParams
-})
+});
 </script>
 
 <style scoped lang="scss">

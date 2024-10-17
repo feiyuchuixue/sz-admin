@@ -3,11 +3,8 @@
     <el-sub-menu v-if="subItem.children?.length" :index="subItem.path">
       <template #title>
         <el-icon>
-          <SvgIcon
-            v-if="subItem.meta?.icon.startsWith('svg-')"
-            :name="subItem.meta?.icon.substring(4)"
-          />
-          <component v-else :is="subItem.meta?.icon"></component>
+          <SvgIcon v-if="subItem.meta?.icon.startsWith('svg-')" :name="subItem.meta?.icon.substring(4)" />
+          <component v-else :is="subItem.meta?.icon" />
         </el-icon>
         <span class="sle">{{ subItem.meta.title }}</span>
       </template>
@@ -15,11 +12,8 @@
     </el-sub-menu>
     <el-menu-item v-else :index="subItem.path" @click="handleClickMenu(subItem)">
       <el-icon>
-        <SvgIcon
-          v-if="subItem.meta?.icon.startsWith('svg-')"
-          :name="subItem.meta?.icon.substring(4)"
-        />
-        <component v-else :is="subItem.meta?.icon"></component>
+        <SvgIcon v-if="subItem.meta?.icon.startsWith('svg-')" :name="subItem.meta?.icon.substring(4)" />
+        <component v-else :is="subItem.meta?.icon" />
       </el-icon>
       <template #title>
         <span class="sle">{{ subItem.meta.title }}</span>
@@ -29,20 +23,20 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import SvgIcon from '@/components/SvgIcon/index.vue'
+import { useRouter } from 'vue-router';
+import SvgIcon from '@/components/SvgIcon/index.vue';
 
 type Props = {
-  menuList: Menu.MenuOptions[]
-}
+  menuList: Menu.MenuOptions[];
+};
 
-defineProps<Props>()
+defineProps<Props>();
 
-const router = useRouter()
+const router = useRouter();
 const handleClickMenu = (subItem: Menu.MenuOptions) => {
-  if (subItem.meta.isLink) return window.open(subItem.meta.isLink, '_blank')
-  router.push(subItem.path)
-}
+  if (subItem.meta.isLink) return window.open(subItem.meta.isLink, '_blank');
+  router.push(subItem.path);
+};
 </script>
 
 <style lang="scss">

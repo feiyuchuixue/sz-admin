@@ -1,5 +1,5 @@
-import type { HandleData } from '@/hooks/interface'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import type { HandleData } from '@/hooks/interface';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 /**
  * @description 操作单条数据信息 (二次确认【删除、禁用、启用、重置密码】)
@@ -22,13 +22,13 @@ export const useHandleData = (
       type: confirmType,
       draggable: true
     }).then(async () => {
-      const res = await api(params)
-      if (!res) return reject(false)
+      const res = await api(params);
+      if (!res) return reject(false);
       ElMessage({
         type: 'success',
         message: `${message}成功!`
-      })
-      resolve(true)
-    })
-  })
-}
+      });
+      resolve(true);
+    });
+  });
+};

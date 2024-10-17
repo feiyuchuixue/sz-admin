@@ -1,20 +1,20 @@
-import { ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus';
 
 /**
  * 成功状态
  * @type {string}
  */
-export const CODE_SUCCESS: string = '0000'
+export const CODE_SUCCESS: string = '0000';
 /**
  * 无效Token
  * @type {string}
  */
-export const CODE_TOKEN_FAIL: string = 'C2001'
+export const CODE_TOKEN_FAIL: string = 'C2001';
 /**
  * 无效用户
  * @type {string}
  */
-export const CODE_USER_FAIL: string = 'C2002'
+export const CODE_USER_FAIL: string = 'C2002';
 
 /**
  * @description: 校验网络请求状态码
@@ -24,39 +24,39 @@ export const CODE_USER_FAIL: string = 'C2002'
 export const checkStatus = (status: number, message?: string) => {
   switch (status) {
     case 400:
-      ElMessage.error(message || '请求失败！请您稍后重试')
-      break
+      ElMessage.error(message || '请求失败！请您稍后重试');
+      break;
     case 401:
-      ElMessage.error(message || '登录失效！请您重新登录')
-      break
+      ElMessage.error(message || '登录失效！请您重新登录');
+      break;
     case 403:
-      ElMessage.error(message || '当前账号无权限访问！')
-      break
+      ElMessage.error(message || '当前账号无权限访问！');
+      break;
     case 404:
-      ElMessage.error(message || '你所访问的资源不存在！')
-      break
+      ElMessage.error(message || '你所访问的资源不存在！');
+      break;
     case 405:
-      ElMessage.error(message || '请求方式错误！请您稍后重试')
-      break
+      ElMessage.error(message || '请求方式错误！请您稍后重试');
+      break;
     case 408:
-      ElMessage.error(message || '请求超时！请您稍后重试')
-      break
+      ElMessage.error(message || '请求超时！请您稍后重试');
+      break;
     case 422:
-      ElMessage.error(message || '请求参数异常！')
-      break
+      ElMessage.error(message || '请求参数异常！');
+      break;
     case 500:
-      ElMessage.error(message || '服务异常！')
-      break
+      ElMessage.error(message || '服务异常！');
+      break;
     case 502:
-      ElMessage.error(message || '网关错误！')
-      break
+      ElMessage.error(message || '网关错误！');
+      break;
     case 503:
-      ElMessage.error(message || '服务不可用！')
-      break
+      ElMessage.error(message || '服务不可用！');
+      break;
     case 504:
-      ElMessage.error(message || '网关超时！')
-      break
+      ElMessage.error(message || '网关超时！');
+      break;
     default:
-      ElMessage.error(message || '请求失败！')
+      ElMessage.error(message || '请求失败！');
   }
-}
+};

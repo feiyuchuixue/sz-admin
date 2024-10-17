@@ -11,12 +11,7 @@
     >
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
-        <el-button
-          type="primary"
-          v-auth="'sys.client.create'"
-          :icon="CirclePlus"
-          @click="openAddEdit('新增客户端管理')"
-        >
+        <el-button type="primary" v-auth="'sys.client.create'" :icon="CirclePlus" @click="openAddEdit('新增客户端管理')">
           新增
         </el-button>
         <el-button
@@ -58,30 +53,30 @@
 </template>
 
 <script setup lang="ts">
-import { CirclePlus, Delete, EditPen } from '@element-plus/icons-vue'
-import ProTable from '@/components/ProTable/index.vue'
+import { CirclePlus, Delete, EditPen } from '@element-plus/icons-vue';
+import ProTable from '@/components/ProTable/index.vue';
 import {
   createSysClientApi,
   removeSysClientApi,
   updateSysClientApi,
   getSysClientListApi,
   getSysClientDetailApi
-} from '@/api/modules/system/client'
-import { useHandleData } from '@/hooks/useHandleData'
-import SysClientForm from '@/views/system/clientManage/components/SysClientForm.vue'
-import { useOptionsStore } from '@/stores/modules/options'
-import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface'
-import type { ISysClient } from '@/api/interface/system/client'
-import { ref } from 'vue'
+} from '@/api/modules/system/client';
+import { useHandleData } from '@/hooks/useHandleData';
+import SysClientForm from '@/views/system/clientManage/components/SysClientForm.vue';
+import { useOptionsStore } from '@/stores/modules/options';
+import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
+import type { ISysClient } from '@/api/interface/system/client';
+import { ref } from 'vue';
 defineOptions({
   name: 'SysClientView'
-})
-const optionsStore = useOptionsStore()
-const proTableRef = ref<ProTableInstance>()
+});
+const optionsStore = useOptionsStore();
+const proTableRef = ref<ProTableInstance>();
 
 // 表格配置项
 const columns: ColumnProps<ISysClient.Row>[] = [
-  { type: 'selection', width: 80, selectable: (row) => row.isLock !== 'T' },
+  { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'clientId', label: 'ClientId' },
   { prop: 'clientKey', label: '客户端名称' },
   { prop: 'clientSecret', label: '客户端秘钥' },
@@ -122,7 +117,7 @@ const columns: ColumnProps<ISysClient.Row>[] = [
   },
   { prop: 'remark', label: '备注' },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
-]
+];
 
 // 搜索条件项
 const searchColumns: SearchProps[] = [
@@ -158,28 +153,28 @@ const searchColumns: SearchProps[] = [
       valueFormat: 'YYYY-MM-DD HH:mm:ss'
     }
   }
-]
+];
 
 // 获取table列表
 const getTableList = (params: ISysClient.Query) => {
-  let newParams = formatParams(params)
-  return getSysClientListApi(newParams)
-}
+  let newParams = formatParams(params);
+  return getSysClientListApi(newParams);
+};
 
 const formatParams = (params: ISysClient.Query) => {
-  let newParams = JSON.parse(JSON.stringify(params))
-  return newParams
-}
+  let newParams = JSON.parse(JSON.stringify(params));
+  return newParams;
+};
 
 // 打开 drawer(新增、查看、编辑)
-const sysClientRef = ref<InstanceType<typeof SysClientForm>>()
+const sysClientRef = ref<InstanceType<typeof SysClientForm>>();
 const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   if (!isAdd) {
-    const record = await getSysClientDetailApi({ id: row?.clientId })
-    row = record?.data
+    const record = await getSysClientDetailApi({ id: row?.clientId });
+    row = record?.data;
   } else {
-    row.activeTimeout = 86400
-    row.timeout = 604800
+    row.activeTimeout = 86400;
+    row.timeout = 604800;
   }
   const params = {
     title,
@@ -187,24 +182,20 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
     api: isAdd ? createSysClientApi : updateSysClientApi,
     getTableList: proTableRef.value?.getTableList,
     isAdd: isAdd
-  }
-  sysClientRef.value?.acceptParams(params)
-}
+  };
+  sysClientRef.value?.acceptParams(params);
+};
 
 // 删除信息
 const deleteInfo = async (params: ISysClient.Row) => {
-  await useHandleData(
-    removeSysClientApi,
-    { ids: [params.clientId] },
-    `删除【${params.clientId}】客户端管理`
-  )
-  proTableRef.value?.getTableList()
-}
+  await useHandleData(removeSysClientApi, { ids: [params.clientId] }, `删除【${params.clientId}】客户端管理`);
+  proTableRef.value?.getTableList();
+};
 
 // 批量删除信息
 const batchDelete = async (ids: (string | number)[]) => {
-  await useHandleData(removeSysClientApi, { ids }, '删除所选客户端管理')
-  proTableRef.value?.clearSelection()
-  proTableRef.value?.getTableList()
-}
+  await useHandleData(removeSysClientApi, { ids }, '删除所选客户端管理');
+  proTableRef.value?.clearSelection();
+  proTableRef.value?.getTableList();
+};
 </script>

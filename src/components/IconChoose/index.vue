@@ -1,17 +1,10 @@
 <template>
   <div class="choose-container">
-    <el-input
-      ref="refInput"
-      v-model="internalValue"
-      v-bind="$attrs"
-      readonly
-      @input="changeValue"
-      @click="showPopover"
-    >
+    <el-input ref="refInput" v-model="internalValue" v-bind="$attrs" readonly @input="changeValue" @click="showPopover">
       <template #prepend>
         <el-icon size="30">
           <SvgIcon v-if="internalValue.startsWith('svg-')" :name="internalValue.substring(4)" />
-          <component v-else-if="internalValue" :is="internalValue"></component>
+          <component v-else-if="internalValue" :is="internalValue" />
         </el-icon>
       </template>
     </el-input>
@@ -26,7 +19,7 @@
               <div class="choose-item" v-for="item in filteredElementIcons" :key="item">
                 <div @click="chooseIcon(item)">
                   <el-icon size="30">
-                    <component :is="item"></component>
+                    <component :is="item" />
                   </el-icon>
                   {{ item }}
                 </div>
@@ -54,88 +47,88 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref } from 'vue';
 // element icons
-import * as Icons from '@element-plus/icons-vue'
-import { Search } from '@element-plus/icons-vue'
-import SvgIcon from '@/components/SvgIcon/index.vue'
-import { onClickOutside } from '@vueuse/core'
+import * as Icons from '@element-plus/icons-vue';
+import { Search } from '@element-plus/icons-vue';
+import SvgIcon from '@/components/SvgIcon/index.vue';
+import { onClickOutside } from '@vueuse/core';
 
 defineOptions({
   name: 'IconChoose'
-})
+});
 type Props = {
-  modelValue: string
-}
-const props = defineProps<Props>()
+  modelValue: string;
+};
+const props = defineProps<Props>();
 const emits = defineEmits<{
-  'update:modelValue': [string]
-}>()
+  'update:modelValue': [string];
+}>();
 
-const internalValue = ref(props.modelValue)
+const internalValue = ref(props.modelValue);
 
 const changeValue = () => {
-  emits('update:modelValue', internalValue.value)
-}
+  emits('update:modelValue', internalValue.value);
+};
 
-const activeTab = ref('element')
+const activeTab = ref('element');
 
 // 图标搜索
-const search = ref('')
-const elementIcons = Object.keys(Icons).map((key) => {
-  return Icons[key as keyof typeof Icons].name
-})
+const search = ref('');
+const elementIcons = Object.keys(Icons).map(key => {
+  return Icons[key as keyof typeof Icons].name;
+});
 
-const svgIcons: string[] = []
-const svgIconsFiles = import.meta.glob('@/assets/icons/**/*.svg')
+const svgIcons: string[] = [];
+const svgIconsFiles = import.meta.glob('@/assets/icons/**/*.svg');
 for (const key in svgIconsFiles) {
-  const matchArray = key.match(/.*\/assets\/icons\/(.*)\.svg/)
+  const matchArray = key.match(/.*\/assets\/icons\/(.*)\.svg/);
   if (matchArray && matchArray.length >= 2) {
-    svgIcons.push(`svg-${matchArray[1]}`)
+    svgIcons.push(`svg-${matchArray[1]}`);
   }
 }
 
 // 过滤图标
 const filteredElementIcons = computed(() => {
-  return elementIcons.filter((item) => item.toLowerCase().includes(search.value.toLowerCase()))
-})
+  return elementIcons.filter(item => item.toLowerCase().includes(search.value.toLowerCase()));
+});
 
 const filteredSvgIcons = computed(() => {
-  return svgIcons.filter((item) => item.toLowerCase().includes(search.value.toLowerCase()))
-})
+  return svgIcons.filter(item => item.toLowerCase().includes(search.value.toLowerCase()));
+});
 
 /**
  * 弹窗
  */
-const isShow = ref(false)
+const isShow = ref(false);
 
 /**
  * 显示
  */
 const showPopover = () => {
-  isShow.value = true
-}
+  isShow.value = true;
+};
 
 /**
  * 隐藏
  */
 const hidePopover = () => {
-  isShow.value = false
-}
+  isShow.value = false;
+};
 
 // 弹窗外部触发
-const chooseDialogRef = ref(null)
+const chooseDialogRef = ref(null);
 onClickOutside(chooseDialogRef, () => {
   if (isShow.value) {
-    hidePopover()
+    hidePopover();
   }
-})
+});
 
 const chooseIcon = (name: string) => {
-  hidePopover()
-  internalValue.value = name
-  emits('update:modelValue', name)
-}
+  hidePopover();
+  internalValue.value = name;
+  emits('update:modelValue', name);
+};
 </script>
 
 <style scoped lang="scss">

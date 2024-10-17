@@ -17,37 +17,37 @@
       :data="leaderLists"
     />
     <template #footer>
-      <el-button @click="visible = false"> 取消</el-button>
-      <el-button type="primary" @click="handleSubmit"> 确定</el-button>
+      <el-button @click="visible = false"> 取消 </el-button>
+      <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import type { ISysDept } from '@/api/interface/system/dept'
-import { ref } from 'vue'
+import type { ISysDept } from '@/api/interface/system/dept';
+import { ref } from 'vue';
 
 defineOptions({
   name: 'DeptLeaderTransfer'
-})
+});
 
 const transferProps = {
   key: 'id',
   label: 'nickname'
-}
+};
 
 defineProps({
   modelValue: {
     type: Array as () => number[],
     required: true
   }
-})
+});
 
-const leaderLists = ref<ISysDept.Leader[]>([])
-const selectIds = ref<number[]>([])
+const leaderLists = ref<ISysDept.Leader[]>([]);
+const selectIds = ref<number[]>([]);
 const emits = defineEmits<{
-  'update:modelValue': [number[]]
-}>()
+  'update:modelValue': [number[]];
+}>();
 
 /**
  * 过滤角色
@@ -56,37 +56,37 @@ const emits = defineEmits<{
  * @returns {boolean}
  */
 const filterMethod = (query: string, item: Record<string, any>) => {
-  return item.nickname.toLowerCase().includes(query.toLowerCase())
-}
+  return item.nickname.toLowerCase().includes(query.toLowerCase());
+};
 
-const visible = ref(false)
+const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({
   title: '',
   row: {},
   api: undefined,
   leaderList: []
-})
+});
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
-  paramsProps.value = params
-  leaderLists.value = params.leaderList
-  selectIds.value = params.selectIds
-  visible.value = true
-}
+  paramsProps.value = params;
+  leaderLists.value = params.leaderList;
+  selectIds.value = params.selectIds;
+  visible.value = true;
+};
 
 const handleSubmit = async () => {
   try {
-    emits('update:modelValue', selectIds.value)
-    visible.value = false
+    emits('update:modelValue', selectIds.value);
+    visible.value = false;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};
 
 defineExpose({
   acceptParams
-})
+});
 </script>
 
 <style scoped lang="scss"></style>

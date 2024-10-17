@@ -1,12 +1,5 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    :title="`${paramsProps.title}`"
-    :destroy-on-close="true"
-    width="580px"
-    draggable
-    append-to-body
-  >
+  <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="580px" draggable append-to-body>
     <el-alert
       v-if="paramsProps?.isBatch"
       title="警告信息"
@@ -46,94 +39,94 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="visible = false"> 取消</el-button>
-      <el-button type="primary" @click="handleSubmit"> 确定</el-button>
+      <el-button @click="visible = false"> 取消 </el-button>
+      <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { type ElForm, ElMessage } from 'element-plus'
-import type { ISysDept } from '@/api/interface/system/dept'
-import { getMenuTree } from '@/api/modules/system/dept'
-import { bindUserDeptApi } from '@/api/modules/system/user'
+import { ref, reactive } from 'vue';
+import { type ElForm, ElMessage } from 'element-plus';
+import type { ISysDept } from '@/api/interface/system/dept';
+import { getMenuTree } from '@/api/modules/system/dept';
+import { bindUserDeptApi } from '@/api/modules/system/user';
 
 defineOptions({
   name: 'UserDeptForm'
-})
-const parentMenus = ref<ISysDept.Tree[]>([])
+});
+const parentMenus = ref<ISysDept.Tree[]>([]);
 const treeProps = {
   label: 'name',
   value: 'id'
-}
-const leaders = ref<ISysDept.Leader[]>([])
+};
+const leaders = ref<ISysDept.Leader[]>([]);
 
-const selectIds = ref<number[]>([])
+const selectIds = ref<number[]>([]);
 
-const deptIds = ref<number[]>([])
+const deptIds = ref<number[]>([]);
 
-const visible = ref(false)
+const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({
   title: '',
   row: {},
   api: undefined,
   getTableList: undefined
-})
+});
 
 const loadParentMenus = () => {
-  getMenuTree({ excludeNodeId: paramsProps.value.row?.id }).then((res) => {
-    parentMenus.value = res.data
-  })
-}
+  getMenuTree({ excludeNodeId: paramsProps.value.row?.id }).then(res => {
+    parentMenus.value = res.data;
+  });
+};
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
-  paramsProps.value = params
-  selectIds.value = params?.selectIds
-  leaders.value = params?.selectedList
+  paramsProps.value = params;
+  selectIds.value = params?.selectIds;
+  leaders.value = params?.selectedList;
   if (Array.isArray(params?.deptId)) {
     // 过滤掉值为 0 -1 和 -2 的元素
-    deptIds.value = params.deptId.filter((id) => id !== 0 && id !== -1 && id !== -2)
+    deptIds.value = params.deptId.filter(id => id !== 0 && id !== -1 && id !== -2);
   }
-  visible.value = true
-  loadParentMenus()
-}
+  visible.value = true;
+  loadParentMenus();
+};
 
 const rules = reactive({
   id: [{ required: true, message: '请选择部门' }]
-})
+});
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit']);
 
 // 提交数据（新增/编辑）
-const ruleFormRef = ref<InstanceType<typeof ElForm>>()
+const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const handleSubmit = () => {
-  paramsProps.value.selectIds
-  const containsAny = [1, 2, 3, 4, 5, 6].some((id) => paramsProps.value.selectIds.includes(id))
+  paramsProps.value.selectIds;
+  const containsAny = [1, 2, 3, 4, 5, 6].some(id => paramsProps.value.selectIds.includes(id));
   if (import.meta.env.VITE_PREVIEW && containsAny) {
-    return ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' })
+    return ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' });
   }
-  ruleFormRef.value!.validate(async (valid) => {
-    if (!valid) return
+  ruleFormRef.value!.validate(async valid => {
+    if (!valid) return;
     try {
       const param = {
         userIds: selectIds.value,
         deptIds: deptIds.value
-      }
-      await bindUserDeptApi(param).then(() => paramsProps.value.getTableList!())
-      ElMessage.success({ message: `${paramsProps.value.title}成功！` })
-      emit('submit')
-      visible.value = false
+      };
+      await bindUserDeptApi(param).then(() => paramsProps.value.getTableList!());
+      ElMessage.success({ message: `${paramsProps.value.title}成功！` });
+      emit('submit');
+      visible.value = false;
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  })
-}
+  });
+};
 
 defineExpose({
   acceptParams
-})
+});
 </script>
 
 <style scoped lang="scss">

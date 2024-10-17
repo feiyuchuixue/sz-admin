@@ -1,11 +1,11 @@
-import { ElNotification } from 'element-plus'
+import { ElNotification } from 'element-plus';
 
 /**
  * @description 全局代码错误捕捉
  * */
 const errorHandler = (error: any): void => {
   // 过滤 HTTP 请求错误
-  if (!error || error.status || error.status === 0) return
+  if (!error || error.status || error.status === 0) return;
   const errorMap: { [key: string]: string } = {
     InternalError: 'Javascript引擎内部错误',
     ReferenceError: '未找到对象',
@@ -14,13 +14,13 @@ const errorHandler = (error: any): void => {
     SyntaxError: '语法错误',
     EvalError: '错误的使用了Eval',
     URIError: 'URI错误'
-  }
-  const errorName = errorMap[error.name] || '未知错误'
+  };
+  const errorName = errorMap[error.name] || '未知错误';
   ElNotification({
     title: errorName,
     message: error,
     type: 'error',
     duration: 3000
-  })
-}
-export default errorHandler
+  });
+};
+export default errorHandler;

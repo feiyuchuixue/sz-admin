@@ -1,4 +1,4 @@
-import type { Options } from '@/config/typings'
+import type { Options } from '@/config/typings';
 
 export const javaTypeOptions: Options[] = [
   {
@@ -33,7 +33,7 @@ export const javaTypeOptions: Options[] = [
     label: 'LocalTime',
     value: 'LocalTime'
   }
-]
+];
 
 export const queryTypeOptions: Options[] = [
   {
@@ -68,7 +68,7 @@ export const queryTypeOptions: Options[] = [
     label: '模糊',
     value: 'LIKE'
   }
-]
+];
 
 export const htmlTypeOptions: Options[] = [
   {
@@ -119,4 +119,4 @@ export const htmlTypeOptions: Options[] = [
     label: 'editor [未完待续]',
     value: 'editor'
   }
-]
+];

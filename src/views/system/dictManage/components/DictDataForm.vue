@@ -1,12 +1,5 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    append-to-body
-    :title="`${paramsProps.title}`"
-    :destroy-on-close="true"
-    width="580px"
-    draggable
-  >
+  <el-dialog v-model="visible" append-to-body :title="`${paramsProps.title}`" :destroy-on-close="true" width="580px" draggable>
     <el-form
       ref="ruleFormRef"
       label-width="100px"
@@ -16,11 +9,7 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="字典名称" prop="codeName">
-        <el-input
-          v-model="paramsProps.row.codeName"
-          placeholder="请填写字典名称"
-          clearable
-        ></el-input>
+        <el-input v-model="paramsProps.row.codeName" placeholder="请填写字典名称" clearable />
       </el-form-item>
       <el-form-item label="字典别名" prop="alias">
         <template #label>
@@ -39,7 +28,7 @@
             <span>字典别名 :</span>
           </span>
         </template>
-        <el-input v-model="paramsProps.row.alias" placeholder="请填写字典别名" clearable></el-input>
+        <el-input v-model="paramsProps.row.alias" placeholder="请填写字典别名" clearable />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input-number v-model="paramsProps.row.sort" :precision="0" :min="1" :max="999999" />
@@ -47,77 +36,73 @@
       <el-form-item label="回显样式" prop="isFull">
         <el-radio-group v-model="paramsProps.row.callbackShowStyle" value="1">
           <el-radio :value="item.value" v-for="item in tagsTypeOptions" :key="item.label">
-            <el-tag :type="item.value">{{ item.label }}</el-tag>
+            <el-tag :type="item.value">
+              {{ item.label }}
+            </el-tag>
           </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input
-          v-model="paramsProps.row.remark"
-          placeholder="请填写备注"
-          :rows="2"
-          type="textarea"
-          clearable
-        ></el-input>
+        <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="visible = false"> 取消</el-button>
-      <el-button type="primary" @click="handleSubmit"> 确定</el-button>
+      <el-button @click="visible = false"> 取消 </el-button>
+      <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { tagsTypeOptions } from '@/config/consts'
-import { reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { QuestionFilled } from '@element-plus/icons-vue'
+import { tagsTypeOptions } from '@/config/consts';
+import { reactive, ref } from 'vue';
+import { ElMessage } from 'element-plus';
+import { QuestionFilled } from '@element-plus/icons-vue';
 defineOptions({
-  name: 'dictDataForm'
-})
+  name: 'DictDataForm'
+});
 
 const rules = reactive({
   codeName: [{ required: true, message: '请填写字典名称' }],
   sort: [{ required: true, message: '请填写排序' }]
-})
+});
 
-const visible = ref(false)
+const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({
   title: '',
   row: {},
   api: undefined,
   getTableList: undefined
-})
+});
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
-  paramsProps.value = params
-  visible.value = true
-}
+  paramsProps.value = params;
+  visible.value = true;
+};
 
 // 提交数据（新增/编辑）
-const ruleFormRef = ref()
+const ruleFormRef = ref();
 const handleSubmit = () => {
   ruleFormRef.value!.validate(async (valid: boolean) => {
     if (import.meta.env.VITE_PREVIEW) {
-      return ElMessage.warning({ message: '预览环境，禁止修改字典请谅解！' })
+      return ElMessage.warning({ message: '预览环境，禁止修改字典请谅解！' });
     }
-    if (!valid) return
+    if (!valid) return;
     try {
-      await paramsProps.value.api!(paramsProps.value.row)
-      ElMessage.success({ message: `${paramsProps.value.title}成功！` })
-      paramsProps.value.getTableList!()
-      visible.value = false
+      await paramsProps.value.api!(paramsProps.value.row);
+      ElMessage.success({ message: `${paramsProps.value.title}成功！` });
+      paramsProps.value.getTableList!();
+      visible.value = false;
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  })
-}
+  });
+};
 
 defineExpose({
   acceptParams
-})
+});
 </script>
 
 <style scoped lang="scss">

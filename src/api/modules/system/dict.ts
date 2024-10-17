@@ -1,7 +1,7 @@
-import http from '@/api'
-import { ADMIN_MODULE } from '@/api/helper/prefix'
-import type { IDict } from '@/api/interface/system/dict'
-import type { IPage } from '@/api/interface'
+import http from '@/api';
+import { ADMIN_MODULE } from '@/api/helper/prefix';
+import type { IDict } from '@/api/interface/system/dict';
+import type { IPage } from '@/api/interface';
 
 /**
  * 字典类别列表
@@ -9,8 +9,8 @@ import type { IPage } from '@/api/interface'
  * @returns {*}
  */
 export const getDictType = (params: IDict.DictTypeQuery) => {
-  return http.get<IPage<IDict.DictType>>(ADMIN_MODULE + `/sys-dict-type`, params)
-}
+  return http.get<IPage<IDict.DictType>>(ADMIN_MODULE + `/sys-dict-type`, params);
+};
 
 /**
  * 添加字典类别
@@ -18,8 +18,8 @@ export const getDictType = (params: IDict.DictTypeQuery) => {
  * @returns {*}
  */
 export const addDictType = (params: IDict.DictType) => {
-  return http.post(ADMIN_MODULE + `/sys-dict-type`, params)
-}
+  return http.post(ADMIN_MODULE + `/sys-dict-type`, params);
+};
 
 /**
  * 修改字典类型
@@ -27,8 +27,8 @@ export const addDictType = (params: IDict.DictType) => {
  * @returns {*}
  */
 export const editDictType = (params: IDict.DictType) => {
-  return http.put(ADMIN_MODULE + `/sys-dict-type`, params)
-}
+  return http.put(ADMIN_MODULE + `/sys-dict-type`, params);
+};
 
 /**
  * 删除字典类型
@@ -36,8 +36,8 @@ export const editDictType = (params: IDict.DictType) => {
  * @returns {*}
  */
 export const deleteDictType = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-dict-type`, params)
-}
+  return http.delete(ADMIN_MODULE + `/sys-dict-type`, params);
+};
 
 /**
  * 获取字典数据列表
@@ -45,8 +45,8 @@ export const deleteDictType = (params: { ids: number[] }) => {
  * @returns {*}
  */
 export const getDictData = (params: IDict.DictQuery) => {
-  return http.get<IPage<IDict.Dict>>(ADMIN_MODULE + `/sys-dict`, params)
-}
+  return http.get<IPage<IDict.Dict>>(ADMIN_MODULE + `/sys-dict`, params);
+};
 
 /**
  * 添加字典类别
@@ -54,8 +54,8 @@ export const getDictData = (params: IDict.DictQuery) => {
  * @returns {*}
  */
 export const addDictData = (params: IDict.Dict) => {
-  return http.post(ADMIN_MODULE + `/sys-dict`, params)
-}
+  return http.post(ADMIN_MODULE + `/sys-dict`, params);
+};
 
 /**
  * 修改字典类型
@@ -63,8 +63,8 @@ export const addDictData = (params: IDict.Dict) => {
  * @returns {*}
  */
 export const editDictData = (params: IDict.Dict) => {
-  return http.put(ADMIN_MODULE + `/sys-dict`, params)
-}
+  return http.put(ADMIN_MODULE + `/sys-dict`, params);
+};
 
 /**
  * 删除字d典
@@ -72,29 +72,25 @@ export const editDictData = (params: IDict.Dict) => {
  * @returns {*}
  */
 export const deleteDictData = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-dict`, params)
-}
+  return http.delete(ADMIN_MODULE + `/sys-dict`, params);
+};
 
 /**
  * 获取所有字典信息
  * @returns {*}
  */
 export const getAllDict = () => {
-  return http.get<Record<string, IDict.DictCustom[]>>(
-    ADMIN_MODULE + `/sys-dict/dict`,
-    {},
-    { loading: false }
-  )
-}
+  return http.get<Record<string, IDict.DictCustom[]>>(ADMIN_MODULE + `/sys-dict/dict`, {}, { loading: false });
+};
 
 export const getDictTypeOptions = () => {
-  return http.get<IDict.DictType[]>(ADMIN_MODULE + `/sys-dict-type/selectOptionsType`)
-}
+  return http.get<IDict.DictType[]>(ADMIN_MODULE + `/sys-dict-type/selectOptionsType`);
+};
 
 /**
  * 导出字典sql
  * @param params
  */
 export const exportDictSql = (params: { ids: number[] }) => {
-  return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params)
-}
+  return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params);
+};

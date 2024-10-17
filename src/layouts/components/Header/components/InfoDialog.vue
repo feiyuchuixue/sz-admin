@@ -36,33 +36,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { getUserinfo } from '@/api/modules/system/user'
-import type { IUser } from '@/api/interface/system/user'
+import { ref } from 'vue';
+import { getUserinfo } from '@/api/modules/system/user';
+import type { IUser } from '@/api/interface/system/user';
 
-const visible = ref(false)
+const visible = ref(false);
 const openDialog = () => {
-  visible.value = true
-  loadInfo()
-}
+  visible.value = true;
+  loadInfo();
+};
 
-const info = ref<IUser.Info>()
+const info = ref<IUser.Info>();
 const loadInfo = () => {
-  getUserinfo().then((res) => {
-    info.value = res.data
-  })
-}
+  getUserinfo().then(res => {
+    info.value = res.data;
+  });
+};
 
 const showSex = (sex: number | undefined) => {
   switch (sex) {
     case 1:
-      return '男'
+      return '男';
     case 2:
-      return '女'
+      return '女';
     default:
-      return '未知'
+      return '未知';
   }
-}
+};
 
-defineExpose({ openDialog })
+defineExpose({ openDialog });
 </script>

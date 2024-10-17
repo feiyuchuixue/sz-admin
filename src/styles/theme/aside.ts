@@ -1,4 +1,4 @@
-import type { Theme } from '@/hooks/interface'
+import type { Theme } from '@/hooks/interface';
 
 export const asideTheme: Record<Theme.ThemeType, { [key: string]: string }> = {
   light: {
@@ -13,4 +13,4 @@ export const asideTheme: Record<Theme.ThemeType, { [key: string]: string }> = {
     '--el-aside-logo-text-color': '#dadada',
     '--el-aside-border-color': '#414243'
   }
-}
+};

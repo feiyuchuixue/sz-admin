@@ -6,11 +6,11 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores/modules/app'
-import CollapseIcon from './components/CollapseIcon.vue'
-import Breadcrumb from './components/Breadcrumb.vue'
+import { useAppStore } from '@/stores/modules/app';
+import CollapseIcon from './components/CollapseIcon.vue';
+import Breadcrumb from './components/Breadcrumb.vue';
 
-const appStore = useAppStore()
+const appStore = useAppStore();
 </script>
 
 <style scoped lang="scss">

@@ -1,16 +1,16 @@
 <template>
   <div class="maximize" @click="exitMaximize">
-    <i :class="'iconfont icon-tuichu'"></i>
+    <i :class="'iconfont icon-tuichu'" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores/modules/app'
+import { useAppStore } from '@/stores/modules/app';
 
-const appStore = useAppStore()
+const appStore = useAppStore();
 const exitMaximize = () => {
-  appStore.changeMaximize(false)
-}
+  appStore.changeMaximize(false);
+};
 </script>
 
 <style scoped lang="scss">

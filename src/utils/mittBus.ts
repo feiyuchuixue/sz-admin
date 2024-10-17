@@ -1,5 +1,5 @@
-import mitt from 'mitt'
+import mitt from 'mitt';
 
-const mittBus = mitt()
+const mittBus = mitt();
 
-export default mittBus
+export default mittBus;

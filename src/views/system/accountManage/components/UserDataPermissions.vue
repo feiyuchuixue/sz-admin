@@ -17,26 +17,26 @@
       :data="roleLists"
     />
     <template #footer>
-      <el-button @click="visible = false"> 取消</el-button>
-      <el-button type="primary" @click="handleSubmit"> 确定</el-button>
+      <el-button @click="visible = false"> 取消 </el-button>
+      <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { getDataUserRole } from '@/api/modules/system/user'
-import type { IUser } from '@/api/interface/system/user'
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { getDataUserRole } from '@/api/modules/system/user';
+import type { IUser } from '@/api/interface/system/user';
+import { ref } from 'vue';
+import { ElMessage } from 'element-plus';
 
 defineOptions({
   name: 'DataUserPermissions'
-})
+});
 
 const transferProps = {
   key: 'id',
   label: 'roleName'
-}
+};
 
 /**
  * 过滤角色
@@ -45,57 +45,57 @@ const transferProps = {
  * @returns {boolean}
  */
 const filterMethod = (query: string, item: Record<string, any>) => {
-  return item.roleName.toLowerCase().includes(query.toLowerCase())
-}
+  return item.roleName.toLowerCase().includes(query.toLowerCase());
+};
 
-const visible = ref(false)
+const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({
   title: '',
   row: {},
   api: undefined,
   getTableList: undefined
-})
+});
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
-  paramsProps.value = params
-  visible.value = true
-  getInfo(params.row.id)
-}
+  paramsProps.value = params;
+  visible.value = true;
+  getInfo(params.row.id);
+};
 
-const roleLists = ref<IUser.RoleInfo[]>([])
-const selectIds = ref<number[]>([])
+const roleLists = ref<IUser.RoleInfo[]>([]);
+const selectIds = ref<number[]>([]);
 
 /**
  * 获取权限信息
  * @param userId
  */
 const getInfo = (userId: number) => {
-  getDataUserRole({ userId }).then((res) => {
-    roleLists.value = res.data.roleInfoVOS
-    selectIds.value = res.data.selectIds
-  })
-}
+  getDataUserRole({ userId }).then(res => {
+    roleLists.value = res.data.roleInfoVOS;
+    selectIds.value = res.data.selectIds;
+  });
+};
 
 const handleSubmit = async () => {
   try {
     if (import.meta.env.VITE_PREVIEW && paramsProps.value.row.id < 7) {
-      return ElMessage.warning({ message: '预览环境，禁止修改演示账户，请谅解！' })
+      return ElMessage.warning({ message: '预览环境，禁止修改演示账户，请谅解！' });
     }
     await paramsProps.value.api!({
       userId: paramsProps.value.row.id,
       roleIds: selectIds.value
-    }).then(() => paramsProps.value.getTableList!())
-    ElMessage.success({ message: `${paramsProps.value.title}成功！` })
-    visible.value = false
+    }).then(() => paramsProps.value.getTableList!());
+    ElMessage.success({ message: `${paramsProps.value.title}成功！` });
+    visible.value = false;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};
 
 defineExpose({
   acceptParams
-})
+});
 </script>
 
 <style scoped lang="scss"></style>

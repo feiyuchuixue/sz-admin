@@ -27,53 +27,53 @@
     </template>
   </el-dropdown>
   <!-- infoDialog -->
-  <InfoDialog ref="infoRef"></InfoDialog>
+  <InfoDialog ref="infoRef" />
   <!-- passwordDialog -->
-  <PasswordDialog ref="passwordRef"></PasswordDialog>
+  <PasswordDialog ref="passwordRef" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { LOGIN_URL } from '@/config'
-import { useRouter } from 'vue-router'
-import { logoutApi } from '@/api/modules/system/login'
-import { useUserStore } from '@/stores/modules/user'
-import { useAuthStore } from '@/stores/modules/auth'
-import InfoDialog from './InfoDialog.vue'
-import PasswordDialog from './PasswordDialog.vue'
-import { Edit, SwitchButton, User } from '@element-plus/icons-vue'
-import { useSocketStore } from '@/stores/modules/socket'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import defaultAvatar from '@/assets/images/avatar.gif'
+import { ref } from 'vue';
+import { LOGIN_URL } from '@/config';
+import { useRouter } from 'vue-router';
+import { logoutApi } from '@/api/modules/system/login';
+import { useUserStore } from '@/stores/modules/user';
+import { useAuthStore } from '@/stores/modules/auth';
+import InfoDialog from './InfoDialog.vue';
+import PasswordDialog from './PasswordDialog.vue';
+import { Edit, SwitchButton, User } from '@element-plus/icons-vue';
+import { useSocketStore } from '@/stores/modules/socket';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import defaultAvatar from '@/assets/images/avatar.gif';
 
-const router = useRouter()
-const userStore = useUserStore()
-const socketStore = useSocketStore()
-const authStore = useAuthStore()
-const avatarSrc = ref<string | null>(null)
+const router = useRouter();
+const userStore = useUserStore();
+const socketStore = useSocketStore();
+const authStore = useAuthStore();
+const avatarSrc = ref<string | null>(null);
 /**
  * 预加载图片，判断图片是否可以正常加载
  * @param url
  */
 const preloadImage = (url: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => resolve()
-    img.onerror = () => reject()
-    img.src = url
-  })
-}
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => reject();
+    img.src = url;
+  });
+};
 
 const getLogo = async () => {
-  const logo = userStore.userInfo.logo || defaultAvatar
+  const logo = userStore.userInfo.logo || defaultAvatar;
   try {
-    await preloadImage(logo)
-    avatarSrc.value = logo
+    await preloadImage(logo);
+    avatarSrc.value = logo;
   } catch (error) {
-    console.error(`Error loading image: ${logo}`)
-    avatarSrc.value = defaultAvatar // 默认头像地址
+    console.error(`Error loading image: ${logo}`);
+    avatarSrc.value = defaultAvatar; // 默认头像地址
   }
-}
+};
 
 // 退出登录
 const logout = () => {
@@ -83,28 +83,28 @@ const logout = () => {
     type: 'warning'
   }).then(async () => {
     // 1.执行退出登录接口
-    await logoutApi()
+    await logoutApi();
 
     // 2.清除 Token
-    userStore.clear()
-    authStore.clear()
+    userStore.clear();
+    authStore.clear();
     // 关闭socket
-    socketStore.close()
+    socketStore.close();
 
     // 3.重定向到登陆页
-    router.replace(LOGIN_URL)
-    ElMessage.success('退出登录成功！')
-  })
-}
+    router.replace(LOGIN_URL);
+    ElMessage.success('退出登录成功！');
+  });
+};
 
 // 打开修改密码和个人信息弹窗
-const infoRef = ref<InstanceType<typeof InfoDialog>>()
-const passwordRef = ref<InstanceType<typeof PasswordDialog>>()
+const infoRef = ref<InstanceType<typeof InfoDialog>>();
+const passwordRef = ref<InstanceType<typeof PasswordDialog>>();
 const openDialog = (ref: string) => {
-  if (ref === 'infoRef') infoRef.value?.openDialog()
-  if (ref === 'passwordRef') passwordRef.value?.openDialog()
-}
-getLogo()
+  if (ref === 'infoRef') infoRef.value?.openDialog();
+  if (ref === 'passwordRef') passwordRef.value?.openDialog();
+};
+getLogo();
 </script>
 
 <style scoped lang="scss">

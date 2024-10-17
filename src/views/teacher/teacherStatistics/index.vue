@@ -11,12 +11,7 @@
     >
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
-        <el-button
-          type="primary"
-          v-auth="'teacher.statistics.create'"
-          :icon="CirclePlus"
-          @click="openAddEdit('新增教师统计')"
-        >
+        <el-button type="primary" v-auth="'teacher.statistics.create'" :icon="CirclePlus" @click="openAddEdit('新增教师统计')">
           新增
         </el-button>
         <el-button
@@ -29,22 +24,8 @@
         >
           批量删除
         </el-button>
-        <el-button
-          v-auth="'teacher.statistics.import'"
-          type="primary"
-          :icon="Upload"
-          plain
-          @click="importData"
-        >
-          导入
-        </el-button>
-        <el-button
-          v-auth="'teacher.statistics.export'"
-          type="primary"
-          :icon="Download"
-          plain
-          @click="downloadFile"
-        >
+        <el-button v-auth="'teacher.statistics.import'" type="primary" :icon="Upload" plain @click="importData"> 导入 </el-button>
+        <el-button v-auth="'teacher.statistics.export'" type="primary" :icon="Download" plain @click="downloadFile">
           导出
         </el-button>
       </template>
@@ -58,13 +39,7 @@
         >
           编辑
         </el-button>
-        <el-button
-          v-auth="'teacher.statistics.remove'"
-          type="primary"
-          link
-          :icon="Delete"
-          @click="deleteInfo(row)"
-        >
+        <el-button v-auth="'teacher.statistics.remove'" type="primary" link :icon="Delete" @click="deleteInfo(row)">
           删除
         </el-button>
       </template>
@@ -75,9 +50,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { CirclePlus, Delete, EditPen, Upload, Download } from '@element-plus/icons-vue'
-import ProTable from '@/components/ProTable/index.vue'
+import { ref } from 'vue';
+import { CirclePlus, Delete, EditPen, Upload, Download } from '@element-plus/icons-vue';
+import ProTable from '@/components/ProTable/index.vue';
 import {
   createTeacherStatisticsApi,
   removeTeacherStatisticsApi,
@@ -86,21 +61,21 @@ import {
   getTeacherStatisticsDetailApi,
   importTeacherStatisticsExcelApi,
   exportTeacherStatisticsExcelApi
-} from '@/api/modules/teacher/teacherStatistics'
-import { useHandleData } from '@/hooks/useHandleData'
-import TeacherStatisticsForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsForm.vue'
-import { useOptionsStore } from '@/stores/modules/options'
-import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface'
-import type { ITeacherStatistics } from '@/api/interface/teacher/teacherStatistics'
-import ImportExcel from '@/components/ImportExcel/index.vue'
-import { downloadTemplate } from '@/api/modules/system/common'
-import { ElMessageBox } from 'element-plus'
-import { useDownload } from '@/hooks/useDownload'
+} from '@/api/modules/teacher/teacherStatistics';
+import { useHandleData } from '@/hooks/useHandleData';
+import TeacherStatisticsForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsForm.vue';
+import { useOptionsStore } from '@/stores/modules/options';
+import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
+import type { ITeacherStatistics } from '@/api/interface/teacher/teacherStatistics';
+import ImportExcel from '@/components/ImportExcel/index.vue';
+import { downloadTemplate } from '@/api/modules/system/common';
+import { ElMessageBox } from 'element-plus';
+import { useDownload } from '@/hooks/useDownload';
 defineOptions({
   name: 'TeacherStatisticsView'
-})
-const optionsStore = useOptionsStore()
-const proTableRef = ref<ProTableInstance>()
+});
+const optionsStore = useOptionsStore();
+const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<ITeacherStatistics.Row>[] = [
   { type: 'selection', width: 80 },
@@ -137,7 +112,7 @@ const columns: ColumnProps<ITeacherStatistics.Row>[] = [
   { prop: 'lastSyncTime', label: '最近一次同步时间' },
   { prop: 'remark', label: '备注' },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
-]
+];
 // 搜索条件项
 const searchColumns: SearchProps[] = [
   { prop: 'year', label: '统计年限', el: 'input' },
@@ -197,51 +172,47 @@ const searchColumns: SearchProps[] = [
       valueFormat: 'YYYY-MM-DD HH:mm:ss'
     }
   }
-]
+];
 // 获取table列表
 const getTableList = (params: ITeacherStatistics.Query) => {
-  let newParams = formatParams(params)
-  return getTeacherStatisticsListApi(newParams)
-}
+  let newParams = formatParams(params);
+  return getTeacherStatisticsListApi(newParams);
+};
 const formatParams = (params: ITeacherStatistics.Query) => {
-  let newParams = JSON.parse(JSON.stringify(params))
-  newParams.checkTime && (newParams.checkTimeStart = newParams.checkTime[0])
-  newParams.checkTime && (newParams.checkTimeEnd = newParams.checkTime[1])
-  delete newParams.checkTime
-  return newParams
-}
+  let newParams = JSON.parse(JSON.stringify(params));
+  newParams.checkTime && (newParams.checkTimeStart = newParams.checkTime[0]);
+  newParams.checkTime && (newParams.checkTimeEnd = newParams.checkTime[1]);
+  delete newParams.checkTime;
+  return newParams;
+};
 // 打开 drawer(新增、查看、编辑)
-const teacherStatisticsRef = ref<InstanceType<typeof TeacherStatisticsForm>>()
+const teacherStatisticsRef = ref<InstanceType<typeof TeacherStatisticsForm>>();
 const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   if (!isAdd) {
-    const record = await getTeacherStatisticsDetailApi({ id: row?.id })
-    row = record?.data
+    const record = await getTeacherStatisticsDetailApi({ id: row?.id });
+    row = record?.data;
   }
   const params = {
     title,
     row: { ...row },
     api: isAdd ? createTeacherStatisticsApi : updateTeacherStatisticsApi,
     getTableList: proTableRef.value?.getTableList
-  }
-  teacherStatisticsRef.value?.acceptParams(params)
-}
+  };
+  teacherStatisticsRef.value?.acceptParams(params);
+};
 // 删除信息
 const deleteInfo = async (params: ITeacherStatistics.Row) => {
-  await useHandleData(
-    removeTeacherStatisticsApi,
-    { ids: [params.id] },
-    `删除【${params.id}】教师统计`
-  )
-  proTableRef.value?.getTableList()
-}
+  await useHandleData(removeTeacherStatisticsApi, { ids: [params.id] }, `删除【${params.id}】教师统计`);
+  proTableRef.value?.getTableList();
+};
 // 批量删除信息
 const batchDelete = async (ids: (string | number)[]) => {
-  await useHandleData(removeTeacherStatisticsApi, { ids }, '删除所选教师统计')
-  proTableRef.value?.clearSelection()
-  proTableRef.value?.getTableList()
-}
+  await useHandleData(removeTeacherStatisticsApi, { ids }, '删除所选教师统计');
+  proTableRef.value?.clearSelection();
+  proTableRef.value?.getTableList();
+};
 // 导入
-const ImportExcelRef = ref<InstanceType<typeof ImportExcel>>()
+const ImportExcelRef = ref<InstanceType<typeof ImportExcel>>();
 const importData = () => {
   const params = {
     title: '教师统计',
@@ -249,14 +220,14 @@ const importData = () => {
     tempApi: downloadTemplate,
     importApi: importTeacherStatisticsExcelApi,
     getTableList: proTableRef.value?.getTableList
-  }
-  ImportExcelRef.value?.acceptParams(params)
-}
+  };
+  ImportExcelRef.value?.acceptParams(params);
+};
 // 导出
 const downloadFile = async () => {
   ElMessageBox.confirm('确认导出教师统计数据?', '温馨提示', { type: 'warning' }).then(() => {
-    let newParams = formatParams(proTableRef.value?.searchParam as ITeacherStatistics.Query)
-    useDownload(exportTeacherStatisticsExcelApi, '教师统计', newParams)
-  })
-}
+    let newParams = formatParams(proTableRef.value?.searchParam as ITeacherStatistics.Query);
+    useDownload(exportTeacherStatisticsExcelApi, '教师统计', newParams);
+  });
+};
 </script>

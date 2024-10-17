@@ -27,7 +27,7 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="表名称" prop="tableName">
-                <el-input v-model="baseInfo.tableName" clearable disabled></el-input>
+                <el-input v-model="baseInfo.tableName" clearable disabled />
               </el-form-item>
             </el-col>
 
@@ -37,16 +37,12 @@
                   <el-space :size="4">
                     <span>表描述</span>
                     <el-tooltip effect="dark" content="表名，注释信息" placement="top">
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="baseInfo.tableComment"
-                  placeholder="请填写表描述"
-                  clearable
-                ></el-input>
+                <el-input v-model="baseInfo.tableComment" placeholder="请填写表描述" clearable />
               </el-form-item>
             </el-col>
           </el-row>
@@ -57,39 +53,25 @@
                   <el-space :size="4">
                     <span>实体类名称</span>
                     <el-tooltip effect="dark" content="java PO层" placement="top">
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="baseInfo.className"
-                  placeholder="请填写实体类名称"
-                  clearable
-                ></el-input>
+                <el-input v-model="baseInfo.className" placeholder="请填写实体类名称" clearable />
               </el-form-item>
             </el-col>
 
             <el-col :span="12">
               <el-form-item label="作者" prop="functionAuthor">
-                <el-input
-                  v-model="baseInfo.functionAuthor"
-                  placeholder="请填写作者"
-                  clearable
-                ></el-input>
+                <el-input v-model="baseInfo.functionAuthor" placeholder="请填写作者" clearable />
               </el-form-item>
             </el-col>
           </el-row>
           <el-row>
             <el-col :span="24">
               <el-form-item label="备注" prop="remark">
-                <el-input
-                  v-model="baseInfo.remark"
-                  placeholder="请填写备注"
-                  :rows="2"
-                  type="textarea"
-                  clearable
-                ></el-input>
+                <el-input v-model="baseInfo.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
               </el-form-item>
             </el-col>
           </el-row>
@@ -105,40 +87,23 @@
             <el-radio-button label="数据库" value="db" />
           </el-radio-group>
           <div class="tip custom-block">
-            <p style="color: var(--el-color-info)">
-              Tip： {{ typeContent[generatorInfo.generateType].tooltip }}
-            </p>
+            <p style="color: var(--el-color-info)">Tip： {{ typeContent[generatorInfo.generateType].tooltip }}</p>
             <p>{{ typeContent[generatorInfo.generateType].text }}</p>
           </div>
           <el-row>
-            <el-col
-              :span="3"
-              v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'"
-            >
+            <el-col :span="3" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
               <el-form-item prop="type">
                 <template #label>
                   <el-space :size="4">
                     <span>Excel支持</span>
                     <el-tooltip effect="dark" content="是否支持列表的导入导出" placement="top">
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-checkbox
-                  label="导入"
-                  name="type"
-                  v-model="generatorInfo.hasImport"
-                  true-value="1"
-                  false-value="0"
-                />
-                <el-checkbox
-                  label="导出"
-                  name="type"
-                  v-model="generatorInfo.hasExport"
-                  true-value="1"
-                  false-value="0"
-                />
+                <el-checkbox label="导入" name="type" v-model="generatorInfo.hasImport" true-value="1" false-value="0" />
+                <el-checkbox label="导出" name="type" v-model="generatorInfo.hasExport" true-value="1" false-value="0" />
               </el-form-item>
             </el-col>
             <el-col :span="3">
@@ -146,22 +111,13 @@
                 <template #label>
                   <el-space :size="4">
                     <span>自动填充</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="对create、update操作进行自动填充。需遵循约定。"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                    <el-tooltip effect="dark" content="对create、update操作进行自动填充。需遵循约定。" placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-checkbox
-                  name="type"
-                  v-model="generatorInfo.isAutofill"
-                  true-value="1"
-                  false-value="0"
-                />
+                <el-checkbox name="type" v-model="generatorInfo.isAutofill" true-value="1" false-value="0" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -181,12 +137,8 @@
             <template #isUniqueValidHeader="scope">
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip
-                  effect="dark"
-                  content="添加和修改时根据此属性进行唯一性校验."
-                  placement="top"
-                >
-                  <i :class="'iconfont icon-yiwen'"></i>
+                <el-tooltip effect="dark" content="添加和修改时根据此属性进行唯一性校验." placement="top">
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -199,7 +151,7 @@
                   content="逻辑删除标识，需配合mf配置 deleted-value-of-logic-delete 、normal-value-of-logic-delete 使用。sz-admin中默认设置其属性为T、F"
                   placement="top"
                 >
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -207,13 +159,8 @@
             <template #isInsertHeader="scope">
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip
-                  effect="dark"
-                  content="xxCreateDTO.java元素"
-                  placement="top"
-                  style="line-height: 1"
-                >
-                  <i :class="'iconfont icon-yiwen'"></i>
+                <el-tooltip effect="dark" content="xxCreateDTO.java元素" placement="top" style="line-height: 1">
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -221,7 +168,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="xxUpdateDTO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -229,7 +176,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="xxVO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -237,7 +184,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="xxListDTO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -245,7 +192,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="xxImportDTO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -253,7 +200,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="excel表格导出元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -261,7 +208,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="sql条件查询关键字" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -269,7 +216,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="vue 组件" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -277,7 +224,7 @@
               {{ scope?.column.label }}
               <el-space :size="2" class="column-table-header-yiwen">
                 <el-tooltip effect="dark" content="对应字典表，字典管理。" placement="top">
-                  <i :class="'iconfont icon-yiwen'"></i>
+                  <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
             </template>
@@ -288,12 +235,7 @@
 
             <template #javaType="{ row }">
               <el-select v-model="row.javaType" filterable>
-                <el-option
-                  v-for="item in javaTypeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+                <el-option v-for="item in javaTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
 
@@ -338,41 +280,18 @@
             </template>
 
             <template #isExport="{ row }">
-              <el-checkbox
-                v-if="row.isList == '1'"
-                v-model="row.isExport"
-                true-value="1"
-                false-value="0"
-              />
+              <el-checkbox v-if="row.isList == '1'" v-model="row.isExport" true-value="1" false-value="0" />
             </template>
 
             <template #queryType="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0' && row.isQuery == '1'"
-                v-model="row.queryType"
-                filterable
-              >
-                <el-option
-                  v-for="item in queryTypeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+              <el-select v-if="row.isLogicDel == '0' && row.isQuery == '1'" v-model="row.queryType" filterable>
+                <el-option v-for="item in queryTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
 
             <template #htmlType="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0' && row.isQuery == '1'"
-                v-model="row.htmlType"
-                filterable
-              >
-                <el-option
-                  v-for="item in htmlTypeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+              <el-select v-if="row.isLogicDel == '0' && row.isQuery == '1'" v-model="row.htmlType" filterable>
+                <el-option v-for="item in htmlTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
 
@@ -383,17 +302,8 @@
                 clearable
                 filterable
               >
-                <el-option-group
-                  v-for="group in dictTypeOptions"
-                  :key="group.label"
-                  :label="group.label"
-                >
-                  <el-option
-                    v-for="item in group.options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
+                <el-option-group v-for="group in dictTypeOptions" :key="group.label" :label="group.label">
+                  <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-option-group>
               </el-select>
             </template>
@@ -416,16 +326,12 @@
                   <el-space :size="4">
                     <span>包名</span>
                     <el-tooltip effect="dark" content="java包名" placement="top">
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="generatorInfo.packageName"
-                  placeholder="请填写包路径"
-                  clearable
-                ></el-input>
+                <el-input v-model="generatorInfo.packageName" placeholder="请填写包路径" clearable />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -434,16 +340,12 @@
                   <el-space :size="4">
                     <span>模块名</span>
                     <el-tooltip effect="dark" content="java包名下的一级目录名" placement="top">
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="generatorInfo.moduleName"
-                  placeholder="请填写模块名"
-                  clearable
-                ></el-input>
+                <el-input v-model="generatorInfo.moduleName" placeholder="请填写模块名" clearable />
               </el-form-item>
             </el-col>
           </el-row>
@@ -458,16 +360,12 @@
                       content="实际业务文件名。如java service：GoodService、vue Form表单Ref：goodRef "
                       placement="top"
                     >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="generatorInfo.businessName"
-                  placeholder="请填写业务名"
-                  clearable
-                ></el-input>
+                <el-input v-model="generatorInfo.businessName" placeholder="请填写业务名" clearable />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -475,21 +373,13 @@
                 <template #label>
                   <el-space :size="4">
                     <span>功能名</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="展示名。如vue index页面title：编辑'商品信息' "
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                    <el-tooltip effect="dark" content="展示名。如vue index页面title：编辑'商品信息' " placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="generatorInfo.functionName"
-                  placeholder="请填写功能名"
-                  clearable
-                ></el-input>
+                <el-input v-model="generatorInfo.functionName" placeholder="请填写功能名" clearable />
               </el-form-item>
             </el-col>
           </el-row>
@@ -499,37 +389,25 @@
                 <template #label>
                   <el-space :size="4">
                     <span>生成菜单</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="代码生成时是否直接生成菜单路由（自动添加到菜单管理列表）"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                    <el-tooltip effect="dark" content="代码生成时是否直接生成菜单路由（自动添加到菜单管理列表）" placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
                 <el-radio-group v-model="generatorInfo.menuInitType">
-                  <el-radio value="1">是</el-radio>
-                  <el-radio value="0">否</el-radio>
+                  <el-radio value="1"> 是 </el-radio>
+                  <el-radio value="0"> 否 </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
             <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
-              <el-form-item
-                label="上级菜单"
-                prop="parentMenuId"
-                v-show="generatorInfo.menuInitType === '1'"
-              >
+              <el-form-item label="上级菜单" prop="parentMenuId" v-show="generatorInfo.menuInitType === '1'">
                 <template #label>
                   <el-space :size="4">
                     <span>上级菜单</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="设置当前菜单的上级目录(非按钮类型)"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                    <el-tooltip effect="dark" content="设置当前菜单的上级目录(非按钮类型)" placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
@@ -549,11 +427,7 @@
           </el-row>
           <el-row>
             <el-col :span="24" v-if="generatorInfo.generateType == 'all'">
-              <el-form-item
-                label="生成按钮权限"
-                prop="btnPermissionType"
-                v-show="generatorInfo.menuInitType === '1'"
-              >
+              <el-form-item label="生成按钮权限" prop="btnPermissionType" v-show="generatorInfo.menuInitType === '1'">
                 <template #label>
                   <el-space :size="4">
                     <span>生成按钮权限</span>
@@ -562,14 +436,14 @@
                       content="代码生成时是否直接生成按钮权限，如：sys.user.query_table。取消生成则不会对按钮进行权限控制。推荐开启。"
                       placement="top"
                     >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
                 <el-radio-group v-model="generatorInfo.btnPermissionType">
-                  <el-radio value="1">是</el-radio>
-                  <el-radio value="0">否</el-radio>
+                  <el-radio value="1"> 是 </el-radio>
+                  <el-radio value="0"> 否 </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
@@ -580,21 +454,13 @@
                 <template #label>
                   <el-space :size="4">
                     <span>api项目路径</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="java项目所在磁盘路径，直接生成代码到项目结构下"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                    <el-tooltip effect="dark" content="java项目所在磁盘路径，直接生成代码到项目结构下" placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="generatorInfo.pathApi"
-                  placeholder="请填写路径"
-                  clearable
-                ></el-input>
+                <el-input v-model="generatorInfo.pathApi" placeholder="请填写路径" clearable />
               </el-form-item>
             </el-col>
 
@@ -603,21 +469,13 @@
                 <template #label>
                   <el-space :size="4">
                     <span>web项目路径</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="web项目所在磁盘路径，直接生成代码到项目结构下"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'"></i>
+                    <el-tooltip effect="dark" content="web项目所在磁盘路径，直接生成代码到项目结构下" placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
                     </el-tooltip>
                   </el-space>
                   <span>&nbsp;:</span>
                 </template>
-                <el-input
-                  v-model="generatorInfo.pathWeb"
-                  placeholder="请填写路径"
-                  clearable
-                ></el-input>
+                <el-input v-model="generatorInfo.pathWeb" placeholder="请填写路径" clearable />
               </el-form-item>
             </el-col>
           </el-row>
@@ -626,32 +484,28 @@
     </div>
 
     <template #footer>
-      <el-button type="primary" @click="handleSubmit"> 保存</el-button>
-      <el-button @click="visible = false"> 取消</el-button>
+      <el-button type="primary" @click="handleSubmit"> 保存 </el-button>
+      <el-button @click="visible = false"> 取消 </el-button>
     </template>
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import ProTable from '@/components/ProTable/index.vue'
-import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface'
-import type { IGenerator } from '@/api/interface/toolbox/generator'
-import { getGeneratorInfo } from '@/api/modules/toolbox/generator'
-import {
-  htmlTypeOptions,
-  javaTypeOptions,
-  queryTypeOptions
-} from '@/views/toolbox/generator/common/Options'
-import { getDictTypeOptions } from '@/api/modules/system/dict'
-import type { IDict } from '@/api/interface/system/dict'
-import type { IMenu } from '@/api/interface/system/menu'
-import { getMenuTree } from '@/api/modules/system/menu'
-import { ref, watchEffect } from 'vue'
-import { ElMessage } from 'element-plus'
+import ProTable from '@/components/ProTable/index.vue';
+import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
+import type { IGenerator } from '@/api/interface/toolbox/generator';
+import { getGeneratorInfo } from '@/api/modules/toolbox/generator';
+import { htmlTypeOptions, javaTypeOptions, queryTypeOptions } from '@/views/toolbox/generator/common/Options';
+import { getDictTypeOptions } from '@/api/modules/system/dict';
+import type { IDict } from '@/api/interface/system/dict';
+import type { IMenu } from '@/api/interface/system/menu';
+import { getMenuTree } from '@/api/modules/system/menu';
+import { ref, watchEffect } from 'vue';
+import { ElMessage } from 'element-plus';
 
 defineOptions({
   name: 'EditForm'
-})
-const columnsInfos = ref<IGenerator.ColumnInfo[]>([])
+});
+const columnsInfos = ref<IGenerator.ColumnInfo[]>([]);
 const generatorInfo = ref<IGenerator.GeneratorInfo>({
   businessName: '',
   functionName: '',
@@ -668,8 +522,8 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
   menuInitType: '1',
   btnPermissionType: '1',
   isAutofill: '1'
-})
-const isShowExcel = ref<boolean>(true)
+});
+const isShowExcel = ref<boolean>(true);
 
 // 表格配置项
 // const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
@@ -713,60 +567,60 @@ const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
   { prop: 'queryType', label: '查询方式' },
   { prop: 'htmlType', label: '显示类型' },
   { prop: 'dictType', label: '字典类型' }
-])
+]);
 
-const active = ref(1)
-const visible = ref(false)
+const active = ref(1);
+const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({
   title: '',
   row: {},
   api: undefined,
   getTableList: undefined
-})
+});
 
-const dictTypeOptions = ref<IDict.DictCategory[]>([])
+const dictTypeOptions = ref<IDict.DictCategory[]>([]);
 const getDictTypes = () => {
-  getDictTypeOptions().then((res) => {
-    dictTypeOptions.value = processDictionary(res.data)
-  })
-}
+  getDictTypeOptions().then(res => {
+    dictTypeOptions.value = processDictionary(res.data);
+  });
+};
 
 // 字典分组处理逻辑
 const processDictionary = (data: IDict.DictType[]): IDict.DictCategory[] => {
   const categorizedDict = data.reduce<{
-    [key: string]: IDict.DictCategory
+    [key: string]: IDict.DictCategory;
   }>((acc, item) => {
-    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName }
-    const category = item.isDynamic ? '动态字典' : '静态字典'
+    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName };
+    const category = item.isDynamic ? '动态字典' : '静态字典';
 
     if (!acc[category]) {
-      acc[category] = { label: category, options: [] }
+      acc[category] = { label: category, options: [] };
     }
-    acc[category].options.push(option)
+    acc[category].options.push(option);
 
-    return acc
-  }, {})
+    return acc;
+  }, {});
 
-  return Object.values(categorizedDict)
-}
+  return Object.values(categorizedDict);
+};
 
-getDictTypes()
+getDictTypes();
 
 const treeProps = {
   label: 'title',
   value: 'id'
-}
-const parentMenus = ref<IMenu.Tree[]>([])
+};
+const parentMenus = ref<IMenu.Tree[]>([]);
 
 const loadParentMenus = () => {
-  getMenuTree({}).then((res) => {
-    parentMenus.value = res.data
-  })
-}
+  getMenuTree({}).then(res => {
+    parentMenus.value = res.data;
+  });
+};
 
-loadParentMenus()
+loadParentMenus();
 
-const editProTableRef = ref<ProTableInstance>()
+const editProTableRef = ref<ProTableInstance>();
 
 const baseInfo = ref<IGenerator.BaseInfo>({
   tableId: 0,
@@ -775,81 +629,81 @@ const baseInfo = ref<IGenerator.BaseInfo>({
   className: '',
   functionAuthor: '',
   remark: ''
-})
+});
 
 const baseRules = ref({
   tableComment: [{ required: true, message: '请填写表描述' }],
   className: [{ required: true, message: '请填写实体类名称' }],
   functionAuthor: [{ required: true, message: '请填写作者' }]
-})
+});
 
 const generatorRules = ref({
   packageName: [{ required: true, message: '请填写包路径' }],
   moduleName: [{ required: true, message: '请填写模块名' }],
   businessName: [{ required: true, message: '请填写业务名' }],
   functionName: [{ required: true, message: '请填写功能名' }]
-})
+});
 
 const getInfo = () => {
-  const tableName = paramsProps.value.row.tableName
-  getGeneratorInfo(tableName).then((res) => {
-    baseInfo.value = res.data.baseInfo
-    columnsInfos.value = res.data.columns
-    generatorInfo.value = res.data.generatorInfo
-  })
-}
+  const tableName = paramsProps.value.row.tableName;
+  getGeneratorInfo(tableName).then(res => {
+    baseInfo.value = res.data.baseInfo;
+    columnsInfos.value = res.data.columns;
+    generatorInfo.value = res.data.generatorInfo;
+  });
+};
 
 // 更新列属性的通用函数
 const updateColumns = (newValue: string, propToUpdate: string) => {
-  const existingColumn = columns.value.find((col) => col.prop === propToUpdate)
+  const existingColumn = columns.value.find(col => col.prop === propToUpdate);
 
   if (existingColumn) {
-    existingColumn.isShow = newValue === '1'
+    existingColumn.isShow = newValue === '1';
   }
-}
+};
 
 // 监听多个属性的变化，并执行相同的更新逻辑
 watchEffect(() => {
   try {
-    updateColumns(generatorInfo.value.hasImport, 'isImport')
-    updateColumns(generatorInfo.value.hasExport, 'isExport')
+    updateColumns(generatorInfo.value.hasImport, 'isImport');
+    updateColumns(generatorInfo.value.hasExport, 'isExport');
     // 如果有其他类似的属性，也可以在这里进行处理
   } catch (error) {
-    console.error('Error in watchEffect:', error)
+    console.error('Error in watchEffect:', error);
     // 根据实际情况进行错误处理，如显示错误提示、回滚变更等
   }
-})
+});
 
-const baseFormRef = ref()
-const generatorFormRef = ref()
+const baseFormRef = ref();
+const generatorFormRef = ref();
 
 const handleSubmit = () => {
   const baseValidate = new Promise((resolve, reject) => {
     baseFormRef.value
       ?.validate((valid: boolean) => {
-        resolve(valid)
+        resolve(valid);
       })
       .catch((err: any) => {
-        reject(err)
-      })
-  })
+        reject(err);
+      });
+  });
   const geneValidate = new Promise((resolve, reject) => {
     generatorFormRef.value
       ?.validate((valid: boolean) => {
-        resolve(valid)
+        resolve(valid);
       })
       .catch((err: any) => {
-        reject(err)
-      })
-  })
-  Promise.all([baseValidate, geneValidate]).then((res) => {
+        reject(err);
+      });
+  });
+  Promise.all([baseValidate, geneValidate]).then(res => {
     if (res[0] === false) {
-      active.value = 0
-      return
+      active.value = 0;
+      return;
     }
     if (res[1] === false) {
-      active.value = 2
-      return
+      active.value = 2;
+      return;
     }
 
     paramsProps.value.api!({
@@ -857,24 +711,24 @@ const handleSubmit = () => {
       columns: columnsInfos.value,
       generatorInfo: generatorInfo.value
     }).then(() => {
-      ElMessage.success({ message: '保存成功！' })
-      visible.value = false
-    })
-  })
-}
+      ElMessage.success({ message: '保存成功！' });
+      visible.value = false;
+    });
+  });
+};
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
-  paramsProps.value = params
-  getInfo()
-  visible.value = true
-}
+  paramsProps.value = params;
+  getInfo();
+  visible.value = true;
+};
 
 const typeContent = ref<{
   [key: string]: {
-    tooltip: string
-    text: string
-  }
+    tooltip: string;
+    text: string;
+  };
 }>({
   all: {
     tooltip: '【增删改查】 所有组件，包括后端服务和前端视图',
@@ -892,15 +746,15 @@ const typeContent = ref<{
     tooltip: '数据库交互组件，包括数据模型和映射配置',
     text: 'PO、Mapper'
   }
-})
+});
 
 const changeRadio = (val: string) => {
-  isShowExcel.value = val === 'all' || val === 'server'
-}
+  isShowExcel.value = val === 'all' || val === 'server';
+};
 
 defineExpose({
   acceptParams
-})
+});
 </script>
 
 <style scoped lang="scss">
