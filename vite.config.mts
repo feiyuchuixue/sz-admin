@@ -34,8 +34,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     css: {
       preprocessorOptions: {
         scss: {
-          api: 'modern-compile',
-          silenceDeprecations: ['legacy-js-api'],
+          api: 'modern-compiler', // https://github.com/sass/dart-sass/issues/2395#issuecomment-988870897
           additionalData: `@use "@/styles/element/index.scss" as *;`,
         },
       },
