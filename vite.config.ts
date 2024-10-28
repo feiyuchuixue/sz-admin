@@ -14,6 +14,9 @@ export default defineConfig(({mode}: ConfigEnv): UserConfig => {
   return {
     base: env.VITE_PUBLIC_PATH,
     root,
+    build: {
+      outDir: 'sz-admin'
+    },
     plugins: [
       vue(),
       vueJsx(),
@@ -42,10 +45,15 @@ export default defineConfig(({mode}: ConfigEnv): UserConfig => {
       // open: env.VITE_OPEN === "true",
       proxy: {
         "/api": {
-          target: env.VITE_API_URL,
+          // 这里代理到后端项目的api访问路径
+          // 后端项目地址  https://github.com/feiyuchuixue/sz-admin.git
+          // sz-admin 官网: https://szadmin.cn/
+          target: "http://localhost:9991/api",
           changeOrigin: true,
           ws: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          rewrite: (path) => {
+            return path.replace(/^\/api/, '')
+          },
           // https is require secure=false
           ...(/^https:\/\//.test(env.VITE_API_URL) ? {secure: false} : {})
         }
