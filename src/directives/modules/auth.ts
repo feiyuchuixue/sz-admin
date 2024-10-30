@@ -21,7 +21,7 @@ const auth: Directive = {
     const currentPageRoles: string[] = authStore.authRoleListGet ?? [];
 
     const ADMIN_ROLE = 'admin';
-    const ADMIN_BYPASS = import.meta.env.VITE_ADMIN_BYPASS_PERMISSION === 'true';
+    const ADMIN_BYPASS = import.meta.env.VITE_ADMIN_BYPASS_PERMISSION;
 
     // 如果配置允许对admin用户放行，并且当前用户角色包含admin，则放行
     if (ADMIN_BYPASS && currentPageRoles.includes(ADMIN_ROLE)) {

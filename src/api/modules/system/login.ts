@@ -4,9 +4,8 @@ import type { ILogin } from '@/api/interface/system/login';
 
 // 用户登录
 export const loginApi = (params: ILogin.LoginParams) => {
-  const clientId = import.meta.env.VITE_APP_CLIENT_ID;
   params.grantType = 'password';
-  params.clientId = clientId;
+  params.clientId = import.meta.env.VITE_APP_CLIENT_ID;
   return http.post<ILogin.LoginInfo>(ADMIN_MODULE + `/auth/login`, params, { loading: false }); // 正常 post json 请求  ==>  application/json
   // return http.post(`/login`, params, { loading: false }); // 控制当前请求不显示 loading
   // return http.post(`/login`, {}, { params }); // post 请求携带 query 参数  ==>  ?username=admin&password=123456
