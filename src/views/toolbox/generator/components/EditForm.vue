@@ -91,7 +91,7 @@
             <p>{{ typeContent[generatorInfo.generateType].text }}</p>
           </div>
           <el-row>
-            <el-col :span="3" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
+            <el-col :span="6" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
               <el-form-item prop="type">
                 <template #label>
                   <el-space :size="4">
@@ -228,6 +228,14 @@
                 </el-tooltip>
               </el-space>
             </template>
+            <template #dictShowWayHeader="scope">
+              {{ scope?.column.label }}
+              <el-space :size="2" class="column-table-header-yiwen">
+                <el-tooltip effect="dark" content="字典展示类型：0 唯一标识；1 别名。" placement="top">
+                  <i :class="'iconfont icon-yiwen'" />
+                </el-tooltip>
+              </el-space>
+            </template>
 
             <template #columnComment="{ row }">
               <el-input v-model="row.columnComment" />
@@ -305,6 +313,16 @@
                 <el-option-group v-for="group in dictTypeOptions" :key="group.label" :label="group.label">
                   <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-option-group>
+              </el-select>
+            </template>
+
+            <template #dictShowWay="{ row }">
+              <el-select
+                v-if="row.isLogicDel == '0' && row.isQuery == '1' && row.htmlType == 'select' && row.dictType"
+                v-model="row.dictShowWay"
+                filterable
+              >
+                <el-option v-for="item in dictShowWayOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
           </ProTable>
@@ -494,7 +512,7 @@ import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import type { IGenerator } from '@/api/interface/toolbox/generator';
 import { getGeneratorInfo } from '@/api/modules/toolbox/generator';
-import { htmlTypeOptions, javaTypeOptions, queryTypeOptions } from '@/views/toolbox/generator/common/Options';
+import { dictShowWayOptions, htmlTypeOptions, javaTypeOptions, queryTypeOptions } from '@/views/toolbox/generator/common/Options';
 import { getDictTypeOptions } from '@/api/modules/system/dict';
 import type { IDict } from '@/api/interface/system/dict';
 import type { IMenu } from '@/api/interface/system/menu';
@@ -548,25 +566,26 @@ const isShowExcel = ref<boolean>(true);
 //   { prop: 'dictType', label: '字典类型' }
 // ]
 const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
-  { type: 'sort', width: 100, label: '拖拽排序' },
+  { type: 'sort', width: 75, label: '拖拽排序' },
   { prop: 'columnName', label: '字段列名' },
   { prop: 'columnComment', label: '字段描述' },
   { prop: 'columnType', label: '物理类型' },
   { prop: 'javaType', label: 'Java类型' },
-  { prop: 'isPk', label: '主键', width: 60 },
-  { prop: 'isIncrement', label: '自增', width: 60 },
-  { prop: 'isUniqueValid', label: '唯一', width: 80 },
-  { prop: 'isRequired', label: '必填', width: 60 },
-  { prop: 'isLogicDel', label: '逻辑删除', width: 120 },
-  { prop: 'isInsert', label: '插入', width: 80 },
-  { prop: 'isEdit', label: '编辑', width: 80 },
-  { prop: 'isList', label: '列表', width: 80 },
-  { prop: 'isQuery', label: '查询', width: 80 },
-  { prop: 'isImport', label: '导入', width: 80 },
-  { prop: 'isExport', label: '导出', width: 80 },
+  { prop: 'isPk', label: '主键', width: 55 },
+  { prop: 'isIncrement', label: '自增', width: 55 },
+  { prop: 'isUniqueValid', label: '唯一', width: 75 },
+  { prop: 'isRequired', label: '必填', width: 55 },
+  { prop: 'isLogicDel', label: '逻辑删除', width: 75 },
+  { prop: 'isInsert', label: '插入', width: 75 },
+  { prop: 'isEdit', label: '编辑', width: 75 },
+  { prop: 'isList', label: '列表', width: 75 },
+  { prop: 'isQuery', label: '查询', width: 75 },
+  { prop: 'isImport', label: '导入', width: 75 },
+  { prop: 'isExport', label: '导出', width: 75 },
   { prop: 'queryType', label: '查询方式' },
   { prop: 'htmlType', label: '显示类型' },
-  { prop: 'dictType', label: '字典类型' }
+  { prop: 'dictType', label: '字典类型' },
+  { prop: 'dictShowWay', label: '字典显示方式' }
 ]);
 
 const active = ref(1);

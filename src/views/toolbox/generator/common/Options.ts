@@ -120,3 +120,14 @@ export const htmlTypeOptions: Options[] = [
     value: 'editor'
   }
 ];
+
+export const dictShowWayOptions: Options[] = [
+  {
+    label: '唯一标识',
+    value: '0'
+  },
+  {
+    label: '别名',
+    value: '1'
+  }
+];
