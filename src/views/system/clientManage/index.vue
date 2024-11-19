@@ -87,7 +87,7 @@ const columns: ColumnProps<ISysClient.Row>[] = [
     enum: optionsStore.getDictOptions('grant_type'),
     fieldNames: {
       label: 'codeName',
-      value: 'id',
+      value: 'alias',
       tagType: 'callbackShowStyle'
     }
   },
@@ -129,7 +129,7 @@ const searchColumns: SearchProps[] = [
     el: 'select',
     fieldNames: {
       label: 'codeName',
-      value: 'id',
+      value: 'alias',
       tagType: 'callbackShowStyle'
     }
   },
