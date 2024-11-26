@@ -67,7 +67,13 @@
       </el-row>
       <el-row>
         <el-form-item label="头像" prop="logo">
-          <SimplifyUpload dir="user" v-model="paramsProps.row.logo" />
+          <UploadImg v-model:image-url="paramsProps.row.logo" dir="user" width="135px" height="135px">
+            <template #empty>
+              <el-icon><Avatar /></el-icon>
+              <span>请上传头像</span>
+            </template>
+            <template #tip> 头像大小不能超过 3M </template>
+          </UploadImg>
         </el-form-item>
       </el-row>
     </el-form>
@@ -82,6 +88,7 @@
 import SimplifyUpload from '@/components/SimplifyUpload/index.vue';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import UploadImg from '@/components/Upload/Img.vue';
 
 defineOptions({
   name: 'UserAdd'
