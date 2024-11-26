@@ -8,5 +8,5 @@ import type { IUpload } from '@/api/interface/system/upload';
  * @returns {*}
  */
 export const uploadFile = (params: IUpload.File) => {
-  return http.upload(ADMIN_MODULE + `/sys-file/upload`, params);
+  return http.upload<IUpload.UploadResult>(ADMIN_MODULE + `/sys-file/upload`, params);
 };

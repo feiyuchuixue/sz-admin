@@ -54,6 +54,8 @@ import { UploadFilled, Delete, Document, Picture } from '@element-plus/icons-vue
 import { ref } from 'vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import type { UploadFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
+import type { IUpload } from '@/api/interface/system/upload';
+import type { IResultData } from '@/api/interface';
 
 defineOptions({
   name: 'SimplifyUpload'
@@ -104,14 +106,15 @@ if (defaultVal !== undefined && defaultVal !== '') {
 
 // 重新设置的上传
 const uploadFileRequest = (options: UploadRequestOptions) => {
-  return uploadFile({ file: options.file, type: props.dir });
+  return uploadFile({ file: options.file, dirTag: props.dir });
 };
 
-const handleSuccess = (res: any, file: UploadFile) => {
+const handleSuccess = (res: IResultData<IUpload.UploadResult>, file: UploadFile) => {
   const { uid } = file;
   const index = fileList.value.findIndex(item => item.uid === uid);
   if (index !== -1) {
-    fileList.value[index].url = res.data;
+    fileList.value[index].url = res.data.url;
+    fileList.value[index].name = res.data.filename;
     emitChange();
   }
 };
