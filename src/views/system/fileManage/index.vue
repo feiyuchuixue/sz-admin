@@ -38,7 +38,7 @@ const columns: ColumnProps<ISysFile.Row>[] = [
   { prop: 'contextType', label: 'contextType', tag: true, width: 180 },
   { prop: 'eTag', label: 'eTag标识' },
   { prop: 'url', label: '文件', width: 80 },
-  { prop: 'createTime', label: '创建时间',  width: 165 },
+  { prop: 'createTime', label: '创建时间', width: 165 },
   {
     prop: 'createId',
     label: '创建人ID',
@@ -53,9 +53,7 @@ const columns: ColumnProps<ISysFile.Row>[] = [
   }
 ];
 // 搜索条件项
-const searchColumns: SearchProps[] = [
-  { prop: 'filename', label: '文件名', el: 'input' }
-];
+const searchColumns: SearchProps[] = [{ prop: 'filename', label: '文件名', el: 'input' }];
 // 获取table列表
 const getTableList = (params: ISysFile.Query) => {
   let newParams = formatParams(params);
@@ -70,9 +68,8 @@ const formatParams = (params: ISysFile.Query) => {
 };
 // 是否是图片
 const isImage = (contextType: string) => {
-  console.log('contextType', contextType)
+  console.log('contextType', contextType);
   const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp', 'image/svg+xml'];
   return imageMimeTypes.includes(contextType);
-}
-
+};
 </script>

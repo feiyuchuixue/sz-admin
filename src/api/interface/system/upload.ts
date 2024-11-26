@@ -10,5 +10,9 @@ export namespace IUpload {
     url: string;
     filename: string;
     eTag: string;
+    objectName: string;
+    dirTag: string;
+    contextType: string;
+    size: number;
   }
 }
