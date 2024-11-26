@@ -41,7 +41,7 @@ const columns: ColumnProps<ISysFile.Row>[] = [
   { prop: 'createTime', label: '创建时间', width: 165 },
   {
     prop: 'createId',
-    label: '创建人ID',
+    label: '创建人',
     tag: true,
     enum: optionsStore.getDictOptions('dynamic_user_options'),
     fieldNames: {
