@@ -67,7 +67,7 @@
       </el-row>
       <el-row>
         <el-form-item label="头像" prop="logo">
-          <UploadImg v-model:image-url="paramsProps.row.logo" dir="user" width="135px" height="135px">
+          <UploadImg v-model:image-url="paramsProps.row.logo" dir="user" width="135px" height="135px" border-radius="50%">
             <template #empty>
               <el-icon><Avatar /></el-icon>
               <span>请上传头像</span>
