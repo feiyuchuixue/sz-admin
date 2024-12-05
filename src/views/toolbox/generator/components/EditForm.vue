@@ -309,7 +309,7 @@
 
             <template #dictType="{ row }">
               <el-select
-                v-if="row.isLogicDel == '0' && row.isQuery == '1' && row.htmlType == 'select'"
+                v-if="row.isLogicDel == '0'"
                 v-model="row.dictType"
                 clearable
                 filterable
@@ -322,7 +322,7 @@
 
             <template #dictShowWay="{ row }">
               <el-select
-                v-if="row.isLogicDel == '0' && row.isQuery == '1' && row.htmlType == 'select' && row.dictType"
+                v-if="row.isLogicDel == '0' && row.dictType"
                 v-model="row.dictShowWay"
                 filterable
               >
