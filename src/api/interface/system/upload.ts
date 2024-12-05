@@ -14,5 +14,6 @@ export namespace IUpload {
     dirTag: string;
     contextType: string;
     size: number;
+    fileId: number;
   }
 }
