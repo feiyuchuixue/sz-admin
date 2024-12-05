@@ -298,7 +298,11 @@
             </template>
 
             <template #htmlType="{ row }">
-              <el-select v-if="row.isLogicDel == '0' && row.isQuery == '1'" v-model="row.htmlType" filterable>
+              <el-select
+                v-if="row.isLogicDel == '0' && row.isPk == '0' && (row.isInsert == '1' || row.isEdit == '1')"
+                v-model="row.htmlType"
+                filterable
+              >
                 <el-option v-for="item in htmlTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
@@ -579,11 +583,11 @@ const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
   { prop: 'isInsert', label: '插入', width: 65 },
   { prop: 'isEdit', label: '编辑', width: 65 },
   { prop: 'isList', label: '列表', width: 65 },
+  { prop: 'htmlType', label: '显示类型' },
   { prop: 'isQuery', label: '查询', width: 65 },
   { prop: 'isImport', label: '导入', width: 65 },
   { prop: 'isExport', label: '导出', width: 65 },
   { prop: 'queryType', label: '查询方式', width: 105 },
-  { prop: 'htmlType', label: '显示类型' },
   { prop: 'dictType', label: '字典类型' },
   { prop: 'dictShowWay', label: '字典显示方式' }
 ]);
@@ -691,9 +695,9 @@ watchEffect(() => {
     updateColumnVisibility('isImport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasImport === '1');
     updateColumnVisibility('isExport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasExport === '1');
     updateColumnVisibility('queryType', genType === 'all' || genType === 'server');
-    updateColumnVisibility('htmlType', genType === 'all' || genType === 'server');
-    updateColumnVisibility('dictType', genType === 'all' || genType === 'server');
-    updateColumnVisibility('dictShowWay', genType === 'all' || genType === 'server');
+    updateColumnVisibility('htmlType', genType === 'all');
+    updateColumnVisibility('dictType', genType === 'all');
+    updateColumnVisibility('dictShowWay', genType === 'all');
 
     // 如果有其他类似的属性，也可以在这里进行处理
   } catch (error) {
