@@ -16,3 +16,5 @@ export namespace IUpload {
     size: number;
   }
 }
+
+export type IUploadResult = IUpload.UploadResult | null;

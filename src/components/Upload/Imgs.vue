@@ -37,7 +37,7 @@
       </template>
     </el-upload>
     <div class="el-upload__tip">
-      <slot name="tip"></slot>
+      <slot name="tip" />
     </div>
     <el-image-viewer v-if="imgViewVisible" :url-list="[viewImageUrl]" @close="imgViewVisible = false" />
   </div>
@@ -49,9 +49,10 @@ import { Plus } from '@element-plus/icons-vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import type { UploadProps, UploadFile, UploadUserFile, UploadRequestOptions } from 'element-plus';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
-
+import type { IUploadResult } from '@/api/interface/system/upload';
 interface UploadFileProps {
   fileList: UploadUserFile[];
+  fileInfo?: IUploadResult; // 文件信息 ==> 非必传
   api?: (params: any) => Promise<any>; // 上传图片的 api 方法，一般项目上传都是同一个 api 方法，在组件里直接引入即可 ==> 非必传
   drag?: boolean; // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled?: boolean; // 是否禁用上传组件 ==> 非必传（默认为 false）
@@ -66,6 +67,7 @@ interface UploadFileProps {
 
 const props = withDefaults(defineProps<UploadFileProps>(), {
   fileList: () => [],
+  fileInfo: null,
   drag: true,
   disabled: false,
   limit: 5,
@@ -140,11 +142,13 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
  * */
 const emit = defineEmits<{
   'update:fileList': [value: UploadUserFile[]];
+  change: [value: IUploadResult];
 }>();
-const uploadSuccess = (response: { url: string } | undefined, uploadFile: UploadFile) => {
+const uploadSuccess = (response: IUploadResult | undefined, uploadFile: UploadFile) => {
   if (!response) return;
   uploadFile.url = response.url;
   emit('update:fileList', _fileList.value);
+  emit('change', response);
   // 调用 el-form 内部的校验方法（可自动校验）
   formItemContext?.prop && formContext?.validateField([formItemContext.prop as string]);
   ElNotification({
@@ -161,6 +165,7 @@ const uploadSuccess = (response: { url: string } | undefined, uploadFile: Upload
 const handleRemove = (file: UploadFile) => {
   _fileList.value = _fileList.value.filter(item => item.url !== file.url || item.name !== file.name);
   emit('update:fileList', _fileList.value);
+  emit('change', null);
 };
 
 /**

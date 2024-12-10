@@ -70,7 +70,14 @@
       </el-row>
       <el-row>
         <el-form-item label="头像" prop="logo">
-          <UploadImg v-model:image-url="paramsProps.row.logo" dir="user" width="135px" height="135px" border-radius="50%">
+          <UploadImg
+            v-model:image-url="paramsProps.row.logo"
+            @change="fileChange"
+            dir="user"
+            width="135px"
+            height="135px"
+            border-radius="50%"
+          >
             <template #empty>
               <el-icon><Avatar /></el-icon>
               <span>请上传头像</span>
@@ -92,6 +99,7 @@ import { useOptionsStore } from '@/stores/modules/options';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import UploadImg from '@/components/Upload/Img.vue';
+import type { IUploadResult } from '@/api/interface/system/upload';
 defineOptions({
   name: 'UserEdit'
 });
@@ -132,6 +140,11 @@ const handleSubmit = () => {
       console.log(error);
     }
   });
+};
+
+// 获取文件变更事件
+const fileChange = (data: IUploadResult) => {
+  console.log(data);
 };
 
 defineExpose({

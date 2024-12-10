@@ -53,9 +53,11 @@ import { generateUUID } from '@/utils';
 import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
 import type { UploadProps, UploadRequestOptions } from 'element-plus';
+import type { IUploadResult } from '@/api/interface/system/upload';
 
 interface UploadFileProps {
   imageUrl: string; // 图片地址 ==> 必传
+  fileInfo?: IUploadResult; // 文件信息 ==> 非必传
   api?: (params: any) => Promise<any>; // 上传图片的 api 方法，一般项目上传都是同一个 api 方法，在组件里直接引入即可 ==> 非必传
   drag?: boolean; // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled?: boolean; // 是否禁用上传组件 ==> 非必传（默认为 false）
@@ -70,6 +72,7 @@ interface UploadFileProps {
 // 接受父组件参数
 const props = withDefaults(defineProps<UploadFileProps>(), {
   imageUrl: '',
+  fileInfo: null,
   drag: true,
   disabled: false,
   fileSize: 5,
@@ -100,11 +103,13 @@ const self_disabled = computed(() => {
  * */
 const emit = defineEmits<{
   'update:imageUrl': [value: string];
+  change: [value: IUploadResult];
 }>();
 const handleHttpUpload = async (options: UploadRequestOptions) => {
   try {
     const { data } = await uploadFile({ file: options.file, dirTag: props.dir });
     emit('update:imageUrl', data.url);
+    emit('change', data);
     // 调用 el-form 内部的校验方法（可自动校验）
     formItemContext?.prop && formContext?.validateField([formItemContext.prop as string]);
   } catch (error) {
@@ -117,6 +122,7 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
  * */
 const deleteImg = () => {
   emit('update:imageUrl', '');
+  emit('change', null);
 };
 
 /**
