@@ -17,3 +17,5 @@ export namespace IUpload {
     fileId: number;
   }
 }
+
+export type IUploadResult = IUpload.UploadResult | null;
