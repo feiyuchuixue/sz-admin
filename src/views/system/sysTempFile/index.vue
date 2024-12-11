@@ -11,11 +11,7 @@
     >
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
-        <el-button type="primary"
-          v-auth="'sys.temp.file.create'"
-          :icon="CirclePlus"
-          @click="openAddEdit('新增模版文件管理')"
-        >
+        <el-button type="primary" v-auth="'sys.temp.file.create'" :icon="CirclePlus" @click="openAddEdit('新增模版文件管理')">
           新增
         </el-button>
         <el-button
@@ -39,15 +35,7 @@
         >
           编辑
         </el-button>
-        <el-button
-            v-auth="'sys.temp.file.remove'"
-          type="primary"
-          link
-          :icon="Delete"
-          @click="deleteInfo(row)"
-        >
-          删除
-        </el-button>
+        <el-button v-auth="'sys.temp.file.remove'" type="primary" link :icon="Delete" @click="deleteInfo(row)"> 删除 </el-button>
       </template>
     </ProTable>
     <SysTempFileForm ref="sysTempFileRef" />
@@ -55,19 +43,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import {
-  CirclePlus,
-  Delete,
-  EditPen,
-} from '@element-plus/icons-vue'
-import ProTable from '@/components/ProTable/index.vue'
+import { ref } from 'vue';
+import { CirclePlus, Delete, EditPen } from '@element-plus/icons-vue';
+import ProTable from '@/components/ProTable/index.vue';
 import {
   createSysTempFileApi,
   removeSysTempFileApi,
   updateSysTempFileApi,
   getSysTempFileListApi,
-  getSysTempFileDetailApi,
+  getSysTempFileDetailApi
 } from '@/api/modules/system/sysTempFile';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysTempFileForm from '@/views/system/sysTempFile/components/SysTempFileForm.vue';
@@ -76,7 +60,7 @@ import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/Pr
 import type { ISysTempFile } from '@/api/interface/system/sysTempFile';
 defineOptions({
   name: 'SysTempFileView'
-})
+});
 const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
@@ -87,40 +71,40 @@ const columns: ColumnProps<ISysTempFile.Row>[] = [
   { prop: 'url', label: '地址' },
   { prop: 'remark', label: '备注' },
   { prop: 'delFlag', label: '逻辑删除' },
-  { prop: 'createId',
+  {
+    prop: 'createId',
     label: '创建人',
     tag: true,
     enum: optionsStore.getDictOptions('dynamic_user_options'),
     fieldNames: {
-      label: "codeName",
-      value: "id",
-      tagType: "callbackShowStyle"
-    },
+      label: 'codeName',
+      value: 'id',
+      tagType: 'callbackShowStyle'
+    }
   },
   { prop: 'createTime', label: '创建时间' },
-  { prop: 'updateId',
+  {
+    prop: 'updateId',
     label: '更新人',
     tag: true,
     enum: optionsStore.getDictOptions('dynamic_user_options'),
     fieldNames: {
-      label: "codeName",
-      value: "id",
-      tagType: "callbackShowStyle"
-    },
+      label: 'codeName',
+      value: 'id',
+      tagType: 'callbackShowStyle'
+    }
   },
   { prop: 'updateTime', label: '更新时间' },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
-]
+];
 // 搜索条件项
-const searchColumns: SearchProps[] = [
-  { prop: 'tempName', label: '模版名', el: 'input' },
-]
+const searchColumns: SearchProps[] = [{ prop: 'tempName', label: '模版名', el: 'input' }];
 // 获取table列表
 const getTableList = (params: ISysTempFile.Query) => {
   let newParams = formatParams(params);
   return getSysTempFileListApi(newParams);
 };
-const formatParams = (params: ISysTempFile.Query) =>{
+const formatParams = (params: ISysTempFile.Query) => {
   let newParams = JSON.parse(JSON.stringify(params));
   newParams.createTime && (newParams.createTimeStart = newParams.createTime[0]);
   newParams.createTime && (newParams.createTimeEnd = newParams.createTime[1]);
@@ -129,35 +113,31 @@ const formatParams = (params: ISysTempFile.Query) =>{
   newParams.updateTime && (newParams.updateTimeEnd = newParams.updateTime[1]);
   delete newParams.updateTime;
   return newParams;
-}
+};
 // 打开 drawer(新增、查看、编辑)
-const sysTempFileRef = ref<InstanceType<typeof SysTempFileForm>>()
-const openAddEdit = async(title: string, row: any = {}, isAdd = true) => {
+const sysTempFileRef = ref<InstanceType<typeof SysTempFileForm>>();
+const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   if (!isAdd) {
-    const record = await getSysTempFileDetailApi({ id: row?.id })
-    row = record?.data
+    const record = await getSysTempFileDetailApi({ id: row?.id });
+    row = record?.data;
   }
   const params = {
     title,
     row: { ...row },
     api: isAdd ? createSysTempFileApi : updateSysTempFileApi,
     getTableList: proTableRef.value?.getTableList
-  }
-  sysTempFileRef.value?.acceptParams(params)
-}
+  };
+  sysTempFileRef.value?.acceptParams(params);
+};
 // 删除信息
 const deleteInfo = async (params: ISysTempFile.Row) => {
-  await useHandleData(
-    removeSysTempFileApi,
-    { ids: [params.id] },
-    `删除【${params.id}】模版文件管理`
-  )
-  proTableRef.value?.getTableList()
-}
+  await useHandleData(removeSysTempFileApi, { ids: [params.id] }, `删除【${params.id}】模版文件管理`);
+  proTableRef.value?.getTableList();
+};
 // 批量删除信息
 const batchDelete = async (ids: (string | number)[]) => {
-  await useHandleData(removeSysTempFileApi, { ids }, '删除所选模版文件管理')
-  proTableRef.value?.clearSelection()
-  proTableRef.value?.getTableList()
-}
+  await useHandleData(removeSysTempFileApi, { ids }, '删除所选模版文件管理');
+  proTableRef.value?.clearSelection();
+  proTableRef.value?.getTableList();
+};
 </script>

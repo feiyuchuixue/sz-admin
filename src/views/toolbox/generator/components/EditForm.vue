@@ -308,12 +308,7 @@
             </template>
 
             <template #dictType="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0'"
-                v-model="row.dictType"
-                clearable
-                filterable
-              >
+              <el-select v-if="row.isLogicDel == '0'" v-model="row.dictType" clearable filterable>
                 <el-option-group v-for="group in dictTypeOptions" :key="group.label" :label="group.label">
                   <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-option-group>
@@ -321,11 +316,7 @@
             </template>
 
             <template #dictShowWay="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0' && row.dictType"
-                v-model="row.dictShowWay"
-                filterable
-              >
+              <el-select v-if="row.isLogicDel == '0' && row.dictType" v-model="row.dictShowWay" filterable>
                 <el-option v-for="item in dictShowWayOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>

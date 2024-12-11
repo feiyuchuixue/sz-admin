@@ -21,5 +21,6 @@ export namespace ISysFile {
     objectName?: string;
     contextType?: string;
     eTag?: string;
+    fileId?: number;
   }
 }
