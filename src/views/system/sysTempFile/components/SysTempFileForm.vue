@@ -9,7 +9,18 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles v-model="paramsProps.row.url" multiple :limit="3" :type="'excel'" width="300px" height="200px" />
+        <UploadFiles
+          v-model:file-list="paramsProps.row.url"
+          multiple
+          :file-size="3"
+          :limit="3"
+          :auto-upload="false"
+          width="300px"
+          height="200px"
+          @change="fileChange"
+        >
+          <template #tip> 文件大小不能超过 3M </template>
+        </UploadFiles>
       </el-form-item>
       <el-form-item label="模版名" prop="tempName">
         <el-input v-model="paramsProps.row.tempName" placeholder="请填写模版名" clearable />
@@ -32,6 +43,7 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import UploadFiles from '@/components/Upload/file.vue';
+import type { IUploadResult } from '@/api/interface/system/upload';
 
 defineOptions({
   name: 'SysTempFileForm'
@@ -67,6 +79,10 @@ const handleSubmit = () => {
       console.log(error);
     }
   });
+};
+
+const fileChange = (file: IUploadResult) => {
+  console.log('file', file);
 };
 
 defineExpose({
