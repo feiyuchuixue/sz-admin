@@ -25,6 +25,16 @@
           批量删除
         </el-button>
       </template>
+
+      <template #url="{ row }">
+        <a href="#" target="_blank" @click="downloadFile(row?.url)">下载</a>
+      </template>
+      <template #history="{ row }">
+        <span>
+          <el-button type="primary" link @click="openFileHistory(row)"> 文件历史 </el-button>
+        </span>
+      </template>
+
       <template #operation="{ row }">
         <el-button
           v-auth="'sys.temp.file.update'"
@@ -39,6 +49,7 @@
       </template>
     </ProTable>
     <SysTempFileForm ref="sysTempFileRef" />
+    <SysTemplateHistoryList ref="sysTempFileHistoryListRef" />
   </div>
 </template>
 
@@ -58,6 +69,7 @@ import SysTempFileForm from '@/views/system/sysTempFile/components/SysTempFileFo
 import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { ISysTempFile } from '@/api/interface/system/sysTempFile';
+import SysTemplateHistoryList from '@/views/system/sysTempFile/components/HistoryList.vue';
 defineOptions({
   name: 'SysTempFileView'
 });
@@ -66,11 +78,11 @@ const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<ISysTempFile.Row>[] = [
   { type: 'selection', width: 80 },
-  { prop: 'sysFileId', label: '文件ID' },
+  { prop: 'id', label: '模板标识' ,width:120},
   { prop: 'tempName', label: '模版名' },
-  { prop: 'url', label: '地址' },
+  { prop: 'url', label: '文件',width:120 },
   { prop: 'remark', label: '备注' },
-  { prop: 'delFlag', label: '逻辑删除' },
+  { prop: 'history', label: '历史' },
   {
     prop: 'createId',
     label: '创建人',
@@ -129,6 +141,9 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   };
   sysTempFileRef.value?.acceptParams(params);
 };
+
+const sysTempFileHistoryListRef = ref<InstanceType<typeof SysTemplateHistoryList>>();
+
 // 删除信息
 const deleteInfo = async (params: ISysTempFile.Row) => {
   await useHandleData(removeSysTempFileApi, { ids: [params.id] }, `删除【${params.id}】模版文件管理`);
@@ -139,5 +154,28 @@ const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(removeSysTempFileApi, { ids }, '删除所选模版文件管理');
   proTableRef.value?.clearSelection();
   proTableRef.value?.getTableList();
+};
+
+const downloadFile = (url: string) => {
+  const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件
+  link.style.display = 'none';
+  link.href = url;
+  const fileName = getFileNameFromUrl(url);
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const getFileNameFromUrl = (url: string) => {
+  // 使用正则表达式提取文件名
+  const regex = /\/([^/]+)$/;
+  const match = url.match(regex);
+  return match ? match[1] : '';
+};
+
+// 打开历史记录页
+const openFileHistory = (row: ISysTempFile.Row) => {
+  sysTempFileHistoryListRef.value?.show(row);
 };
 </script>

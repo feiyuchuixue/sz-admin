@@ -48,3 +48,11 @@ export const getSysTempFileDetailApi = (params: { id: number }) => {
   const { id } = params;
   return http.get<ISysTempFile.Row>(ADMIN_MODULE + `/sys-temp-file/${id}`);
 };
+
+/**
+ * 获取历史记录
+ * @param params
+ */
+export const getSysTempFileHistoryListApi = (params: ISysTempFile.HistoryQuery) => {
+  return http.get<IPage<ISysTempFile.History>>(ADMIN_MODULE + `/sys-temp-file-history/history`, params);
+};

@@ -40,7 +40,9 @@
     <el-dialog v-model="generatorVisible" title="代码生成信息" center align-center append-to-body width="65%">
       <div class="tip custom-block">
         <template v-for="item in generatorCodeInfos" :key="item">
-          <el-text type="info" class="el-text-code" size="small" line-clamp="2"> {{ item }} </el-text><br />
+          <el-text type="info" class="el-text-code" size="small" line-clamp="2">
+            {{ item }} </el-text
+          ><br />
         </template>
       </div>
       <template #footer>

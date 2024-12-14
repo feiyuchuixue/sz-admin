@@ -9,16 +9,7 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles
-          v-model:file-list="paramsProps.row.url"
-          multiple
-          :file-size="3"
-          :limit="3"
-          :auto-upload="false"
-          width="300px"
-          height="200px"
-          @change="fileChange"
-        >
+        <UploadFiles v-model:file-list="fileList" multiple :file-size="3" width="300px" height="200px" @change="fileChange">
           <template #tip> 文件大小不能超过 3M </template>
         </UploadFiles>
       </el-form-item>
@@ -41,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
-import { type ElForm, ElMessage } from 'element-plus';
+import { type ElForm, ElMessage, type UploadUserFile } from 'element-plus';
 import UploadFiles from '@/components/Upload/file.vue';
 import type { IUploadResult } from '@/api/interface/system/upload';
 
@@ -59,10 +50,18 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
+const fileList = ref<UploadUserFile[]>();
+
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
+  fileList.value = [
+    {
+      name: getFileNameFromUrl(params.row.url),
+      url: params.row.url
+    }
+  ];
 };
 
 // 提交数据（新增/编辑）
@@ -82,7 +81,15 @@ const handleSubmit = () => {
 };
 
 const fileChange = (file: IUploadResult) => {
-  console.log('file', file);
+  paramsProps.value.row.tempName = file?.filename;
+  paramsProps.value.row.url = file?.url;
+  paramsProps.value.row.sysFileId = file?.fileId;
+};
+const getFileNameFromUrl = (url: string) => {
+  // 使用正则表达式提取文件名
+  const regex = /\/([^/]+)$/;
+  const match = url.match(regex);
+  return match ? match[1] : '';
 };
 
 defineExpose({

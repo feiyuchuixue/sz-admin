@@ -1,7 +1,6 @@
 <template>
   <!--  <div class="upload-box">-->
   <el-upload
-    ref="uploadRef"
     :drag="drag"
     :multiple="limit > 1"
     :limit="limit"
@@ -20,8 +19,8 @@
         <UploadFilled />
       </el-icon>
       <div class="el-upload__text">
-        <template v-if="drag"> 拖拽或<em>点击上传</em></template>
-        <template v-else> 点击上传</template>
+        <template v-if="drag"> 拖拽或<em>点击上传</em> </template>
+        <template v-else> 点击上传 </template>
       </div>
     </div>
     <template #tip>
@@ -37,7 +36,8 @@
               <el-icon class="el-icon el-icon--document">
                 <Document />
               </el-icon>
-              <span class="el-upload-list__item-file-name" :title="file.name">{{ file.name }}</span></a>
+              <span class="el-upload-list__item-file-name" :title="file.name">{{ file.name }}</span></a
+            >
           </div>
           <label class="el-upload-list__item-status-label">
             <el-icon class="el-icon el-icon--upload-success el-icon--circle-check">
@@ -50,9 +50,9 @@
           <el-icon class="el-icon el-icon--close" @click="handleRemove(file)">
             <Close />
           </el-icon>
-            <el-icon class="el-icon el-icon--download" @click="handlerDownloadFile(file)">
-              <Download />
-            </el-icon>
+          <el-icon class="el-icon el-icon--download" @click="handlerDownloadFile(file)">
+            <Download />
+          </el-icon>
           <i class="el-icon--close-tip">press delete to remove</i>
         </li>
       </ul>
@@ -72,17 +72,10 @@
 </template>
 
 <script setup lang="ts">
-import {Download, UploadFilled} from '@element-plus/icons-vue';
+import { Download, UploadFilled } from '@element-plus/icons-vue';
 import { ref, watch } from 'vue';
 import { uploadTmpFile } from '@/api/modules/system/upload';
-import {
-  ElNotification,
-  type UploadFile,
-  type UploadInstance,
-  type UploadProps,
-  type UploadRequestOptions,
-  type UploadUserFile
-} from 'element-plus';
+import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/interface/system/upload';
 
 defineOptions({
@@ -90,7 +83,7 @@ defineOptions({
 });
 
 type Props = {
-  fileList: UploadUserFile[];
+  fileList?: UploadUserFile[];
   type?: string;
   tip?: string;
   multiple?: boolean;
@@ -190,25 +183,16 @@ const handleRemove = (file: UploadFile) => {
   emit('change', null);
 };
 
-const handlerDownloadFile = (url: string) => {
-  // console.log(url)
-  // console.log(fileName)
+const handlerDownloadFile = (file: UploadFile) => {
   const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件
   link.style.display = 'none';
-  link.href = url;
-  // link.download = fileName
-  const fileName = '1230';
+  link.href = file.url + '';
+  const fileName = file.name;
   link.setAttribute('download', fileName);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  // exportFile.getImgURLs(url, fileName)
 };
-
-const uploadRef = ref<UploadInstance>();
-/*const submitBatch = () => {
-  uploadRef.value!.submit();
-};*/
 </script>
 
 <style scoped lang="scss">

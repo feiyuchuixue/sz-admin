@@ -6,6 +6,11 @@ export namespace ISysTempFile {
     tempName?: string;
   }
 
+  // 历史记录查询条件
+  export interface HistoryQuery extends IPageQuery {
+    sysTempFileId: number;
+  }
+
   // 编辑form表单
   export interface Form {
     id?: number;
@@ -27,5 +32,18 @@ export namespace ISysTempFile {
     createTime?: string;
     updateId?: number;
     updateTime?: string;
+  }
+
+  // 历史记录
+  export interface History {
+    id?: number;
+    sysTempFileId?: number;
+    sysFileId?: number;
+    tempName?: string;
+    url?: string;
+    remark?: string;
+    delFlag?: string;
+    createId?: number;
+    createTime?: string;
   }
 }
