@@ -54,10 +54,10 @@ defineExpose({
 const optionsStore = useOptionsStore();
 // 表格配置项
 const columns: ColumnProps<IDict.Dict>[] = [
-  { prop: 'sysTempFileId', label: '模板标识',width:120 },
-  { prop: 'sysFileId', label: '文件标识',width:120 },
-  { prop: 'tempName', label: '模版名',tag: true },
-  { prop: 'url', label: '文件' ,width:120},
+  { prop: 'sysTempFileId', label: '模板标识', width: 120 },
+  { prop: 'sysFileId', label: '文件标识', width: 120 },
+  { prop: 'tempName', label: '模版名', tag: true },
+  { prop: 'url', label: '文件', width: 120 },
   { prop: 'remark', label: '备注' },
   {
     prop: 'createId',

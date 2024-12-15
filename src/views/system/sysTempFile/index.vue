@@ -78,9 +78,9 @@ const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<ISysTempFile.Row>[] = [
   { type: 'selection', width: 80 },
-  { prop: 'id', label: '模板标识' ,width:120},
+  { prop: 'id', label: '模板标识', width: 120 },
   { prop: 'tempName', label: '模版名' },
-  { prop: 'url', label: '文件',width:120 },
+  { prop: 'url', label: '文件', width: 120 },
   { prop: 'remark', label: '备注' },
   { prop: 'history', label: '历史' },
   {

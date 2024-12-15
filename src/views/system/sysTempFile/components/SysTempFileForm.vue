@@ -56,6 +56,7 @@ const fileList = ref<UploadUserFile[]>();
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
+  if (!params.row.url) return;
   fileList.value = [
     {
       name: getFileNameFromUrl(params.row.url),
