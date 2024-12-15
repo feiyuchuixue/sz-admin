@@ -40,9 +40,7 @@
     <el-dialog v-model="generatorVisible" title="代码生成信息" center align-center append-to-body width="65%">
       <div class="tip custom-block">
         <template v-for="item in generatorCodeInfos" :key="item">
-          <el-text type="info" class="el-text-code" size="small" line-clamp="2">
-            {{ item }} </el-text
-          ><br />
+          <el-text type="info" class="el-text-code" size="small" line-clamp="2"> {{ item }} </el-text><br />
         </template>
       </div>
       <template #footer>
@@ -171,7 +169,7 @@ const codeGene = (row: IGenerator.Info) => {
 
 // 压缩文件下载
 const download = (row: IGenerator.Info) => {
-  useDownload(downloadZip, 'sz-admin-' + row.tableName, { tableNames: [row.tableName] }, true, '.zip');
+  useDownload(downloadZip, '', { tableNames: [row.tableName] });
 };
 // 删除
 const delGene = (row: IGenerator.Info) => {
