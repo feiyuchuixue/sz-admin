@@ -93,7 +93,7 @@ const props = withDefaults(defineProps<Props>(), {
   drag: true,
   limit: 1,
   fileSize: 5,
-  accept: '.xlsx,.xls',
+  accept: '',
   height: '150px',
   width: '200px'
 });

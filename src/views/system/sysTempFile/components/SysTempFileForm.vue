@@ -13,10 +13,10 @@
           v-model:file-list="fileList"
           multiple
           :file-size="3"
-          :limit="3"
           width="300px"
           height="200px"
           @change="fileChange"
+          :accept="'.xlsx,.xls,.doc,.docx'"
         >
           <template #tip> 文件大小不能超过 3M </template>
         </UploadFiles>
@@ -64,7 +64,6 @@ const fileList = ref<UploadUserFile[]>();
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
-  //if (!params.row.url) return;
   fileList.value = params.row.url
     ? [
         {
@@ -92,7 +91,7 @@ const handleSubmit = () => {
 };
 
 const fileChange = (file: IUploadResult) => {
-  paramsProps.value.row.tempName = file?.filename;
+  if (paramsProps.value.isAdd) paramsProps.value.row.tempName = file?.filename; // 如果是新增，便利性带入文件名
   paramsProps.value.row.url = file?.url;
   paramsProps.value.row.sysFileId = file?.fileId;
 };
