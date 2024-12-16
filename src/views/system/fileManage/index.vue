@@ -31,6 +31,7 @@ const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<ISysFile.Row>[] = [
   { type: 'selection', width: 80 },
+  { prop: 'id', label: '文件标识', width: 120 },
   { prop: 'filename', label: '文件名' },
   { prop: 'dirTag', label: '目录标识', tag: true, width: 120 },
   { prop: 'size', label: '文件大小', width: 100 },
