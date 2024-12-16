@@ -35,6 +35,8 @@ declare namespace View {
     api: ((params: any) => Promise<any>) | undefined;
     // 刷新列表数据使用
     getTableList?: (() => Promise<any>) | undefined;
+    // 是否是新增
+    isAdd?: boolean;
     // 其他附加信息
     [key: string]: any;
   }
