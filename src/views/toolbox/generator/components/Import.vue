@@ -1,7 +1,14 @@
 <template>
   <div class="dialog-table-box">
     <el-dialog v-model="visible" title="导入表" width="60%" :destroy-on-close="true" :close-on-click-modal="false" append-to-body>
-      <ProTable ref="proTableRef" :indent="20" :columns="columns" :search-columns="searchColumns" :request-api="getTableList" row-key="tableName" />
+      <ProTable
+        ref="proTableRef"
+        :indent="20"
+        :columns="columns"
+        :search-columns="searchColumns"
+        :request-api="getTableList"
+        row-key="tableName"
+      />
 
       <template #footer>
         <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
@@ -13,7 +20,7 @@
 
 <script setup lang="ts">
 import ProTable from '@/components/ProTable/index.vue';
-import type {ColumnProps, ProTableInstance, SearchProps} from '@/components/ProTable/interface';
+import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { IGenerator } from '@/api/interface/toolbox/generator';
 import { getGeneratorSchemaList, importGenerator } from '@/api/modules/toolbox/generator';
 import type { IPageQuery } from '@/api/interface';
@@ -50,7 +57,7 @@ const columns: ColumnProps<IGenerator.Info>[] = [
 const searchColumns: SearchProps[] = [
   { prop: 'tableName', label: '表名称', el: 'input' },
   { prop: 'tableComment', label: '表描述', el: 'input' },
-  { prop: 'filterSys', label: '是否过滤系统表', el: 'switch' },
+  { prop: 'filterSys', label: '是否过滤系统表', el: 'switch' }
 ];
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTableRef = ref<ProTableInstance>();

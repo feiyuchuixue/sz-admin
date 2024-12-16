@@ -57,7 +57,7 @@ const paramsProps = ref<View.DefaultParams>({
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
-  isAdd.value = params?.isAdd;
+  if (params?.isAdd) isAdd.value = params?.isAdd;
 };
 
 // 提交数据（新增/编辑）
