@@ -1,5 +1,4 @@
 <template>
-  <!--  <div class="upload-box">-->
   <el-upload
     :drag="drag"
     :multiple="limit > 1"
@@ -30,45 +29,34 @@
     </template>
     <template #file="{ file }">
       <ul class="el-upload-list el-upload-list--text">
-        <li class="el-upload-list__item is-success" tabindex="0" style="">
+        <li class="el-upload-list__item is-success" tabindex="0">
           <div class="el-upload-list__item-info">
             <a class="el-upload-list__item-name">
               <el-icon class="el-icon el-icon--document">
                 <Document />
               </el-icon>
-              <span class="el-upload-list__item-file-name" :title="file.name">{{ file.name }}</span></a
+              <span class="el-upload-list__item-file-name" :title="file.name" :style="{ width: `calc(${width} - 80px)` }">{{
+                file.name
+              }}</span></a
             >
           </div>
-          <label class="el-upload-list__item-status-label">
-            <el-icon class="el-icon el-icon--upload-success el-icon--circle-check">
-              <circle-check />
-            </el-icon>
-            <el-icon class="el-icon el-icon--upload-success el-icon--circle-check">
-              <circle-check />
-            </el-icon>
-          </label>
-          <el-icon class="el-icon el-icon--close" @click="handleRemove(file)">
+          <el-progress
+            v-if="file.status === 'uploading'"
+            type="line"
+            :stroke-width="2"
+            :percentage="file.percentage"
+            style="margin-top: 0.5rem"
+          />
+          <el-icon v-if="file.status === 'success'" class="el-icon el-icon--remove" @click="handleRemove(file)">
             <Close />
           </el-icon>
-          <el-icon class="el-icon el-icon--download" @click="handlerDownloadFile(file)">
+          <el-icon v-if="file.status === 'success'" class="el-icon el-icon--download" @click="handlerDownloadFile(file)">
             <Download />
           </el-icon>
-          <i class="el-icon--close-tip">press delete to remove</i>
         </li>
       </ul>
-
-      <!--      <span class="el-upload-list__item">
-        <span class="el-upload-list__item-file-name">{{ file.name }}</span>
-        <span class="el-upload-list__item-actions">
-          <el-button size="mini" type="text" @click="handlerDownloadFile(file)">下载</el-button>
-        </span>
-      </span>-->
     </template>
   </el-upload>
-  <!--    <template v-if="limit > 1">
-        <el-button class="upload-btn" type="success" @click="submitBatch"> 文件上传 </el-button>
-      </template>-->
-  <!--  </div>-->
 </template>
 
 <script setup lang="ts">
@@ -77,6 +65,7 @@ import { ref, watch } from 'vue';
 import { uploadTmpFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/interface/system/upload';
+import type { AxiosProgressEvent } from 'axios';
 
 defineOptions({
   name: 'UploadFiles'
@@ -104,7 +93,7 @@ const props = withDefaults(defineProps<Props>(), {
   drag: true,
   limit: 1,
   fileSize: 5,
-  accept: '',
+  accept: '.xlsx,.xls',
   height: '150px',
   width: '200px'
 });
@@ -114,14 +103,15 @@ const emit = defineEmits<{
   'update:fileList': [value: UploadUserFile[]];
   change: [value: IUploadResult];
 }>();
-const _fileList = ref<UploadUserFile[]>(props.fileList);
+const _fileList = ref<UploadUserFile[]>([]);
 
 // 监听 props.fileList 列表默认值改变
 watch(
-  () => props.fileList,
-  (n: UploadUserFile[]) => {
-    _fileList.value = n;
-  }
+  props.fileList,
+  (newFileList: UploadUserFile[]) => {
+    _fileList.value = [...newFileList]; // 深拷贝防止引用问题
+  },
+  { immediate: true } // 初始化时执行
 );
 
 /**
@@ -162,7 +152,33 @@ const handleExceed = () => {
 // 重新设置的上传
 const uploadFileRequest = async (options: UploadRequestOptions) => {
   try {
-    const { data } = await uploadTmpFile({ file: options.file });
+    const { data } = await uploadTmpFile(
+      { file: options.file },
+      {
+        onUploadProgress(event: AxiosProgressEvent) {
+          const progressEvent = new ProgressEvent('upload', {
+            lengthComputable: event.total !== undefined,
+            loaded: event.loaded || 0,
+            total: event.total || 0
+          });
+          options.onProgress(new CustomUploadProgressEvent(progressEvent));
+          //console.log('event',event)
+          //if (event.total) {}
+          /* if(event.progress){
+            console.log(   Math.ceil(event.progress * 100));
+            progress.value = Math.ceil(event.progress * 100)
+            if(progress.value === 100){
+              isUploaded.value = true;
+
+             /!* setTimeout(() => {
+                progress.value = 0;
+                isUploaded.value = false;
+              }, 1000);*!/
+            }
+          }*/
+        }
+      }
+    );
     options.onSuccess(data);
   } catch (error) {
     options.onError(error as any);
@@ -193,6 +209,39 @@ const handlerDownloadFile = (file: UploadFile) => {
   link.click();
   document.body.removeChild(link);
 };
+
+/*const handleProgress = (event: UploadProgressEvent , file: UploadFile, uploadFiles: UploadFiles) => {
+  // progress.value = Math.floor((event.loaded / event.total) * 100);
+  console.log('file',file)
+/!*  for (let i = 0; i <uploadFiles.length ; i++) {
+    if (file.uid === uploadFiles[i].uid) {
+      uploadFiles[i].percentage = Math.floor((event.loaded / event.total) * 100);
+      file.percentage = Math.floor((event.loaded / event.total) * 100);
+      // console.log('uploadFiles' + i, uploadFiles[i])
+    }
+  }*!/
+  //console.log('uploadFiles',uploadFiles)
+
+  /!*  if(event.progress){
+    console.log(   Math.ceil(event.progress * 100));
+    progress.value = Math.ceil(event.progress * 100)
+    if(progress.value === 100){
+      isUploaded.value = true;
+
+      /!* setTimeout(() => {
+         progress.value = 0;
+         isUploaded.value = false;
+       }, 1000);*!/
+    }*!/
+};*/
+
+class CustomUploadProgressEvent extends ProgressEvent {
+  percent: number;
+  constructor(event: ProgressEvent) {
+    super(event.type, event);
+    this.percent = event.lengthComputable ? Math.round((event.loaded / event.total) * 100) : 0;
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -237,17 +286,6 @@ const handlerDownloadFile = (file: UploadFile) => {
   }
 }
 
-/*.image-slot {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
-  font-size: 30px;
-}*/
-
 .el-upload__tip {
   line-height: 15px;
   text-align: center;
@@ -270,5 +308,40 @@ const handlerDownloadFile = (file: UploadFile) => {
 .upload-file-list .file-name,
 .upload-file-list .file-size {
   margin-right: 10px;
+}
+
+.el-upload-list__item-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 14px;
+}
+
+.el-upload-list__item .el-icon--remove {
+  color: var(--el-text-color-regular);
+  cursor: pointer;
+  opacity: 0.75;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity var(--el-transition-duration);
+}
+
+.el-upload-list__item .el-icon--download {
+  color: var(--el-text-color-regular);
+  cursor: pointer;
+  opacity: 0.75;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  padding-right: 10px;
+  transform: translateY(-50%);
+  transition: opacity var(--el-transition-duration);
+}
+.el-upload-list .el-upload-list--text {
+  line-height: 24px;
+  font-size: 28px;
 }
 </style>

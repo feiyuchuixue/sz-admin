@@ -9,7 +9,15 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles v-model:file-list="fileList" multiple :file-size="3" width="300px" height="200px" @change="fileChange">
+        <UploadFiles
+          v-model:file-list="fileList"
+          multiple
+          :file-size="3"
+          :limit="3"
+          width="300px"
+          height="200px"
+          @change="fileChange"
+        >
           <template #tip> 文件大小不能超过 3M </template>
         </UploadFiles>
       </el-form-item>
@@ -56,13 +64,15 @@ const fileList = ref<UploadUserFile[]>();
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
-  if (!params.row.url) return;
-  fileList.value = [
-    {
-      name: getFileNameFromUrl(params.row.url),
-      url: params.row.url
-    }
-  ];
+  //if (!params.row.url) return;
+  fileList.value = params.row.url
+    ? [
+        {
+          name: getFileNameFromUrl(params.row.url),
+          url: params.row.url
+        }
+      ]
+    : [];
 };
 
 // 提交数据（新增/编辑）

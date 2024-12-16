@@ -137,7 +137,8 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
     title,
     row: { ...row },
     api: isAdd ? createSysTempFileApi : updateSysTempFileApi,
-    getTableList: proTableRef.value?.getTableList
+    getTableList: proTableRef.value?.getTableList,
+    isAdd: isAdd
   };
   sysTempFileRef.value?.acceptParams(params);
 };
