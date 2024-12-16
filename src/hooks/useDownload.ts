@@ -12,8 +12,7 @@ export const useDownload = async (
   api: (param: any) => Promise<any>,
   tempName: string,
   params: any = {},
-  isNotify: boolean = true,
-  fileType: string = '.xlsx'
+  isNotify: boolean = true
 ) => {
   if (isNotify) {
     ElNotification({
@@ -24,14 +23,29 @@ export const useDownload = async (
     });
   }
   try {
+    // 如果params为空，构建请求参数
+    if (!params) {
+      params = {
+        templateName: tempName
+      };
+    }
     const res = await api(params);
-    const blob = new Blob([res]);
-    // 兼容 edge 不支持 createObjectURL 方法
-    if ('msSaveOrOpenBlob' in navigator) return window.navigator.msSaveOrOpenBlob(blob, tempName + fileType);
+
+    // 提取文件名
+    const contentDisposition = res.headers['content-disposition'];
+    const filename = decodeURIComponent(
+      contentDisposition?.match(/filename\*?=(?:UTF-8'')?([^;]+)?/)?.[1]?.replace(/['"]/g, '') || '下载文件'
+    );
+
+    // 下载文件
+    const blob = new Blob([res.data], { type: res.headers['content-type'] });
     const blobUrl = window.URL.createObjectURL(blob);
+
+    // 兼容 edge 不支持 createObjectURL 方法
+    if ('msSaveOrOpenBlob' in navigator) return window.navigator.msSaveOrOpenBlob(blob, filename);
     const exportFile = document.createElement('a');
     exportFile.style.display = 'none';
-    exportFile.download = `${tempName}${fileType}`;
+    exportFile.download = filename;
     exportFile.href = blobUrl;
     document.body.appendChild(exportFile);
     exportFile.click();

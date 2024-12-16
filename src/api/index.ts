@@ -61,6 +61,11 @@ class RequestHttp {
         const userStore = useUserStore();
         const socketStore = useSocketStore();
         const authStore = useAuthStore();
+        // 如果是文件流，直接返回整个响应对象
+        if (response.config.responseType === 'blob') {
+          return response;
+        }
+
         //tryHideFullScreenLoading()
         // 登陆失效
         if (data.code === CODE_TOKEN_FAIL || data.code === CODE_USER_FAIL) {
@@ -131,7 +136,7 @@ class RequestHttp {
     return this.service.get(url, { params, ..._object, responseType: 'blob' });
   }
 
-  upload<T>(url: string, params = {}, _object = {}): Promise<IResultData<T>> {
+  upload<T>(url: string, params = {}, _object: AxiosRequestConfig<{}> | undefined): Promise<IResultData<T>> {
     return this.service.post(url, params, {
       ..._object,
       headers: {

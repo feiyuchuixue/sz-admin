@@ -169,7 +169,7 @@ const codeGene = (row: IGenerator.Info) => {
 
 // 压缩文件下载
 const download = (row: IGenerator.Info) => {
-  useDownload(downloadZip, 'sz-admin-' + row.tableName, { tableNames: [row.tableName] }, true, '.zip');
+  useDownload(downloadZip, '', { tableNames: [row.tableName] });
 };
 // 删除
 const delGene = (row: IGenerator.Info) => {
