@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="`${paramsProps.title}`"
+    :title="`${paramsProps.title}：${paramsProps.row?.tableName}`"
     :destroy-on-close="true"
     :close-on-click-modal="false"
     :close-on-press-escape="true"
@@ -298,18 +298,17 @@
             </template>
 
             <template #htmlType="{ row }">
-              <el-select v-if="row.isLogicDel == '0' && row.isQuery == '1'" v-model="row.htmlType" filterable>
+              <el-select
+                v-if="row.isLogicDel == '0' && row.isPk == '0' && (row.isInsert == '1' || row.isEdit == '1')"
+                v-model="row.htmlType"
+                filterable
+              >
                 <el-option v-for="item in htmlTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
 
             <template #dictType="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0' && row.isQuery == '1' && row.htmlType == 'select'"
-                v-model="row.dictType"
-                clearable
-                filterable
-              >
+              <el-select v-if="row.isLogicDel == '0'" v-model="row.dictType" clearable filterable>
                 <el-option-group v-for="group in dictTypeOptions" :key="group.label" :label="group.label">
                   <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-option-group>
@@ -317,11 +316,7 @@
             </template>
 
             <template #dictShowWay="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0' && row.isQuery == '1' && row.htmlType == 'select' && row.dictType"
-                v-model="row.dictShowWay"
-                filterable
-              >
+              <el-select v-if="row.isLogicDel == '0' && row.dictType" v-model="row.dictShowWay" filterable>
                 <el-option v-for="item in dictShowWayOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </template>
@@ -571,19 +566,19 @@ const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
   { prop: 'columnComment', label: '字段描述' },
   { prop: 'columnType', label: '物理类型' },
   { prop: 'javaType', label: 'Java类型' },
-  { prop: 'isPk', label: '主键', width: 55 },
-  { prop: 'isIncrement', label: '自增', width: 55 },
-  { prop: 'isUniqueValid', label: '唯一', width: 75 },
-  { prop: 'isRequired', label: '必填', width: 55 },
-  { prop: 'isLogicDel', label: '逻辑删除', width: 75 },
-  { prop: 'isInsert', label: '插入', width: 75 },
-  { prop: 'isEdit', label: '编辑', width: 75 },
-  { prop: 'isList', label: '列表', width: 75 },
-  { prop: 'isQuery', label: '查询', width: 75 },
-  { prop: 'isImport', label: '导入', width: 75 },
-  { prop: 'isExport', label: '导出', width: 75 },
-  { prop: 'queryType', label: '查询方式' },
+  { prop: 'isPk', label: '主键', width: 45 },
+  { prop: 'isIncrement', label: '自增', width: 50 },
+  { prop: 'isUniqueValid', label: '唯一', width: 65 },
+  { prop: 'isRequired', label: '必填', width: 45 },
+  { prop: 'isLogicDel', label: '逻辑删除', width: 90 },
+  { prop: 'isInsert', label: '插入', width: 65 },
+  { prop: 'isEdit', label: '编辑', width: 65 },
+  { prop: 'isList', label: '列表', width: 65 },
   { prop: 'htmlType', label: '显示类型' },
+  { prop: 'isQuery', label: '查询', width: 65 },
+  { prop: 'isImport', label: '导入', width: 65 },
+  { prop: 'isExport', label: '导出', width: 65 },
+  { prop: 'queryType', label: '查询方式', width: 105 },
   { prop: 'dictType', label: '字典类型' },
   { prop: 'dictShowWay', label: '字典显示方式' }
 ]);
@@ -673,19 +668,28 @@ const getInfo = () => {
 };
 
 // 更新列属性的通用函数
-const updateColumns = (newValue: string, propToUpdate: string) => {
+const updateColumnVisibility = (propToUpdate: string, isVisible: boolean) => {
   const existingColumn = columns.value.find(col => col.prop === propToUpdate);
-
   if (existingColumn) {
-    existingColumn.isShow = newValue === '1';
+    existingColumn.isShow = isVisible;
   }
 };
 
 // 监听多个属性的变化，并执行相同的更新逻辑
 watchEffect(() => {
   try {
-    updateColumns(generatorInfo.value.hasImport, 'isImport');
-    updateColumns(generatorInfo.value.hasExport, 'isExport');
+    const genType = generatorInfo.value.generateType;
+    updateColumnVisibility('isInsert', genType === 'all' || genType === 'server');
+    updateColumnVisibility('isEdit', genType === 'all' || genType === 'server');
+    updateColumnVisibility('isList', genType === 'all' || genType === 'server');
+    updateColumnVisibility('isQuery', genType === 'all' || genType === 'server');
+    updateColumnVisibility('isImport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasImport === '1');
+    updateColumnVisibility('isExport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasExport === '1');
+    updateColumnVisibility('queryType', genType === 'all' || genType === 'server');
+    updateColumnVisibility('htmlType', genType === 'all');
+    updateColumnVisibility('dictType', genType === 'all');
+    updateColumnVisibility('dictShowWay', genType === 'all');
+
     // 如果有其他类似的属性，也可以在这里进行处理
   } catch (error) {
     console.error('Error in watchEffect:', error);
@@ -804,5 +808,15 @@ defineExpose({
 
 :deep(.el-select-group .el-select-dropdown__item) {
   padding-left: 32px;
+}
+:deep(.el-table .el-table__header th) {
+  font-size: 12px;
+}
+:deep(.el-table--default .cell) {
+  padding: 0 10px;
+}
+
+:deep(.table-main .el-table .el-table__row) {
+  font-size: 12px;
 }
 </style>

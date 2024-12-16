@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="代码预览"
+    :title="`代码预览：${parameter.tableName}`"
     :destroy-on-close="true"
     :close-on-click-modal="false"
     :close-on-press-escape="true"
