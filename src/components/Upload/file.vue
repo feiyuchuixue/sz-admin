@@ -35,10 +35,10 @@
               <el-icon class="el-icon el-icon--document">
                 <Document />
               </el-icon>
-              <span class="el-upload-list__item-file-name" :title="file.name" :style="{ width: `calc(${width} - 80px)` }">{{
-                file.name
-              }}</span></a
-            >
+              <span class="el-upload-list__item-file-name" :title="file.name" :style="{ width: `calc(${width} - 80px)` }">
+                {{ file.name }}
+              </span>
+            </a>
           </div>
           <el-progress
             v-if="file.status === 'uploading'"
@@ -318,7 +318,12 @@ class CustomUploadProgressEvent extends ProgressEvent {
   font-size: 14px;
 }
 
+:deep(.el-upload-list__item) {
+  transition: none;
+}
+
 .el-upload-list__item .el-icon--remove {
+  font-size: medium;
   color: var(--el-text-color-regular);
   cursor: pointer;
   opacity: 0.75;
@@ -329,7 +334,13 @@ class CustomUploadProgressEvent extends ProgressEvent {
   transition: opacity var(--el-transition-duration);
 }
 
+.el-upload-list__item .el-icon--remove:hover {
+  font-weight: bold;
+  color:crimson;
+}
+
 .el-upload-list__item .el-icon--download {
+  font-size: medium;
   color: var(--el-text-color-regular);
   cursor: pointer;
   opacity: 0.75;
@@ -340,8 +351,20 @@ class CustomUploadProgressEvent extends ProgressEvent {
   transform: translateY(-50%);
   transition: opacity var(--el-transition-duration);
 }
+
+.el-upload-list__item .el-icon--download:hover {
+  font-weight: bold;
+  color:deepskyblue;
+}
+
 .el-upload-list .el-upload-list--text {
   line-height: 24px;
   font-size: 28px;
+}
+
+:deep(.el-progress__text) {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 </style>
