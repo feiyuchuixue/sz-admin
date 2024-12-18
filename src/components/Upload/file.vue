@@ -336,7 +336,7 @@ class CustomUploadProgressEvent extends ProgressEvent {
 
 .el-upload-list__item .el-icon--remove:hover {
   font-weight: bold;
-  color:crimson;
+  color: crimson;
 }
 
 .el-upload-list__item .el-icon--download {
@@ -354,7 +354,7 @@ class CustomUploadProgressEvent extends ProgressEvent {
 
 .el-upload-list__item .el-icon--download:hover {
   font-weight: bold;
-  color:deepskyblue;
+  color: deepskyblue;
 }
 
 .el-upload-list .el-upload-list--text {
