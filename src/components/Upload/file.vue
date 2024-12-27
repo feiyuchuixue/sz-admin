@@ -162,20 +162,6 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
             total: event.total || 0
           });
           options.onProgress(new CustomUploadProgressEvent(progressEvent));
-          //console.log('event',event)
-          //if (event.total) {}
-          /* if(event.progress){
-            console.log(   Math.ceil(event.progress * 100));
-            progress.value = Math.ceil(event.progress * 100)
-            if(progress.value === 100){
-              isUploaded.value = true;
-
-             /!* setTimeout(() => {
-                progress.value = 0;
-                isUploaded.value = false;
-              }, 1000);*!/
-            }
-          }*/
         }
       }
     );
@@ -209,31 +195,6 @@ const handlerDownloadFile = (file: UploadFile) => {
   link.click();
   document.body.removeChild(link);
 };
-
-/*const handleProgress = (event: UploadProgressEvent , file: UploadFile, uploadFiles: UploadFiles) => {
-  // progress.value = Math.floor((event.loaded / event.total) * 100);
-  console.log('file',file)
-/!*  for (let i = 0; i <uploadFiles.length ; i++) {
-    if (file.uid === uploadFiles[i].uid) {
-      uploadFiles[i].percentage = Math.floor((event.loaded / event.total) * 100);
-      file.percentage = Math.floor((event.loaded / event.total) * 100);
-      // console.log('uploadFiles' + i, uploadFiles[i])
-    }
-  }*!/
-  //console.log('uploadFiles',uploadFiles)
-
-  /!*  if(event.progress){
-    console.log(   Math.ceil(event.progress * 100));
-    progress.value = Math.ceil(event.progress * 100)
-    if(progress.value === 100){
-      isUploaded.value = true;
-
-      /!* setTimeout(() => {
-         progress.value = 0;
-         isUploaded.value = false;
-       }, 1000);*!/
-    }*!/
-};*/
 
 class CustomUploadProgressEvent extends ProgressEvent {
   percent: number;

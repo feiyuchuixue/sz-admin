@@ -44,6 +44,7 @@ import { ref } from 'vue';
 import { useDownload } from '@/hooks/useDownload';
 import { Download } from '@element-plus/icons-vue';
 import { type UploadRequestOptions, type UploadRawFile, ElNotification } from 'element-plus';
+import type { AxiosProgressEvent, AxiosRequestConfig } from 'axios';
 
 defineOptions({
   name: 'ImportExcel'
@@ -56,7 +57,7 @@ export interface ExcelParameterProps {
   fileSize?: number; // 上传文件的大小
   fileType?: File.ExcelMimeType[]; // 上传文件的类型
   tempApi?: (params: any) => Promise<any>; // 下载模板的Api
-  importApi?: (params: any) => Promise<any>; // 批量导入的Api
+  importApi?: (params: any, config?: AxiosRequestConfig<{}> | undefined) => Promise<any>; // 批量导入的Api
   getTableList?: () => void; // 获取表格数据的Api
 }
 
@@ -91,11 +92,20 @@ const downloadTemp = () => {
 };
 
 // 文件上传
-const uploadExcel = async (param: UploadRequestOptions) => {
+const uploadExcel = async (options: UploadRequestOptions) => {
   let excelFormData = new FormData();
-  excelFormData.append('file', param.file);
+  excelFormData.append('file', options.file);
   excelFormData.append('isCover', isCover.value as unknown as Blob);
-  await parameter.value.importApi!(excelFormData);
+  await parameter.value.importApi!(excelFormData, {
+    onUploadProgress(event: AxiosProgressEvent) {
+      const progressEvent = new ProgressEvent('upload', {
+        lengthComputable: event.total !== undefined,
+        loaded: event.loaded || 0,
+        total: event.total || 0
+      });
+      options.onProgress(new CustomUploadProgressEvent(progressEvent));
+    }
+  });
   parameter.value.getTableList && parameter.value.getTableList();
   dialogVisible.value = false;
 };
@@ -151,6 +161,13 @@ const excelUploadSuccess = () => {
   });
 };
 
+class CustomUploadProgressEvent extends ProgressEvent {
+  percent: number;
+  constructor(event: ProgressEvent) {
+    super(event.type, event);
+    this.percent = event.lengthComputable ? Math.round((event.loaded / event.total) * 100) : 0;
+  }
+}
 defineExpose({
   acceptParams
 });
