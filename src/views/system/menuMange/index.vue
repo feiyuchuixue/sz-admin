@@ -81,6 +81,7 @@ import HighCode from '@/components/HighCode/index.vue';
 import { computed, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import SvgIcon from '@/components/SvgIcon/index.vue';
+import { IS_PREVIEW } from '@/config';
 
 defineOptions({
   name: 'MenuManage'
@@ -169,7 +170,7 @@ const presort = (row: any = {}, pid: number) => {
 };
 // 删除信息
 const deleteInfo = async (params: Menu.MenuOptions) => {
-  if (import.meta.env.VITE_PREVIEW) {
+  if (IS_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除菜单，请谅解！' });
   }
   await useHandleData(deleteMenu, { ids: [params.id] }, `删除【${params?.meta?.title}】菜单及以下菜单`);
@@ -194,7 +195,7 @@ const changeExpand = () => {
 const changeDataScope = (params: Menu.MenuOptions) => {
   switchLoading.value = true;
   const menuId = params.id;
-  if (import.meta.env.VITE_PREVIEW && menuId == '85b54322630f43a39296488a5e76ba16') {
+  if (IS_PREVIEW && menuId == '85b54322630f43a39296488a5e76ba16') {
     switchLoading.value = false;
     ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' });
     return false;

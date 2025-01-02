@@ -100,6 +100,7 @@ import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import UploadImg from '@/components/Upload/Img.vue';
 import type { IUploadResult } from '@/api/interface/system/upload';
+import { IS_PREVIEW } from '@/config';
 defineOptions({
   name: 'UserEdit'
 });
@@ -127,7 +128,7 @@ const ruleFormRef = ref();
 const handleSubmit = () => {
   ruleFormRef.value!.validate(async (valid: boolean) => {
     if (!valid) return;
-    if (import.meta.env.VITE_PREVIEW) {
+    if (IS_PREVIEW) {
       return ElMessage.warning({ message: '预览环境，禁止编辑用户信息，请谅解！' });
     }
     try {

@@ -17,3 +17,5 @@ export const AMAP_MAP_KEY: string = '';
 
 // 百度地图 key
 export const BAIDU_MAP_KEY: string = '';
+// 是否是预览环境
+export const IS_PREVIEW: boolean = import.meta.env.VITE_PREVIEW === 'true';

@@ -29,14 +29,14 @@
     <el-button :icon="CircleClose" round size="large" @click="resetForm"> 重置 </el-button>
     <el-button :icon="UserFilled" round size="large" type="primary" :loading="loading" @click="login"> 登录 </el-button>
   </div>
-  <div v-if="isPreview()" style="margin-top: 20px; color: var(--el-color-warning)">
+  <div v-if="IS_PREVIEW" style="margin-top: 20px; color: var(--el-color-warning)">
     <span>如无法登陆请联系作者：feiyuchuixue@163.com</span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { HOME_URL } from '@/config';
+import { HOME_URL, IS_PREVIEW } from '@/config';
 import { getTimeState } from '@/utils';
 import { loginApi } from '@/api/modules/system/login';
 import { useUserStore } from '@/stores/modules/user';
@@ -124,10 +124,6 @@ onMounted(() => {
     }
   };
 });
-
-const isPreview = () => {
-  return import.meta.env.VITE_PREVIEW;
-};
 </script>
 
 <style scoped lang="scss">

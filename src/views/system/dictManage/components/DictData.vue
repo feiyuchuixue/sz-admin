@@ -72,6 +72,7 @@ import type { IDict } from '@/api/interface/system/dict';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import { IS_PREVIEW } from '@/config';
 
 defineOptions({
   name: 'DictData'
@@ -131,7 +132,7 @@ const openAddEdit = (title: string, row = {}, isAdd = true) => {
 
 // 删除信息
 const deleteInfo = async (params: IDict.Dict) => {
-  if (import.meta.env.VITE_PREVIEW) {
+  if (IS_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除所选字典，请谅解！' });
   }
   await useHandleData(deleteDictData, { ids: [params.id] }, `删除【${params.codeName}】字典`);
@@ -140,7 +141,7 @@ const deleteInfo = async (params: IDict.Dict) => {
 
 // 批量删除信息
 const batchDelete = async (ids: (string | number)[]) => {
-  if (import.meta.env.VITE_PREVIEW) {
+  if (IS_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除所选字典，请谅解！' });
   }
   await useHandleData(deleteDictData, { ids }, '删除所选字典信息');

@@ -28,6 +28,7 @@ import { getDataUserRole } from '@/api/modules/system/user';
 import type { IUser } from '@/api/interface/system/user';
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import { IS_PREVIEW } from '@/config';
 
 defineOptions({
   name: 'DataUserPermissions'
@@ -79,7 +80,7 @@ const getInfo = (userId: number) => {
 
 const handleSubmit = async () => {
   try {
-    if (import.meta.env.VITE_PREVIEW && paramsProps.value.row.id < 7) {
+    if (IS_PREVIEW && paramsProps.value.row.id < 7) {
       return ElMessage.warning({ message: '预览环境，禁止修改演示账户，请谅解！' });
     }
     await paramsProps.value.api!({

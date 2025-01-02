@@ -58,6 +58,7 @@ import { tagsTypeOptions } from '@/config/consts';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { QuestionFilled } from '@element-plus/icons-vue';
+import { IS_PREVIEW } from '@/config';
 defineOptions({
   name: 'DictDataForm'
 });
@@ -85,7 +86,7 @@ const acceptParams = (params: View.DefaultParams) => {
 const ruleFormRef = ref();
 const handleSubmit = () => {
   ruleFormRef.value!.validate(async (valid: boolean) => {
-    if (import.meta.env.VITE_PREVIEW) {
+    if (IS_PREVIEW) {
       return ElMessage.warning({ message: '预览环境，禁止修改字典请谅解！' });
     }
     if (!valid) return;

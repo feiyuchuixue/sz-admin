@@ -51,6 +51,7 @@ import { type ElForm, ElMessage } from 'element-plus';
 import type { ISysDept } from '@/api/interface/system/dept';
 import { getMenuTree } from '@/api/modules/system/dept';
 import { bindUserDeptApi } from '@/api/modules/system/user';
+import { IS_PREVIEW } from '@/config';
 
 defineOptions({
   name: 'UserDeptForm'
@@ -104,7 +105,7 @@ const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const handleSubmit = () => {
   paramsProps.value.selectIds;
   const containsAny = [1, 2, 3, 4, 5, 6].some(id => paramsProps.value.selectIds.includes(id));
-  if (import.meta.env.VITE_PREVIEW && containsAny) {
+  if (IS_PREVIEW && containsAny) {
     return ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' });
   }
   ruleFormRef.value!.validate(async valid => {

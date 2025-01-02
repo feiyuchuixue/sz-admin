@@ -32,6 +32,7 @@ import { reactive, ref } from 'vue';
 import { validatePasswordFormat } from '@/config/validator';
 import { changePassword } from '@/api/modules/system/user';
 import { ElMessage } from 'element-plus';
+import { IS_PREVIEW } from '@/config';
 
 const validateOldNewPassword = (rule: any, value: any, callback: (error?: string | Error) => void) => {
   if (value === formData.value.oldPwd) {
@@ -72,7 +73,7 @@ const ruleFormRef = ref();
 const handleSubmit = () => {
   ruleFormRef.value?.validate(async (valid: boolean) => {
     if (!valid) return;
-    if (import.meta.env.VITE_PREVIEW) {
+    if (IS_PREVIEW) {
       return ElMessage.warning({ message: '预览环境，禁止修改密码，请谅解！' });
     }
     try {

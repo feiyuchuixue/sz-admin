@@ -167,6 +167,7 @@ import SvgIcon from '@/components/SvgIcon/index.vue';
 import UserDeptForm from '@/views/system/accountManage/components/UserDeptForm.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import UserDataPermissions from '@/views/system/accountManage/components/UserDataPermissions.vue';
+import { IS_PREVIEW } from '@/config';
 defineOptions({
   name: 'AccountManage'
 });
@@ -257,7 +258,7 @@ const deptTreeRef = ref<InstanceType<typeof DeptTree>>();
 
 // 删除信息
 const deleteInfo = async (params: IUser.Info) => {
-  if (import.meta.env.VITE_PREVIEW) {
+  if (IS_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除，请谅解！' });
   }
   await useHandleData(deleteUser, { ids: [params.id] }, `删除【${params.username}】用户`);
