@@ -6,6 +6,7 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
+import viteCompression from 'vite-plugin-compression';
 
 // 由于我们使用的是 ESM，不再需要 const path = require('node:path');
 // 直接使用 import { resolve } from 'path'; 即可
@@ -25,7 +26,14 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       createSvgIconsPlugin({
         iconDirs: [resolve(process.cwd(), 'src/assets/icons')],
         symbolId: 'icon-[dir]-[name]',
-      })
+      }),
+      // 配置 gzip 压缩插件
+      viteCompression({
+        algorithm: 'gzip', // 使用 gzip 压缩
+        ext: '.gz', // 压缩文件扩展名
+        threshold: 10240, // 只有大于 10 KB 的文件才会被压缩
+        deleteOriginFile: false, // 不删除源文件
+      }),
     ],
     resolve: {
       alias: {
