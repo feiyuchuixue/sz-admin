@@ -5,7 +5,7 @@ on:
     branches: [ "test" ]
   pull_request:
     branches: [ "test" ]
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -52,6 +52,7 @@ jobs:
       - name: Check if default.conf exists on remote
         id: check-file
         run: |
+          mkdir -p ${{ env.NGINX_CONF_DIR }}
           file_exists=$(sshpass -p ${{ secrets.REMOTE_PASSWORD_TEST }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER_TEST }}@${{ secrets.REMOTE_HOST_TEST }} "if [ -f ${{ env.NGINX_CONF_DIR }}/default.conf ]; then echo true; else echo false; fi")
           echo "file_exists=$file_exists" >> $GITHUB_ENV
 
