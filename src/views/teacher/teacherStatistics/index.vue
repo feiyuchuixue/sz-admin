@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { h, ref } from 'vue';
 import { CirclePlus, Delete, EditPen, Upload, Download } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import {
@@ -60,7 +60,8 @@ import {
   getTeacherStatisticsListApi,
   getTeacherStatisticsDetailApi,
   importTeacherStatisticsExcelApi,
-  exportTeacherStatisticsExcelApi
+  exportTeacherStatisticsExcelApi,
+  remoteTeacherStaticsSearchApi
 } from '@/api/modules/teacher/teacherStatistics';
 import { useHandleData } from '@/hooks/useHandleData';
 import TeacherStatisticsForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsForm.vue';
@@ -71,6 +72,8 @@ import ImportExcel from '@/components/ImportExcel/index.vue';
 import { downloadTemplate } from '@/api/modules/system/common';
 import { ElMessageBox } from 'element-plus';
 import { useDownload } from '@/hooks/useDownload';
+import RemoteSearchSelect from '@/components/RemoteSearchSelect/index.vue';
+
 defineOptions({
   name: 'TeacherStatisticsView'
 });
@@ -127,7 +130,25 @@ const searchColumns: SearchProps[] = [
       valueFormat: 'YYYY-MM-DD HH:mm:ss'
     }
   },
-  { prop: 'teacherId', label: '教师id', el: 'input' },
+  {
+    prop: 'remoteTeacherId',
+    label: '演示：远程搜索',
+    el: 'select',
+    render: (params: any) => {
+      return h(RemoteSearchSelect, {
+        modelValue: params.modelValue,
+        'onUpdate:modelValue': params['onUpdate:modelValue'],
+        placeholder: '教师id，输入数字触发搜索',
+        fetchOptions: remoteTeacherStaticsSearchApi,
+        api: (query: any) => ({ keyword: query }),
+        fieldMappings: {
+          key: 'id',
+          label: 'teacherId',
+          value: 'id'
+        }
+      });
+    }
+  },
   {
     prop: 'teacherCommonType',
     label: '讲师区分类型',

@@ -66,3 +66,12 @@ export const importTeacherStatisticsExcelApi = (params: UploadRawFile, config?: 
 export const exportTeacherStatisticsExcelApi = (params: ITeacherStatistics.Query) => {
   return http.download(ADMIN_MODULE + `/teacher-statistics/export`, params);
 };
+
+/**
+ * 远程搜索
+ * @param params
+ */
+export const remoteTeacherStaticsSearchApi = (params: { keyword: string }) => {
+  const { keyword } = params;
+  return http.get<string[]>(ADMIN_MODULE + `/teacher-statistics/remote/${keyword}`);
+};
