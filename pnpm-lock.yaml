@@ -20,6 +20,9 @@ dependencies:
   axios:
     specifier: ^1.7.7
     version: 1.7.7
+  crypto-js:
+    specifier: ^4.2.0
+    version: 4.2.0
   element-plus:
     specifier: ^2.8.5
     version: 2.8.5(vue@3.5.12)
@@ -61,6 +64,9 @@ devDependencies:
   '@tsconfig/node18':
     specifier: ^18.2.4
     version: 18.2.4
+  '@types/crypto-js':
+    specifier: ^4.2.2
+    version: 4.2.2
   '@types/node':
     specifier: ^18.19.55
     version: 18.19.56
@@ -1221,6 +1227,10 @@ packages:
     resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
     dev: true
 
+  /@types/crypto-js@4.2.2:
+    resolution: {integrity: sha512-sDOLlVbHhXpAUAL0YHDUUwDZf3iN4Bwi4W6a0W0b+QcAezUbRtH4FVb+9J4h+XFPW7l/gQ9F8qC7P+Ec4k8QVQ==}
+    dev: true
+
   /@types/estree@1.0.6:
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
@@ -2110,6 +2120,10 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
+
+  /crypto-js@4.2.0:
+    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    dev: false
 
   /css-select@4.3.0:
     resolution: {integrity: sha512-wPpOYtnsVontu2mODhA19JrqWxNsfdatRKd64kmpRbQgh1KtItko5sTnEpPdpSaJszTOhEMlF/RPz28qj4HqhQ==}

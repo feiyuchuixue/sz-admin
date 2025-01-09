@@ -13,18 +13,6 @@ export const loginApi = (params: ILogin.LoginParams) => {
   // return http.get(`/login?${qs.stringify(params, { arrayFormat: "repeat" })}`); // get 请求可以携带数组等复杂参数
 };
 
-// 获取验证码是否启用
-export const getAuthVerifyApi = () => {
-  return http.get<string[]>(ADMIN_MODULE + `/auth/verify`, {}, { loading: false });
-};
-// 获取滑块拼图验证码
-export const getImageCodeApi = () => {
-  return http.get<string[]>(ADMIN_MODULE + `/common/getImageCode`, {}, { loading: false });
-};
-// 校验滑块拼图验证码
-export const verifyImageCodeApi = (params: ILogin.verifyImageParams) => {
-  return http.get<string[]>(ADMIN_MODULE + `/common/verifyImageCode`, params, { loading: false });
-};
 // 获取菜单列表
 export const getAuthMenuListApi = () => {
   return http.get<Menu.MenuOptions[]>(ADMIN_MODULE + `/sys-menu/menu`, {}, { loading: false });

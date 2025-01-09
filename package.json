@@ -17,6 +17,7 @@
     "@rushstack/eslint-patch": "^1.10.4",
     "@vueuse/core": "^10.11.1",
     "axios": "^1.7.7",
+    "crypto-js": "^4.2.0",
     "element-plus": "^2.8.5",
     "highlight.js": "^11.10.0",
     "mitt": "^3.0.1",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.4",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^18.19.55",
     "@types/nprogress": "^0.2.3",
     "@types/sortablejs": "^1.15.8",

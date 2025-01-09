@@ -5,8 +5,6 @@ export namespace ILogin {
     password: string;
     clientId: string;
     grantType: string;
-    movePosX: number;
-    longTime: number;
   }
 
   export interface LoginInfo {
@@ -35,10 +33,5 @@ export namespace ILogin {
     lastLoginTime?: string;
     createTime?: string;
     updateTime?: string;
-  }
-
-  export interface verifyImageParams {
-    movePosX: number;
-    longTime: number;
   }
 }

@@ -1,4 +1,5 @@
 import { isArray } from '@/utils/is';
+import CryptoJS from 'crypto-js';
 
 /**
  * @description 获取localStorage
@@ -342,4 +343,16 @@ export function findItemNested(enumData: any, callValue: any, value: string, chi
  */
 export function isLocalEnv() {
   return import.meta.env.MODE === 'development' || import.meta.env.MODE === 'local' || import.meta.env.MODE === 'dev';
+}
+
+/**
+ * AES 加密
+ * @param message
+ * @param secretKey
+ */
+export function aesEncrypt(message: string, secretKey: string) {
+  const key = CryptoJS.enc.Utf8.parse(secretKey);
+  const msg = CryptoJS.enc.Utf8.parse(message);
+  const encrypted = CryptoJS.AES.encrypt(msg, key, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 });
+  return encrypted.toString();
 }
