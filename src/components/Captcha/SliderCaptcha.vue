@@ -66,6 +66,10 @@ const overlayVisible = ref(false); // 验证结果提示可见性
 const isVerifying = ref(false); // 是否正在验证标志
 let clearEventListeners: (() => void) | null = null; // 清理事件监听器的函数
 const emit = defineEmits(['success']);
+
+// 检测是否为移动端
+const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 // 接收父组件的参数并初始化滑动验证
 const acceptParams = () => {
   fetchSlideData();
@@ -129,37 +133,60 @@ const initializeSlider = () => {
   let initX = 0;
   let startTime = 0;
 
-  // 鼠标移动事件处理
-  const handleMousemove = (e: MouseEvent) => {
-    offsetX = Math.max(0, Math.min(e.clientX - initX, limit));
+  // 移动滑块
+  const moveSlider = (clientX: number) => {
+    offsetX = Math.max(0, Math.min(clientX - initX, limit));
     slider.value!.style.left = `${offsetX}px`;
     imgK.value!.style.left = `${offsetX}px`;
     trackWidth.value = offsetX;
   };
 
-  // 鼠标松开事件处理
-  const handleMouseup = () => {
-    document.removeEventListener('mousemove', handleMousemove);
-    document.removeEventListener('mouseup', handleMouseup);
-    verifyImageCode({ requestId: slideData.requestId, startTime, moveEncrypted: aesEncrypt(offsetX + '', slideData.secretKey) });
-  };
-
-  // 滑块鼠标按下事件处理
-  const handleMousedown = (e: MouseEvent) => {
-    initX = e.clientX;
+  // 滑块鼠标和触摸按下事件处理
+  const handleStart = (e: MouseEvent | TouchEvent) => {
+    initX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
     startTime = Date.now();
-    document.addEventListener('mousemove', handleMousemove);
-    document.addEventListener('mouseup', handleMouseup);
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
+      moveSlider(clientX);
+    };
+
+    const handleEnd = () => {
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleEnd);
+      verifyImageCode({
+        requestId: slideData.requestId,
+        startTime,
+        moveEncrypted: aesEncrypt(offsetX + '', slideData.secretKey)
+      });
+    };
+
+    if (isMobile) {
+      document.addEventListener('touchmove', handleMove);
+      document.addEventListener('touchend', handleEnd);
+    } else {
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+    }
   };
 
-  // 添加滑块按下事件监听
-  slider.value.addEventListener('mousedown', handleMousedown);
+  // 根据设备类型添加滑块按下事件监听
+  if (isMobile) {
+    slider.value.addEventListener('touchstart', handleStart);
+  } else {
+    slider.value.addEventListener('mousedown', handleStart);
+  }
 
   // 清理事件监听器
   clearEventListeners = () => {
-    document.removeEventListener('mousemove', handleMousemove);
-    document.removeEventListener('mouseup', handleMouseup);
-    slider.value?.removeEventListener('mousedown', handleMousedown);
+    document.removeEventListener('mousemove', handleStart);
+    document.removeEventListener('mouseup', handleStart);
+    document.removeEventListener('touchmove', handleStart);
+    document.removeEventListener('touchend', handleStart);
+    slider.value?.removeEventListener('mousedown', handleStart);
+    slider.value?.removeEventListener('touchstart', handleStart);
   };
 };
 
