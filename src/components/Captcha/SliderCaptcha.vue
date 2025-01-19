@@ -156,10 +156,12 @@ const initializeSlider = () => {
       document.removeEventListener('mouseup', handleEnd);
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
+      const {iv, encryptedData} = aesEncrypt(offsetX + '', slideData.secretKey);
       verifyImageCode({
         requestId: slideData.requestId,
         startTime,
-        moveEncrypted: aesEncrypt(offsetX + '', slideData.secretKey)
+        moveEncrypted: encryptedData,
+        iv: iv
       });
     };
 
@@ -191,7 +193,7 @@ const initializeSlider = () => {
 };
 
 // 验证滑动结果
-const verifyImageCode = async (params: { requestId: string; startTime: number; moveEncrypted: string }) => {
+const verifyImageCode = async (params: { requestId: string; startTime: number; moveEncrypted: string, iv: string }) => {
   if (isVerifying.value) return; // 防止重复验证
   isVerifying.value = true;
 

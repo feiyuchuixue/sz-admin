@@ -350,9 +350,26 @@ export function isLocalEnv() {
  * @param message
  * @param secretKey
  */
-export function aesEncrypt(message: string, secretKey: string) {
+/*export function aesEncrypt(message: string, secretKey: string) {
   const key = CryptoJS.enc.Utf8.parse(secretKey);
   const msg = CryptoJS.enc.Utf8.parse(message);
   const encrypted = CryptoJS.AES.encrypt(msg, key, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 });
   return encrypted.toString();
+}*/
+export function aesEncrypt(message: string, secretKey: string) {
+  const key = CryptoJS.enc.Utf8.parse(secretKey);
+  const iv = CryptoJS.lib.WordArray.random(16);  // 生成随机 IV
+  const msg = CryptoJS.enc.Utf8.parse(message);
+
+  const encrypted = CryptoJS.AES.encrypt(msg, key, {
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+    iv: iv,
+  });
+
+  // 返回加密数据和 IV，IV 需要与加密数据一起传输
+  return {
+    encryptedData: encrypted.toString(),
+    iv: iv.toString(CryptoJS.enc.Base64)  // 使用 Base64 编码 IV 便于传输
+  };
 }
