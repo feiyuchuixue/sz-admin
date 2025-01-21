@@ -151,13 +151,13 @@ const initializeSlider = () => {
       moveSlider(clientX);
     };
 
-    const handleEnd = () => {
+    const handleEnd = async () => {
       document.removeEventListener('mousemove', handleMove);
       document.removeEventListener('mouseup', handleEnd);
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
-      const {iv, encryptedData} = aesEncrypt(offsetX + '', slideData.secretKey);
-      verifyImageCode({
+      const {iv, encryptedData} = await aesEncrypt(offsetX + '', slideData.secretKey);
+      await verifyImageCode({
         requestId: slideData.requestId,
         startTime,
         moveEncrypted: encryptedData,
