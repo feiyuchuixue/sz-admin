@@ -11,12 +11,18 @@
     <div class="sliderBox">
       <div class="sliderBox_content">
         <!-- 大图显示 -->
-        <img v-show="slideData.big" :src="'data:image/png;base64,' + slideData.big" class="bigImg" />
+        <img v-show="slideData.big" :src="'data:image/png;base64,' + slideData.big" class="bigImg" alt="验证码主图" />
         <span class="sliderBox_refresh" @click="refreshSlider">
           <el-icon class="el-input__icon"><refresh /></el-icon>
         </span>
         <!-- 小图显示 -->
-        <img v-show="slideData.small" :src="'data:image/png;base64,' + slideData.small" class="smallImg" ref="imgK" />
+        <img
+          v-show="slideData.small"
+          :src="'data:image/png;base64,' + slideData.small"
+          class="smallImg"
+          ref="imgK"
+          alt="验证码拼图"
+        />
         <!-- 验证结果提示 -->
         <div v-if="overlayVisible" class="overlay" :class="{ success: slideData.isSuccess, failure: !slideData.isSuccess }">
           <span>{{ overlayMessage }}</span>
@@ -156,7 +162,7 @@ const initializeSlider = () => {
       document.removeEventListener('mouseup', handleEnd);
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
-      const {iv, encryptedData} = await aesEncrypt(offsetX + '', slideData.secretKey);
+      const { iv, encryptedData } = await aesEncrypt(offsetX + '', slideData.secretKey);
       await verifyImageCode({
         requestId: slideData.requestId,
         startTime,
@@ -193,7 +199,7 @@ const initializeSlider = () => {
 };
 
 // 验证滑动结果
-const verifyImageCode = async (params: { requestId: string; startTime: number; moveEncrypted: string, iv: string }) => {
+const verifyImageCode = async (params: { requestId: string; startTime: number; moveEncrypted: string; iv: string }) => {
   if (isVerifying.value) return; // 防止重复验证
   isVerifying.value = true;
 

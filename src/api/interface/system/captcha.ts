@@ -11,7 +11,7 @@ export namespace ICaptcha {
     posY: number;
     secretKey: string;
   }
-  export interface verifyImageParams {
+  export interface VerifyImageParams {
     requestId: string;
     moveEncrypted: string;
   }

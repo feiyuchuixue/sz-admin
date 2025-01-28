@@ -82,7 +82,7 @@ const elementIcons = Object.keys(Icons).map(key => {
 const svgIcons: string[] = [];
 const svgIconsFiles = import.meta.glob('@/assets/icons/**/*.svg');
 for (const key in svgIconsFiles) {
-  const matchArray = key.match(/.*\/assets\/icons\/(.*)\.svg/);
+  const matchArray = key.match(/\/assets\/icons\/([^/]+)\.svg$/);
   if (matchArray && matchArray.length >= 2) {
     svgIcons.push(`svg-${matchArray[1]}`);
   }

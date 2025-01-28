@@ -104,7 +104,7 @@ const rules = reactive({
   username: [
     { required: true, message: '用户名是必填项', trigger: 'blur' },
     { min: 3, max: 32, message: '用户名长度应在3到32个字符之间', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
+    { pattern: /^\w+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
   ]
 });
 

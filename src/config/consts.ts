@@ -50,8 +50,7 @@ export const dictBusinessType: Options[] = [
 
 export const dictBusinessTypeLabel = (value: string): string => {
   const item = dictBusinessType.find(item => item.value === value);
-
-  return item?.label || '';
+  return item?.label ?? '';
 };
 
 /**
@@ -61,8 +60,7 @@ export const dictBusinessTypeLabel = (value: string): string => {
  */
 export const yesNoOptionsLabel = (value: string): string => {
   const item = yesNoOptions.find(item => item.value === value);
-
-  return item?.label || '';
+  return item?.label ?? '';
 };
 
 /**
@@ -104,6 +102,5 @@ export const tagsTypeOptions: Options[] = [
  */
 export const tagsTypeOptionsLabel = (value: string): string => {
   const item = tagsTypeOptions.find(item => item.value === value);
-
-  return item?.label || '';
+  return item?.label ?? '';
 };
