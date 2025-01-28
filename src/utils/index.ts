@@ -1,5 +1,4 @@
 import { isArray } from '@/utils/is';
-import CryptoJS from 'crypto-js';
 
 /**
  * @description 获取localStorage
@@ -346,13 +345,35 @@ export function isLocalEnv() {
 }
 
 /**
- * AES 加密
- * @param message
- * @param secretKey
+ * 使用 AES-GCM 模式加密消息
+ * @param {string} message - 待加密的消息
+ * @param {string} secretKey - 加密密钥（16 字节）
+ * @returns {Promise<{ iv: string, encryptedData: string }>} - 返回加密后的数据和 IV
  */
-export function aesEncrypt(message: string, secretKey: string) {
-  const key = CryptoJS.enc.Utf8.parse(secretKey);
-  const msg = CryptoJS.enc.Utf8.parse(message);
-  const encrypted = CryptoJS.AES.encrypt(msg, key, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 });
-  return encrypted.toString();
+export async function aesEncrypt(message: string, secretKey: string) {
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', encoder.encode(secretKey), { name: 'AES-GCM' }, false, ['encrypt']);
+
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // 生成随机 IV (12 字节)
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv
+      },
+      key,
+      encoder.encode(message)
+    );
+
+    // 将加密数据转换为 base64 字符串
+    const encryptedData = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+
+    return {
+      iv: btoa(String.fromCharCode(...iv)),
+      encryptedData: encryptedData
+    };
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    throw error;
+  }
 }

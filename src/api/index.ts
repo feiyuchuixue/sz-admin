@@ -136,7 +136,7 @@ class RequestHttp {
     return this.service.get(url, { params, ..._object, responseType: 'blob' });
   }
 
-  upload<T>(url: string, params = {}, _object: AxiosRequestConfig<{}> | undefined): Promise<IResultData<T>> {
+  upload<T>(url: string, params: any = {}, _object: AxiosRequestConfig<{}> | undefined): Promise<IResultData<T>> {
     return this.service.post(url, params, {
       ..._object,
       headers: {

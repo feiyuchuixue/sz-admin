@@ -112,7 +112,7 @@ const findIndex = () => {
       if (Number(prev) > props.collapsedRows * (gridCols.value as number) - suffixCols) {
         hiddenIndex.value = index;
         find = true;
-        throw 'find it';
+        throw new Error('find it');
       }
       return prev;
     }, 0);

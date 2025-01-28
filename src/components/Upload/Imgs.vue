@@ -19,11 +19,10 @@
       <div class="upload-empty">
         <slot name="empty">
           <el-icon><Plus /></el-icon>
-          <!-- <span>请上传图片</span> -->
         </slot>
       </div>
       <template #file="{ file }">
-        <img :src="file.url" class="upload-image" />
+        <img :src="file.url" class="upload-image" alt="预览图片" />
         <div class="upload-handle" @click.stop>
           <div class="handle-icon" @click="handlePictureCardPreview(file)">
             <el-icon><ZoomIn /></el-icon>

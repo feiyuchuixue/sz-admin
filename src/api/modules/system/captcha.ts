@@ -11,6 +11,6 @@ export const getImageCodeApi = () => {
   return http.post<ICaptcha.Info>(ADMIN_MODULE + `/captcha/get`, {}, { loading: false });
 };
 // 校验滑块拼图验证码
-export const verifyImageCodeApi = (params: ICaptcha.verifyImageParams) => {
+export const verifyImageCodeApi = (params: ICaptcha.VerifyImageParams) => {
   return http.post(ADMIN_MODULE + `/captcha/check`, params, { loading: false });
 };

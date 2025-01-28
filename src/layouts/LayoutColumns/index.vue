@@ -87,8 +87,11 @@ watch(
     const menuItem = menuList.value.filter(item => {
       return route.path === item.path || `/${route.path.split('/')[1]}` === item.path;
     });
-    if (menuItem[0] && menuItem[0].children?.length) return (subMenuList.value = menuItem[0].children);
-    subMenuList.value = [];
+    if (menuItem[0] && menuItem[0].children?.length) {
+      subMenuList.value = menuItem[0].children;
+    } else {
+      subMenuList.value = [];
+    }
   },
   {
     deep: true,
@@ -99,8 +102,11 @@ watch(
 // change SubMenu
 const changeSubMenu = (item: Menu.MenuOptions) => {
   splitActive.value = item.path;
-  if (item.children?.length) return (subMenuList.value = item.children);
-  subMenuList.value = [];
+  if (item.children?.length) {
+    subMenuList.value = item.children;
+  } else {
+    subMenuList.value = [];
+  }
   router.push(item.path);
 };
 </script>
