@@ -351,21 +351,29 @@ export function isLocalEnv() {
  * @returns {Promise<{ iv: string, encryptedData: string }>} - 返回加密后的数据和 IV
  */
 export async function aesEncrypt(message: string, secretKey: string) {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey('raw', encoder.encode(secretKey), { name: 'AES-GCM' }, false, ['encrypt']);
+  try {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', encoder.encode(secretKey), { name: 'AES-GCM' }, false, ['encrypt']);
 
-  const iv = crypto.getRandomValues(new Uint8Array(12)); // 生成随机 IV (12 字节)
-  const encrypted = await crypto.subtle.encrypt(
-    {
-      name: 'AES-GCM',
-      iv: iv
-    },
-    key,
-    encoder.encode(message)
-  );
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // 生成随机 IV (12 字节)
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv
+      },
+      key,
+      encoder.encode(message)
+    );
 
-  return {
-    iv: btoa(String.fromCharCode(...iv)), // 将 IV 转换为 Base64 编码的字符串
-    encryptedData: btoa(String.fromCharCode(...new Uint8Array(encrypted))) // 将加密数据转换为 Base64 编码的字符串
-  };
+    // 将加密数据转换为 base64 字符串
+    const encryptedData = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+
+    return {
+      iv: btoa(String.fromCharCode(...iv)),
+      encryptedData: encryptedData
+    };
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    throw error;
+  }
 }
