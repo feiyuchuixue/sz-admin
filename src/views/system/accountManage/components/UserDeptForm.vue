@@ -103,7 +103,6 @@ const emit = defineEmits(['submit']);
 // 提交数据（新增/编辑）
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const handleSubmit = () => {
-  paramsProps.value.selectIds;
   const containsAny = [1, 2, 3, 4, 5, 6].some(id => paramsProps.value.selectIds.includes(id));
   if (IS_PREVIEW && containsAny) {
     return ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' });
