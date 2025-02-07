@@ -56,12 +56,12 @@ export const useSocketStore = defineStore('socket', () => {
             type: 'warning',
             callback: () => {
               // 2.重定向到登陆页
-              router.replace(LOGIN_URL);
+              router.replace(LOGIN_URL).then(r => r);
             }
           });
           break;
         case UPGRADE_CHANNEL:
-          close();
+/*          close();
           // 1.清除 Token
           userStore.clear();
           authStore.clear();
@@ -73,7 +73,7 @@ export const useSocketStore = defineStore('socket', () => {
               // 2.重定向到登陆页
               router.replace(LOGIN_URL);
             }
-          });
+          });*/
           break;
 
         default:

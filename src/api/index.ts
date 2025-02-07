@@ -3,7 +3,7 @@ import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } fr
 
 import router from '@/router';
 import { LOGIN_URL } from '@/config';
-import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL, CODE_USER_FAIL } from '@/api/helper';
+import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL } from '@/api/helper';
 import type { IResultData } from '@/api/interface';
 import { useUserStore } from '@/stores/modules/user';
 import { useAuthStore } from '@/stores/modules/auth';
@@ -68,7 +68,7 @@ class RequestHttp {
 
         //tryHideFullScreenLoading()
         // 登陆失效
-        if (data.code === CODE_TOKEN_FAIL || data.code === CODE_USER_FAIL) {
+        if (data.code === CODE_TOKEN_FAIL) {
           userStore.clear();
           authStore.clear();
           // 关闭socket

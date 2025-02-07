@@ -9,12 +9,7 @@ export const CODE_SUCCESS: string = '0000';
  * 无效Token
  * @type {string}
  */
-export const CODE_TOKEN_FAIL: string = 'C2001';
-/**
- * 无效用户
- * @type {string}
- */
-export const CODE_USER_FAIL: string = 'C2002';
+export const CODE_TOKEN_FAIL: string = 'C105';
 
 /**
  * @description: 校验网络请求状态码
