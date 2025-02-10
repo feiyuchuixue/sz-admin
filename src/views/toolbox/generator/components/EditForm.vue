@@ -429,11 +429,14 @@
                   v-model="generatorInfo.parentMenuId"
                   :data="parentMenus"
                   check-strictly
+                  node-key="id"
                   placeholder="请选择上级"
                   :render-after-expand="false"
                   clearable
                   :default-expand-all="true"
                   :props="treeProps"
+                  @change="treeSelectChange"
+                  ref="parentTreeRef"
                 />
               </el-form-item>
             </el-col>
@@ -538,28 +541,6 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
 });
 const isShowExcel = ref<boolean>(true);
 
-// 表格配置项
-// const columns: ColumnProps<IGenerator.ColumnInfo>[] = [
-//   { type: 'sort', width: 100, label: '拖拽排序' },
-//   { prop: 'columnName', label: '字段列名' },
-//   { prop: 'columnComment', label: '字段描述' },
-//   { prop: 'columnType', label: '物理类型' },
-//   { prop: 'javaType', label: 'Java类型' },
-//   { prop: 'isPk', label: '主键', width: 60 },
-//   { prop: 'isIncrement', label: '自增', width: 60 },
-//   { prop: 'isUniqueValid', label: '唯一', width: 80 },
-//   { prop: 'isRequired', label: '必填', width: 60 },
-//   { prop: 'isLogicDel', label: '逻辑删除', width: 120 },
-//   { prop: 'isInsert', label: '插入', width: 80 },
-//   { prop: 'isEdit', label: '编辑', width: 80 },
-//   { prop: 'isList', label: '列表', width: 80 },
-//   { prop: 'isQuery', label: '查询', width: 80 },
-//   { prop: 'isImport', label: '导入', width: 80 },
-//   { prop: 'isExport', label: '导出', width: 80 },
-//   { prop: 'queryType', label: '查询方式' },
-//   { prop: 'htmlType', label: '显示类型' },
-//   { prop: 'dictType', label: '字典类型' }
-// ]
 const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
   { type: 'sort', width: 75, label: '拖拽排序' },
   { prop: 'columnName', label: '字段列名' },
@@ -773,6 +754,14 @@ const typeContent = ref<{
 
 const changeRadio = (val: string) => {
   isShowExcel.value = val === 'all' || val === 'server';
+};
+
+const parentTreeRef = ref();
+
+const treeSelectChange = () => {
+  if (parentTreeRef.value!.getCurrentNode().menuTypeCd === '1002001') {
+    generatorInfo.value.moduleName = parentTreeRef.value!.getCurrentNode().name;
+  }
 };
 
 defineExpose({
