@@ -67,7 +67,7 @@ export const editDictData = (params: IDict.Dict) => {
 };
 
 /**
- * 删除字d典
+ * 删除字典
  * @param params
  * @returns {*}
  */
