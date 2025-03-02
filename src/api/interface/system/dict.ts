@@ -5,7 +5,7 @@ export namespace IDict {
   export interface DictCustom {
     callbackShowStyle: string;
     codeName: string;
-    id: number;
+    id: string;
     isLock: string;
     isShow: string;
     sort: number;

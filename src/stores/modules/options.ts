@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getAllDict } from '@/api/modules/system/dict';
+import { getAllDict, getDictByCode } from '@/api/modules/system/dict';
 import piniaPersistConfig from '@/stores/helper/persist';
 import type { IDict } from '@/api/interface/system/dict';
 import { ref } from 'vue';
@@ -25,12 +25,20 @@ export const useOptionsStore = defineStore(
       isLoaded.value = false;
     }
 
+    async function getDictByCodes(typeCodes: string[]) {
+      const { data } = await getDictByCode({ typeCode: typeCodes });
+      typeCodes.forEach(code => {
+        dictOptions.value[code] = data[code];
+      });
+    }
+
     return {
       isLoaded,
       dictOptions,
       getAllDictList,
       getDictOptions,
-      setReloadOptions
+      setReloadOptions,
+      getDictByCodes
     };
   },
   {
