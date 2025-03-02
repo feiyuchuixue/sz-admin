@@ -73,10 +73,12 @@ import { downloadTemplate } from '@/api/modules/system/common';
 import { ElMessageBox } from 'element-plus';
 import { useDownload } from '@/hooks/useDownload';
 import RemoteSearchSelect from '@/components/RemoteSearchSelect/index.vue';
+import { useDict } from '@/hooks/useDict';
 
 defineOptions({
   name: 'TeacherStatisticsView'
 });
+useDict(['account_status', 'dynamic_user_options']); // 使用useDict Hook 主动加载字典 【演示案例】
 const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
