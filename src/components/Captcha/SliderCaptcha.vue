@@ -111,7 +111,7 @@ const refreshSlider = async () => {
 // 关闭滑动验证对话框
 const closeSlider = () => {
   dialogVisible.value = false;
-  clearEventListeners && clearEventListeners(); // 清理事件监听器
+  if (clearEventListeners) clearEventListeners(); // 清理事件监听器
   resetSlider();
 };
 
@@ -235,7 +235,7 @@ const handleVerificationFailure = () => {
 
 // 组件卸载前清理事件监听器
 onBeforeUnmount(() => {
-  clearEventListeners && clearEventListeners();
+  if (clearEventListeners) clearEventListeners();
 });
 
 // 公开的组件方法

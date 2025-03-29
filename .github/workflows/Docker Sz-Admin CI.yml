@@ -2,9 +2,9 @@ name: Docker Sz-Admin CI
 
 on:
   push:
-    branches: [ "preview" ]
+    branches: ['preview']
   pull_request:
-    branches: [ "preview" ]
+    branches: ['preview']
   workflow_dispatch:
 jobs:
   build:

@@ -64,7 +64,7 @@ import { Download, UploadFilled } from '@element-plus/icons-vue';
 import { ref, watch } from 'vue';
 import { uploadTmpFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
-import type { IUploadResult } from '@/api/interface/system/upload';
+import type { IUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
 
 defineOptions({

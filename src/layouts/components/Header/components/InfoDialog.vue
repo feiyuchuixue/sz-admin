@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { getUserinfo } from '@/api/modules/system/user';
-import type { IUser } from '@/api/interface/system/user';
+import type { UserInfo } from '@/api/types/system/user';
 
 const visible = ref(false);
 const openDialog = () => {
@@ -46,7 +46,7 @@ const openDialog = () => {
   loadInfo();
 };
 
-const info = ref<IUser.Info>();
+const info = ref<UserInfo>();
 const loadInfo = () => {
   getUserinfo().then(res => {
     info.value = res.data;

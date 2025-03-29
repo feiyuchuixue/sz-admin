@@ -144,9 +144,9 @@
 import { ref, reactive, nextTick } from 'vue';
 import { type CheckboxValueType, ElForm, ElMessage } from 'element-plus';
 import { useOptionsStore } from '@/stores/modules/options';
-import type { IRole } from '@/api/interface/system/role';
-import type { ISysDept } from '@/api/interface/system/dept';
-import type { IUser } from '@/api/interface/system/user';
+import type { RoleMenuTree } from '@/api/types/system/role';
+import type { SysDeptTree } from '@/api/types/system/dept';
+import type { UserOptions } from '@/api/types/system/user';
 
 defineOptions({
   name: 'SysDataRoleForm'
@@ -155,9 +155,9 @@ const optionsStore = useOptionsStore();
 // 自定义数据权限
 const isCustom = ref(false);
 const isLock = ref(false);
-const userOptions = ref<IUser.Options[]>([]);
+const userOptions = ref<UserOptions[]>([]);
 // ------ 菜单树形
-const menuLists = ref<IRole.MenuTree[]>([]);
+const menuLists = ref<RoleMenuTree[]>([]);
 const selectMenuIds = ref<string[]>([]);
 const menuTreeRef = ref();
 const menuTreeProps = {
@@ -169,7 +169,7 @@ const isMenuExpand = ref(true);
 const isMenuCheckStrictly = ref(true);
 
 // ------ 部门树形
-const deptLists = ref<ISysDept.Tree[]>([]);
+const deptLists = ref<SysDeptTree[]>([]);
 const selectDeptIds = ref<string[]>([]);
 const deptTreeRef = ref();
 const deptTreeProps = {

@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import piniaPersistConfig from '@/stores/helper/persist';
-import type { ILogin } from '@/api/interface/system/login';
+import type { UserInfo } from '@/api/types/system/login';
 
 export const useUserStore = defineStore(
   'user',
   () => {
     const token = ref('');
-    const userInfo = ref<ILogin.UserInfo>({
+    const userInfo = ref<UserInfo>({
       username: ''
     });
     function setToken(tokenStr: string) {
@@ -15,7 +15,7 @@ export const useUserStore = defineStore(
     }
 
     // Set setUserInfo
-    function setUserInfo(info: ILogin.UserInfo) {
+    function setUserInfo(info: UserInfo) {
       userInfo.value = info;
     }
 

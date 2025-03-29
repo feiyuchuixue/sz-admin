@@ -26,11 +26,11 @@
 
 <script setup lang="ts">
 import ProTable from '@/components/ProTable/index.vue';
-import type { IDict } from '@/api/interface/system/dict';
+import type { Dict } from '@/api/types/system/dict';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import { reactive, ref } from 'vue';
 import { getSysTempFileHistoryListApi } from '@/api/modules/system/sysTempFile';
-import type { ISysTempFile } from '@/api/interface/system/sysTempFile';
+import type { SysTempFileHistory, SysTempFileRow, SysTempFileHistoryQuery } from '@/api/types/system/sysTempFile';
 import { useOptionsStore } from '@/stores/modules/options';
 
 defineOptions({
@@ -38,10 +38,10 @@ defineOptions({
 });
 
 const visible = ref(false);
-const info = ref<ISysTempFile.History>();
+const info = ref<SysTempFileHistory>();
 
 // 接收父组件传过来的参数
-const show = (params: ISysTempFile.Row) => {
+const show = (params: SysTempFileRow) => {
   initParam.sysTempFileId = params.id as number;
   info.value = params;
   visible.value = true;
@@ -53,7 +53,7 @@ defineExpose({
 
 const optionsStore = useOptionsStore();
 // 表格配置项
-const columns: ColumnProps<IDict.Dict>[] = [
+const columns: ColumnProps<Dict>[] = [
   { prop: 'sysTempFileId', label: '模板标识', width: 120 },
   { prop: 'sysFileId', label: '文件标识', width: 120 },
   { prop: 'tempName', label: '模版名', tag: true },
@@ -80,7 +80,7 @@ const initParam = reactive({ sysTempFileId: 0 });
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: ISysTempFile.HistoryQuery) => getSysTempFileHistoryListApi(params);
+const getTableList = (params: SysTempFileHistoryQuery) => getSysTempFileHistoryListApi(params);
 
 const downloadFile = (url: string) => {
   const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件

@@ -1,15 +1,15 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IConfig } from '@/api/interface/system/config';
-import type { IPage } from '@/api/interface';
+import type { ConfigForm, ConfigInfo, ConfigQuery } from '@/api/types/system/config';
+import type { IPage } from '@/api/types';
 
 /**
  * 获取列表
  * @param params
  * @returns {*}
  */
-export const getConfigList = (params: IConfig.Query) => {
-  return http.get<IPage<IConfig.Info>>(ADMIN_MODULE + `/sys-config`, params);
+export const getConfigList = (params: ConfigQuery) => {
+  return http.get<IPage<ConfigInfo>>(ADMIN_MODULE + `/sys-config`, params);
 };
 
 /**
@@ -17,7 +17,7 @@ export const getConfigList = (params: IConfig.Query) => {
  * @param params
  * @returns {*}
  */
-export const addConfig = (params: IConfig.Form) => {
+export const addConfig = (params: ConfigForm) => {
   return http.post(ADMIN_MODULE + `/sys-config`, params);
 };
 
@@ -26,7 +26,7 @@ export const addConfig = (params: IConfig.Form) => {
  * @param params
  * @returns {*}
  */
-export const editConfig = (params: IConfig.Form) => {
+export const editConfig = (params: ConfigForm) => {
   return http.put(ADMIN_MODULE + `/sys-config`, params);
 };
 

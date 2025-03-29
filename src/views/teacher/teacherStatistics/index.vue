@@ -67,7 +67,7 @@ import { useHandleData } from '@/hooks/useHandleData';
 import TeacherStatisticsForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsForm.vue';
 import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { ITeacherStatistics } from '@/api/interface/teacher/teacherStatistics';
+import type { TeacherStatisticsQuery, TeacherStatisticsRow } from '@/api/types/teacher/teacherStatistics';
 import ImportExcel from '@/components/ImportExcel/index.vue';
 import { downloadTemplate } from '@/api/modules/system/common';
 import { ElMessageBox } from 'element-plus';
@@ -82,7 +82,7 @@ useDict(['account_status', 'dynamic_user_options']); // 使用useDict Hook 主�
 const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
-const columns: ColumnProps<ITeacherStatistics.Row>[] = [
+const columns: ColumnProps<TeacherStatisticsRow>[] = [
   { type: 'selection', width: 80 },
   { prop: 'year', label: '统计年限' },
   { prop: 'month', label: '统计月份' },
@@ -197,14 +197,16 @@ const searchColumns: SearchProps[] = [
   }
 ];
 // 获取table列表
-const getTableList = (params: ITeacherStatistics.Query) => {
+const getTableList = (params: TeacherStatisticsQuery) => {
   let newParams = formatParams(params);
   return getTeacherStatisticsListApi(newParams);
 };
-const formatParams = (params: ITeacherStatistics.Query) => {
+const formatParams = (params: TeacherStatisticsQuery) => {
   let newParams = JSON.parse(JSON.stringify(params));
-  newParams.checkTime && (newParams.checkTimeStart = newParams.checkTime[0]);
-  newParams.checkTime && (newParams.checkTimeEnd = newParams.checkTime[1]);
+  if (newParams.checkTime) {
+    newParams.checkTimeStart = newParams.checkTime[0];
+    newParams.checkTimeEnd = newParams.checkTime[1];
+  }
   delete newParams.checkTime;
   return newParams;
 };
@@ -224,7 +226,7 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   teacherStatisticsRef.value?.acceptParams(params);
 };
 // 删除信息
-const deleteInfo = async (params: ITeacherStatistics.Row) => {
+const deleteInfo = async (params: TeacherStatisticsRow) => {
   await useHandleData(removeTeacherStatisticsApi, { ids: [params.id] }, `删除【${params.id}】教师统计`);
   proTableRef.value?.getTableList();
 };
@@ -249,7 +251,7 @@ const importData = () => {
 // 导出
 const downloadFile = async () => {
   ElMessageBox.confirm('确认导出教师统计数据?', '温馨提示', { type: 'warning' }).then(() => {
-    let newParams = formatParams(proTableRef.value?.searchParam as ITeacherStatistics.Query);
+    let newParams = formatParams(proTableRef.value?.searchParam as TeacherStatisticsQuery);
     useDownload(exportTeacherStatisticsExcelApi, '教师统计', newParams);
   });
 };

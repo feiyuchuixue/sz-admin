@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia';
 import { getAllDict, getDictByCode } from '@/api/modules/system/dict';
 import piniaPersistConfig from '@/stores/helper/persist';
-import type { IDict } from '@/api/interface/system/dict';
+import type { DictCustom } from '@/api/types/system/dict';
 import { ref } from 'vue';
 
 export const useOptionsStore = defineStore(
   'options',
   () => {
     const isLoaded = ref(false);
-    const dictOptions = ref<Record<string, IDict.DictCustom[]>>({});
+    const dictOptions = ref<Record<string, DictCustom[]>>({});
 
     async function getAllDictList() {
       if (isLoaded.value) return;

@@ -75,7 +75,7 @@ import MenuForm from '@/views/system/menuMange/components/MenuForm.vue';
 import { useHandleData } from '@/hooks/useHandleData';
 import { MENU_BTN, MENU_DIR, MENU_PAGE } from '@/config/consts';
 import { useOptionsStore } from '@/stores/modules/options';
-import type { IMenu } from '@/api/interface/system/menu';
+import type { MenuQuery } from '@/api/types/system/menu';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import HighCode from '@/components/HighCode/index.vue';
 import { computed, ref } from 'vue';
@@ -94,7 +94,7 @@ const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: IMenu.Query) => getMenuList(params);
+const getTableList = (params: MenuQuery) => getMenuList(params);
 
 const defaultExpandAllKey = ref(true);
 

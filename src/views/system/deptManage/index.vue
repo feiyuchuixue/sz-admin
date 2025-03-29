@@ -67,14 +67,14 @@ import {
 import { useHandleData } from '@/hooks/useHandleData';
 import SysDeptForm from '@/views/system/deptManage/components/SysDeptForm.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
-import type { ISysDept } from '@/api/interface/system/dept';
+import type { SysDeptQuery, SysDeptRow } from '@/api/types/system/dept';
 
 defineOptions({
   name: 'SysDeptView'
 });
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
-const columns: ColumnProps<ISysDept.Row>[] = [
+const columns: ColumnProps<SysDeptRow>[] = [
   { prop: 'name', label: '部门名称', align: 'left' },
   { prop: 'sort', label: '排序', width: 60, align: 'left' },
   { prop: 'leaderInfo', label: '负责人' },
@@ -83,11 +83,11 @@ const columns: ColumnProps<ISysDept.Row>[] = [
 ];
 const defaultExpandAllKey = ref(true);
 // 获取table列表
-const getTableList = (params: ISysDept.Query) => {
+const getTableList = (params: SysDeptQuery) => {
   let newParams = formatParams(params);
   return getSysDeptListApi(newParams);
 };
-const formatParams = (params: ISysDept.Query) => {
+const formatParams = (params: SysDeptQuery) => {
   let newParams = JSON.parse(JSON.stringify(params));
   return newParams;
 };
@@ -127,7 +127,7 @@ const presort = (row: any = {}, pid: number) => {
 };
 
 // 删除信息
-const deleteInfo = async (params: ISysDept.Row) => {
+const deleteInfo = async (params: SysDeptRow) => {
   await useHandleData(
     removeSysDeptApi,
     { ids: [params.id] },

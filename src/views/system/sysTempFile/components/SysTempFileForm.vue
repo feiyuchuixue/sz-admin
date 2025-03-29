@@ -42,7 +42,7 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage, type UploadUserFile } from 'element-plus';
 import UploadFiles from '@/components/Upload/file.vue';
-import type { IUploadResult } from '@/api/interface/system/upload';
+import type { IUploadResult } from '@/api/types/system/upload';
 
 defineOptions({
   name: 'SysTempFileForm'

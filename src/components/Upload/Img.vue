@@ -52,7 +52,7 @@ import { generateUUID } from '@/utils';
 import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
 import type { UploadProps, UploadRequestOptions } from 'element-plus';
-import type { IUploadResult } from '@/api/interface/system/upload';
+import type { IUploadResult } from '@/api/types/system/upload';
 
 interface UploadFileProps {
   imageUrl: string; // 图片地址 ==> 必传
@@ -110,7 +110,7 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
     emit('update:imageUrl', data.url);
     emit('change', data);
     // 调用 el-form 内部的校验方法（可自动校验）
-    formItemContext?.prop && formContext?.validateField([formItemContext.prop as string]);
+    if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
   } catch (error) {
     options.onError(error as any);
   }
@@ -129,7 +129,7 @@ const deleteImg = () => {
  * */
 const editImg = () => {
   const dom = document.querySelector(`#${uuid.value} .el-upload__input`);
-  dom && dom.dispatchEvent(new MouseEvent('click'));
+  if (dom) dom.dispatchEvent(new MouseEvent('click'));
 };
 
 /**

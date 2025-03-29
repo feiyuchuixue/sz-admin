@@ -1,16 +1,16 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IUser } from '@/api/interface/system/user';
-import type { IPage } from '@/api/interface';
-import type { ISysDept } from '@/api/interface/system/dept';
+import type { UserQuery, UserInfo, UserForm, UserRoleData, UserRoleForm, UserPasswordForm } from '@/api/types/system/user';
+import type { IPage } from '@/api/types';
+import type { SysDeptDeptSetting, SysDeptTree } from '@/api/types/system/dept';
 
 /**
  * 获取用户列表
  * @param params
  * @returns {*}
  */
-export const getUserList = (params: IUser.Query) => {
-  return http.get<IPage<IUser.Info>>(ADMIN_MODULE + `/sys-user`, params, { loading: false });
+export const getUserList = (params: UserQuery) => {
+  return http.get<IPage<UserInfo>>(ADMIN_MODULE + `/sys-user`, params);
 };
 
 /**
@@ -18,7 +18,7 @@ export const getUserList = (params: IUser.Query) => {
  * @param params
  * @returns {*}
  */
-export const addUser = (params: IUser.Form) => {
+export const addUser = (params: UserForm) => {
   return http.post(ADMIN_MODULE + `/sys-user`, params);
 };
 
@@ -27,7 +27,7 @@ export const addUser = (params: IUser.Form) => {
  * @param params
  * @returns {*}
  */
-export const editUser = (params: IUser.Form) => {
+export const editUser = (params: UserForm) => {
   return http.put(ADMIN_MODULE + `/sys-user`, params);
 };
 
@@ -46,7 +46,7 @@ export const deleteUser = (params: { ids: number[] }) => {
  * @returns {*}
  */
 export const getUserRole = (params: { userId: number }) => {
-  return http.get<IUser.RoleData>(ADMIN_MODULE + `/sys-user/role`, params);
+  return http.get<UserRoleData>(ADMIN_MODULE + `/sys-user/role`, params);
 };
 
 /**
@@ -54,7 +54,7 @@ export const getUserRole = (params: { userId: number }) => {
  * @param params
  * @returns {*}
  */
-export const setUserRole = (params: IUser.RoleForm) => {
+export const setUserRole = (params: UserRoleForm) => {
   return http.put(ADMIN_MODULE + `/sys-user/role`, params);
 };
 
@@ -63,7 +63,7 @@ export const setUserRole = (params: IUser.RoleForm) => {
  * @param params
  * @returns {*}
  */
-export const changePassword = (params: IUser.PasswordForm) => {
+export const changePassword = (params: UserPasswordForm) => {
   return http.put(ADMIN_MODULE + `/sys-user/password`, params);
 };
 
@@ -81,7 +81,7 @@ export const resetPassword = (params: { id: number }) => {
  * @returns {*}
  */
 export const getUserinfo = () => {
-  return http.get<IUser.Info>(ADMIN_MODULE + `/sys-user/userinfo`);
+  return http.get<UserInfo>(ADMIN_MODULE + `/sys-user/userinfo`);
 };
 
 /**
@@ -89,7 +89,7 @@ export const getUserinfo = () => {
  * @param params
  * @returns {*}
  */
-export const bindUserDeptApi = (params: ISysDept.DeptSetting) => {
+export const bindUserDeptApi = (params: SysDeptDeptSetting) => {
   return http.post(ADMIN_MODULE + `/sys-user/dept/bind`, params);
 };
 
@@ -97,7 +97,7 @@ export const bindUserDeptApi = (params: ISysDept.DeptSetting) => {
  * 用户部门属性列表
  */
 export const getUserDeptTree = () => {
-  return http.get<ISysDept.Tree[]>(ADMIN_MODULE + `/sys-user/dept/tree`);
+  return http.get<SysDeptTree[]>(ADMIN_MODULE + `/sys-user/dept/tree`);
 };
 
 /**
@@ -116,7 +116,7 @@ export const unlockUser = (params: { ids: (string | number)[] }) => {
  */
 export const getUserDetailApi = (params: { id: string }) => {
   const { id } = params;
-  return http.get<IUser.Info>(ADMIN_MODULE + `/sys-user/${id}`);
+  return http.get<UserInfo>(ADMIN_MODULE + `/sys-user/${id}`);
 };
 
 /**
@@ -125,7 +125,7 @@ export const getUserDetailApi = (params: { id: string }) => {
  * @returns {*}
  */
 export const getDataUserRole = (params: { userId: number }) => {
-  return http.get<IUser.RoleData>(ADMIN_MODULE + `/sys-user/datarole`, params);
+  return http.get<UserRoleData>(ADMIN_MODULE + `/sys-user/datarole`, params);
 };
 
 /**
@@ -133,6 +133,6 @@ export const getDataUserRole = (params: { userId: number }) => {
  * @param params
  * @returns {*}
  */
-export const setUserDataRole = (params: IUser.RoleForm) => {
+export const setUserDataRole = (params: UserRoleForm) => {
   return http.put(ADMIN_MODULE + `/sys-user/datarole`, params);
 };

@@ -99,7 +99,7 @@ import { useOptionsStore } from '@/stores/modules/options';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import UploadImg from '@/components/Upload/Img.vue';
-import type { IUploadResult } from '@/api/interface/system/upload';
+import type { IUploadResult } from '@/api/types/system/upload';
 import { IS_PREVIEW } from '@/config';
 defineOptions({
   name: 'UserEdit'

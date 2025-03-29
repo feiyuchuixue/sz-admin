@@ -68,7 +68,7 @@ import { useHandleData } from '@/hooks/useHandleData';
 import SysTempFileForm from '@/views/system/sysTempFile/components/SysTempFileForm.vue';
 import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { ISysTempFile } from '@/api/interface/system/sysTempFile';
+import type { SysTempFileQuery, SysTempFileRow } from '@/api/types/system/sysTempFile';
 import SysTemplateHistoryList from '@/views/system/sysTempFile/components/HistoryList.vue';
 defineOptions({
   name: 'SysTempFileView'
@@ -76,7 +76,7 @@ defineOptions({
 const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
-const columns: ColumnProps<ISysTempFile.Row>[] = [
+const columns: ColumnProps<SysTempFileRow>[] = [
   { type: 'selection', width: 80 },
   { prop: 'id', label: '模板标识', width: 120 },
   { prop: 'tempName', label: '模版名' },
@@ -112,17 +112,21 @@ const columns: ColumnProps<ISysTempFile.Row>[] = [
 // 搜索条件项
 const searchColumns: SearchProps[] = [{ prop: 'tempName', label: '模版名', el: 'input' }];
 // 获取table列表
-const getTableList = (params: ISysTempFile.Query) => {
+const getTableList = (params: SysTempFileQuery) => {
   let newParams = formatParams(params);
   return getSysTempFileListApi(newParams);
 };
-const formatParams = (params: ISysTempFile.Query) => {
+const formatParams = (params: SysTempFileQuery) => {
   let newParams = JSON.parse(JSON.stringify(params));
-  newParams.createTime && (newParams.createTimeStart = newParams.createTime[0]);
-  newParams.createTime && (newParams.createTimeEnd = newParams.createTime[1]);
+  if (newParams.createTime) {
+    newParams.createTimeStart = newParams.createTime[0];
+    newParams.createTimeEnd = newParams.createTime[1];
+  }
   delete newParams.createTime;
-  newParams.updateTime && (newParams.updateTimeStart = newParams.updateTime[0]);
-  newParams.updateTime && (newParams.updateTimeEnd = newParams.updateTime[1]);
+  if (newParams.updateTime) {
+    newParams.updateTimeStart = newParams.updateTime[0];
+    newParams.updateTimeEnd = newParams.updateTime[1];
+  }
   delete newParams.updateTime;
   return newParams;
 };
@@ -146,7 +150,7 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
 const sysTempFileHistoryListRef = ref<InstanceType<typeof SysTemplateHistoryList>>();
 
 // 删除信息
-const deleteInfo = async (params: ISysTempFile.Row) => {
+const deleteInfo = async (params: SysTempFileRow) => {
   await useHandleData(removeSysTempFileApi, { ids: [params.id] }, `删除【${params.id}】模版文件管理`);
   proTableRef.value?.getTableList();
 };
@@ -176,7 +180,7 @@ const getFileNameFromUrl = (url: string) => {
 };
 
 // 打开历史记录页
-const openFileHistory = (row: ISysTempFile.Row) => {
+const openFileHistory = (row: SysTempFileRow) => {
   sysTempFileHistoryListRef.value?.show(row);
 };
 </script>

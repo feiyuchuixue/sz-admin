@@ -54,8 +54,8 @@ import { UploadFilled, Delete, Document, Picture } from '@element-plus/icons-vue
 import { ref } from 'vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import type { UploadFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
-import type { IUpload } from '@/api/interface/system/upload';
-import type { IResultData } from '@/api/interface';
+import type { UploadResult } from '@/api/types/system/upload';
+import type { IResultData } from '@/api/types';
 
 defineOptions({
   name: 'SimplifyUpload'
@@ -109,7 +109,7 @@ const uploadFileRequest = (options: UploadRequestOptions) => {
   return uploadFile({ file: options.file, dirTag: props.dir });
 };
 
-const handleSuccess = (res: IResultData<IUpload.UploadResult>, file: UploadFile) => {
+const handleSuccess = (res: IResultData<UploadResult>, file: UploadFile) => {
   const { uid } = file;
   const index = fileList.value.findIndex(item => item.uid === uid);
   if (index !== -1) {

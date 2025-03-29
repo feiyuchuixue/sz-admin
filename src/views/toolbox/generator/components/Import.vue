@@ -21,9 +21,9 @@
 <script setup lang="ts">
 import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { IGenerator } from '@/api/interface/toolbox/generator';
+import type { GeneratorInfo } from '@/api/types/toolbox/generator';
 import { getGeneratorSchemaList, importGenerator } from '@/api/modules/toolbox/generator';
-import type { IPageQuery } from '@/api/interface';
+import type { IPageQuery } from '@/api/types';
 import { ref } from 'vue';
 
 defineOptions({
@@ -46,7 +46,7 @@ defineExpose({
 });
 
 // 表格配置项
-const columns: ColumnProps<IGenerator.Info>[] = [
+const columns: ColumnProps<GeneratorInfo>[] = [
   { type: 'selection', width: 80 },
   { prop: 'tableName', label: '表名称' },
   { prop: 'tableComment', label: '表描述' },

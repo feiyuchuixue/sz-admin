@@ -48,20 +48,20 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
-import type { ISysDept } from '@/api/interface/system/dept';
+import type { SysDeptLeader, SysDeptTree } from '@/api/types/system/dept';
 import { getMenuTree, getSysDeptLeaderApi } from '@/api/modules/system/dept';
 import DeptLeaderTransfer from '@/views/system/deptManage/components/DeptLeaderTransfer.vue';
 defineOptions({
   name: 'SysDeptForm'
 });
-const parentMenus = ref<ISysDept.Tree[]>([]);
+const parentMenus = ref<SysDeptTree[]>([]);
 const treeProps = {
   label: 'name',
   value: 'id'
 };
 
 const deptLeaderTransferRef = ref<InstanceType<typeof DeptLeaderTransfer>>();
-const allLeaders = ref<ISysDept.Leader[]>([]);
+const allLeaders = ref<SysDeptLeader[]>([]);
 const selectLeaderIds = ref<number[]>([]);
 const leaders = computed(() => {
   return allLeaders.value.filter(item => selectLeaderIds.value.includes(item.id));

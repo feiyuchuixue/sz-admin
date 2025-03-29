@@ -48,7 +48,7 @@ import { Plus } from '@element-plus/icons-vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import type { UploadProps, UploadFile, UploadUserFile, UploadRequestOptions } from 'element-plus';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
-import type { IUploadResult } from '@/api/interface/system/upload';
+import type { IUploadResult } from '@/api/types/system/upload';
 interface UploadFileProps {
   fileList: UploadUserFile[];
   fileInfo?: IUploadResult; // 文件信息 ==> 非必传
@@ -149,7 +149,7 @@ const uploadSuccess = (response: IUploadResult | undefined, uploadFile: UploadFi
   emit('update:fileList', _fileList.value);
   emit('change', response);
   // 调用 el-form 内部的校验方法（可自动校验）
-  formItemContext?.prop && formContext?.validateField([formItemContext.prop as string]);
+  if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
   ElNotification({
     title: '温馨提示',
     message: '图片上传成功！',

@@ -1,4 +1,4 @@
-import type { HandleData } from '@/hooks/interface';
+import type { HandleDataMessageType } from '@/hooks/types';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 /**
@@ -13,7 +13,7 @@ export const useHandleData = (
   api: (params: any) => Promise<any>,
   params: any = {},
   message: string,
-  confirmType: HandleData.MessageType = 'warning'
+  confirmType: HandleDataMessageType = 'warning'
 ) => {
   return new Promise((resolve, reject) => {
     ElMessageBox.confirm(`是否${message}?`, '温馨提示', {

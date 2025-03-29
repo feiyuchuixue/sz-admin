@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { getUserRole } from '@/api/modules/system/user';
-import type { IUser } from '@/api/interface/system/user';
+import type { UserRoleInfo } from '@/api/types/system/user';
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { IS_PREVIEW } from '@/config';
@@ -64,7 +64,7 @@ const acceptParams = (params: View.DefaultParams) => {
   getInfo(params.row.id);
 };
 
-const roleLists = ref<IUser.RoleInfo[]>([]);
+const roleLists = ref<UserRoleInfo[]>([]);
 const selectIds = ref<number[]>([]);
 
 /**

@@ -160,8 +160,8 @@ import UserAdd from '@/views/system/accountManage/components/UserAdd.vue';
 import UserEdit from '@/views/system/accountManage/components/UserEdit.vue';
 import UserPermissions from '@/views/system/accountManage/components/UserPermissions.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { IUser } from '@/api/interface/system/user';
-import type { IRole } from '@/api/interface/system/role';
+import type { UserQuery, UserInfo } from '@/api/types/system/user';
+import type { RoleInfo } from '@/api/types/system/role';
 import { reactive, ref } from 'vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import UserDeptForm from '@/views/system/accountManage/components/UserDeptForm.vue';
@@ -175,7 +175,7 @@ defineOptions({
 const optionsStore = useOptionsStore();
 
 // 表格配置项
-const columns: ColumnProps<IRole.Info>[] = [
+const columns: ColumnProps<RoleInfo>[] = [
   { type: 'selection', width: 55, selectable: row => row.id !== 1 },
   { prop: 'username', label: '账户', width: 150, align: 'left' },
   { prop: 'nickname', label: '昵称', width: 150, align: 'left' },
@@ -216,7 +216,7 @@ const searchColumns: SearchProps[] = [
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: IUser.Query) => {
+const getTableList = (params: UserQuery) => {
   return getUserList(params);
 };
 
@@ -257,7 +257,7 @@ const openUserPermissions = (title: string, row = {}) => {
 const deptTreeRef = ref<InstanceType<typeof DeptTree>>();
 
 // 删除信息
-const deleteInfo = async (params: IUser.Info) => {
+const deleteInfo = async (params: UserInfo) => {
   if (IS_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除，请谅解！' });
   }

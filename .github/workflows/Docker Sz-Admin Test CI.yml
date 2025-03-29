@@ -2,9 +2,9 @@ name: Docker Sz-Admin Test CI
 
 on:
   push:
-    branches: [ "test" ]
+    branches: ['test']
   pull_request:
-    branches: [ "test" ]
+    branches: ['test']
   workflow_dispatch:
 jobs:
   build:
