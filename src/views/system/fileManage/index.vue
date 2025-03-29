@@ -69,7 +69,6 @@ const formatParams = (params: SysFileQuery) => {
 };
 // 是否是图片
 const isImage = (contextType: string) => {
-  console.log('contextType', contextType);
   const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp', 'image/svg+xml'];
   return imageMimeTypes.includes(contextType);
 };
