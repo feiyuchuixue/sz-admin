@@ -155,7 +155,6 @@ import {
   getUserDetailApi,
   setUserDataRole
 } from '@/api/modules/system/user';
-import { useOptionsStore } from '@/stores/modules/options';
 import UserAdd from '@/views/system/accountManage/components/UserAdd.vue';
 import UserEdit from '@/views/system/accountManage/components/UserEdit.vue';
 import UserPermissions from '@/views/system/accountManage/components/UserPermissions.vue';
@@ -168,11 +167,10 @@ import UserDeptForm from '@/views/system/accountManage/components/UserDeptForm.v
 import { ElMessage, ElMessageBox } from 'element-plus';
 import UserDataPermissions from '@/views/system/accountManage/components/UserDataPermissions.vue';
 import { IS_PREVIEW } from '@/config';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'AccountManage'
 });
-
-const optionsStore = useOptionsStore();
 
 // 表格配置项
 const columns: ColumnProps<RoleInfo>[] = [
@@ -192,7 +190,7 @@ const columns: ColumnProps<RoleInfo>[] = [
     prop: 'accountStatusCd',
     label: '状态',
     tag: true,
-    enum: optionsStore.getDictOptions('account_status'),
+    enum: useDictOptions('account_status'),
     width: 80,
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' }
   },

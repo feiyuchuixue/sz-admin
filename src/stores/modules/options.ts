@@ -17,7 +17,7 @@ export const useOptionsStore = defineStore(
       isLoaded.value = true;
     }
 
-    function getDictOptions(type: string) {
+    function getDictOptions(type: string): DictCustom[] {
       return dictOptions.value[type] || [];
     }
 

@@ -50,22 +50,12 @@
           <span>&nbsp;:</span>
         </template>
         <el-select v-model="paramsProps.row.grantTypeCdList" multiple clearable placeholder="请选择授权类型">
-          <el-option
-            v-for="item in optionsStore.getDictOptions('grant_type')"
-            :key="item.alias"
-            :label="item.codeName"
-            :value="item.alias"
-          />
+          <el-option v-for="item in grantTypeOption" :key="item.alias" :label="item.codeName" :value="item.alias" />
         </el-select>
       </el-form-item>
       <el-form-item label="设备类型" prop="deviceTypeCd">
         <el-select v-model="paramsProps.row.deviceTypeCd" clearable placeholder="请选择设备类型">
-          <el-option
-            v-for="item in optionsStore.getDictOptions('device_type')"
-            :key="item.id"
-            :label="item.codeName"
-            :value="item.id"
-          />
+          <el-option v-for="item in deviceTypeOption" :key="item.id" :label="item.codeName" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="token活跃超时时间" prop="activeTimeout">
@@ -102,12 +92,7 @@
       </el-form-item>
       <el-form-item label="状态" prop="clientStatusCd">
         <el-select v-model="paramsProps.row.clientStatusCd" clearable placeholder="请选择状态">
-          <el-option
-            v-for="item in optionsStore.getDictOptions('sys_client_status')"
-            :key="item.id"
-            :label="item.codeName"
-            :value="item.id"
-          />
+          <el-option v-for="item in sysClientStatusOption" :key="item.id" :label="item.codeName" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
@@ -122,15 +107,16 @@
 </template>
 
 <script setup lang="ts">
-import { useOptionsStore } from '@/stores/modules/options';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'SysClientForm'
 });
-
-const optionsStore = useOptionsStore();
+const grantTypeOption = useDictOptions('grant_type');
+const deviceTypeOption = useDictOptions('device_type');
+const sysClientStatusOption = useDictOptions('sys_client_status');
 
 const rules = reactive({
   clientKey: [{ required: true, message: '请填写客户端名称' }],

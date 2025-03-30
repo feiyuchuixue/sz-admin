@@ -31,7 +31,7 @@ import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interf
 import { reactive, ref } from 'vue';
 import { getSysTempFileHistoryListApi } from '@/api/modules/system/sysTempFile';
 import type { SysTempFileHistory, SysTempFileRow, SysTempFileHistoryQuery } from '@/api/types/system/sysTempFile';
-import { useOptionsStore } from '@/stores/modules/options';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'SysTemplateHistoryList'
@@ -51,8 +51,6 @@ defineExpose({
   show
 });
 
-const optionsStore = useOptionsStore();
-// 表格配置项
 const columns: ColumnProps<Dict>[] = [
   { prop: 'sysTempFileId', label: '模板标识', width: 120 },
   { prop: 'sysFileId', label: '文件标识', width: 120 },
@@ -63,7 +61,7 @@ const columns: ColumnProps<Dict>[] = [
     prop: 'createId',
     label: '创建人',
     tag: true,
-    enum: optionsStore.getDictOptions('dynamic_user_options'),
+    enum: useDictOptions('dynamic_user_options'),
     fieldNames: {
       label: 'codeName',
       value: 'id',

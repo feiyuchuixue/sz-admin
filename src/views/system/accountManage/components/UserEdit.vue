@@ -58,12 +58,7 @@
         <el-col :span="12">
           <el-form-item label="状态" prop="accountStatusCd">
             <el-radio-group v-model="paramsProps.row.accountStatusCd">
-              <el-radio-button
-                v-for="item in optionsStore.getDictOptions('account_status')"
-                :key="item.id"
-                :label="item.codeName"
-                :value="item.id"
-              />
+              <el-radio-button v-for="item in accountStatusOptions" :key="item.id" :label="item.codeName" :value="item.id" />
             </el-radio-group>
           </el-form-item>
         </el-col>
@@ -95,18 +90,16 @@
 </template>
 
 <script setup lang="ts">
-import { useOptionsStore } from '@/stores/modules/options';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import UploadImg from '@/components/Upload/Img.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
 import { IS_PREVIEW } from '@/config';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'UserEdit'
 });
-
-const optionsStore = useOptionsStore();
-
+const accountStatusOptions = useDictOptions('account_status');
 const rules = reactive({});
 
 const visible = ref(false);

@@ -66,14 +66,13 @@ import {
 } from '@/api/modules/system/sysTempFile';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysTempFileForm from '@/views/system/sysTempFile/components/SysTempFileForm.vue';
-import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { SysTempFileQuery, SysTempFileRow } from '@/api/types/system/sysTempFile';
 import SysTemplateHistoryList from '@/views/system/sysTempFile/components/HistoryList.vue';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'SysTempFileView'
 });
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<SysTempFileRow>[] = [
@@ -87,7 +86,7 @@ const columns: ColumnProps<SysTempFileRow>[] = [
     prop: 'createId',
     label: '创建人',
     tag: true,
-    enum: optionsStore.getDictOptions('dynamic_user_options'),
+    enum: useDictOptions('dynamic_user_options'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -99,7 +98,7 @@ const columns: ColumnProps<SysTempFileRow>[] = [
     prop: 'updateId',
     label: '更新人',
     tag: true,
-    enum: optionsStore.getDictOptions('dynamic_user_options'),
+    enum: useDictOptions('dynamic_user_options'),
     fieldNames: {
       label: 'codeName',
       value: 'id',

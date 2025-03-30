@@ -22,12 +22,7 @@
       </el-form-item>
       <el-form-item label="讲师区分类型" prop="teacherCommonType">
         <el-select v-model="paramsProps.row.teacherCommonType" clearable placeholder="请选择讲师区分类型">
-          <el-option
-            v-for="item in optionsStore.getDictOptions('account_status')"
-            :key="item.id"
-            :label="item.codeName"
-            :value="Number(item.id)"
-          />
+          <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" />
         </el-select>
       </el-form-item>
       <el-form-item label="授课总数" prop="totalTeaching">
@@ -41,12 +36,7 @@
       </el-form-item>
       <el-form-item label="核对状态" prop="checkStatus">
         <el-select v-model="paramsProps.row.checkStatus" clearable placeholder="请选择核对状态">
-          <el-option
-            v-for="item in optionsStore.getDictOptions('account_status')"
-            :key="item.id"
-            :label="item.codeName"
-            :value="Number(item.id)"
-          />
+          <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" />
         </el-select>
       </el-form-item>
       <el-form-item label="核对时间" prop="checkTime">
@@ -81,13 +71,12 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
-import { useOptionsStore } from '@/stores/modules/options';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'TeacherStatisticsForm'
 });
-
-const optionsStore = useOptionsStore();
+const accountStatus = useDictOptions('account_status');
 
 const rules = reactive({
   year: [{ required: true, message: '请填写统计年限' }],

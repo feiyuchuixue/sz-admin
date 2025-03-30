@@ -64,14 +64,13 @@ import {
 } from '@/api/modules/system/client';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysClientForm from '@/views/system/clientManage/components/SysClientForm.vue';
-import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { SysClientQuery, SysClientRow } from '@/api/types/system/client';
 import { ref } from 'vue';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'SysClientView'
 });
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 
 // 表格配置项
@@ -84,7 +83,7 @@ const columns: ColumnProps<SysClientRow>[] = [
     prop: 'grantTypeCd',
     label: '授权类型',
     tag: true,
-    enum: optionsStore.getDictOptions('grant_type'),
+    enum: useDictOptions('grant_type'),
     fieldNames: {
       label: 'codeName',
       value: 'alias',
@@ -95,7 +94,7 @@ const columns: ColumnProps<SysClientRow>[] = [
     prop: 'deviceTypeCd',
     label: '设备类型',
     tag: true,
-    enum: optionsStore.getDictOptions('device_type'),
+    enum: useDictOptions('device_type'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -108,7 +107,7 @@ const columns: ColumnProps<SysClientRow>[] = [
     prop: 'clientStatusCd',
     label: '状态',
     tag: true,
-    enum: optionsStore.getDictOptions('sys_client_status'),
+    enum: useDictOptions('sys_client_status'),
     fieldNames: {
       label: 'codeName',
       value: 'id',

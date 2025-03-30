@@ -30,12 +30,7 @@
               @change="changeDataScope"
               :disabled="isLock"
             >
-              <el-option
-                v-for="item in optionsStore.getDictOptions('data_scope')"
-                :key="item.id"
-                :label="item.codeName"
-                :value="item.id"
-              />
+              <el-option v-for="item in dataScopeOptions" :key="item.id" :label="item.codeName" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -143,15 +138,17 @@
 <script setup lang="ts">
 import { ref, reactive, nextTick } from 'vue';
 import { type CheckboxValueType, ElForm, ElMessage } from 'element-plus';
-import { useOptionsStore } from '@/stores/modules/options';
 import type { RoleMenuTree } from '@/api/types/system/role';
 import type { SysDeptTree } from '@/api/types/system/dept';
 import type { UserOptions } from '@/api/types/system/user';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'SysDataRoleForm'
 });
-const optionsStore = useOptionsStore();
+
+const dataScopeOptions = useDictOptions('data_scope');
+
 // 自定义数据权限
 const isCustom = ref(false);
 const isLock = ref(false);

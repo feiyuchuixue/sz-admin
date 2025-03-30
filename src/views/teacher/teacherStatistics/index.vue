@@ -65,7 +65,6 @@ import {
 } from '@/api/modules/teacher/teacherStatistics';
 import { useHandleData } from '@/hooks/useHandleData';
 import TeacherStatisticsForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsForm.vue';
-import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { TeacherStatisticsQuery, TeacherStatisticsRow } from '@/api/types/teacher/teacherStatistics';
 import ImportExcel from '@/components/ImportExcel/index.vue';
@@ -74,12 +73,12 @@ import { ElMessageBox } from 'element-plus';
 import { useDownload } from '@/hooks/useDownload';
 import RemoteSearchSelect from '@/components/RemoteSearchSelect/index.vue';
 import { useDict } from '@/hooks/useDict';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'TeacherStatisticsView'
 });
 useDict(['account_status', 'dynamic_user_options']); // 使用useDict Hook 主动加载字典 【演示案例】
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<TeacherStatisticsRow>[] = [
@@ -92,7 +91,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     prop: 'teacherCommonType',
     label: '讲师区分类型',
     tag: true,
-    enum: optionsStore.getDictOptions('account_status'),
+    enum: useDictOptions('account_status'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -106,7 +105,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     prop: 'checkStatus',
     label: '核对状态',
     tag: true,
-    enum: optionsStore.getDictOptions('account_status'),
+    enum: useDictOptions('account_status'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -155,7 +154,7 @@ const searchColumns: SearchProps[] = [
     prop: 'teacherCommonType',
     label: '讲师区分类型',
     el: 'select',
-    enum: optionsStore.getDictOptions('account_status'),
+    enum: useDictOptions('account_status'),
     fieldNames: {
       label: 'codeName',
       value: 'id',

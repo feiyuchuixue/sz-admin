@@ -74,7 +74,6 @@ import { addMenu, deleteMenu, editMenu, exportMenuSql, getMenuInfo, getMenuList,
 import MenuForm from '@/views/system/menuMange/components/MenuForm.vue';
 import { useHandleData } from '@/hooks/useHandleData';
 import { MENU_BTN, MENU_DIR, MENU_PAGE } from '@/config/consts';
-import { useOptionsStore } from '@/stores/modules/options';
 import type { MenuQuery } from '@/api/types/system/menu';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import HighCode from '@/components/HighCode/index.vue';
@@ -82,6 +81,7 @@ import { computed, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import { IS_PREVIEW } from '@/config';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'MenuManage'
@@ -90,7 +90,6 @@ defineOptions({
 const showSqlDialog = ref(false);
 const sqlData = ref<string>('');
 const rowSqlName = ref<any>({});
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
@@ -107,7 +106,7 @@ const columns: ColumnProps<Menu.MenuOptions>[] = [
     label: '类型',
     width: 100,
     tag: true,
-    enum: optionsStore.getDictOptions('menu_type'),
+    enum: useDictOptions('menu_type'),
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' }
   },
   { prop: 'meta.icon', label: '图标', width: 100 },

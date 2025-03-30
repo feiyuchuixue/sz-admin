@@ -137,7 +137,6 @@
 
 <script setup lang="ts">
 import { MENU_BTN, MENU_DIR, MENU_PAGE } from '@/config/consts';
-import { useOptionsStore } from '@/stores/modules/options';
 import IconChoose from '@/components/IconChoose/index.vue';
 import { getBtnExits, getMenuTree } from '@/api/modules/system/menu';
 import type { MenuTree } from '@/api/types/system/menu';
@@ -145,13 +144,13 @@ import type { FormItemRule } from 'element-plus/es/components/form/src/types';
 import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { IS_PREVIEW } from '@/config';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'MenuForm'
 });
 
-const optionsStore = useOptionsStore();
-const menuOptions = optionsStore.getDictOptions('menu_type');
+const menuOptions = useDictOptions('menu_type').value;
 
 const menuLabel = (type: any, defaultLabel = '') => {
   return menuOptions[type] || defaultLabel;

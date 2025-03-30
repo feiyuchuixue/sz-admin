@@ -22,11 +22,10 @@ import ProTable from '@/components/ProTable/index.vue';
 import { getSysFileListApi } from '@/api/modules/system/file';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { SysFileRow, SysFileQuery } from '@/api/types/system/file';
-import { useOptionsStore } from '@/stores/modules/options';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'SysFileView'
 });
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<SysFileRow>[] = [
@@ -44,7 +43,7 @@ const columns: ColumnProps<SysFileRow>[] = [
     prop: 'createId',
     label: '创建人',
     tag: true,
-    enum: optionsStore.getDictOptions('dynamic_user_options'),
+    enum: useDictOptions('dynamic_user_options'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
