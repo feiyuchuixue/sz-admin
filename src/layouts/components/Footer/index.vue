@@ -10,5 +10,5 @@ import pkg from 'package.json';
 const version: string = pkg.version;
 </script>
 <style scoped lang="scss">
-@import './index.scss';
+@use './index';
 </style>
