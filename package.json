@@ -10,7 +10,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
     "lint": "eslint --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write src/"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
