@@ -64,18 +64,17 @@ import {
 } from '@/api/modules/system/client';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysClientForm from '@/views/system/clientManage/components/SysClientForm.vue';
-import { useOptionsStore } from '@/stores/modules/options';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { ISysClient } from '@/api/interface/system/client';
+import type { SysClientQuery, SysClientRow } from '@/api/types/system/client';
 import { ref } from 'vue';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'SysClientView'
 });
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 
 // 表格配置项
-const columns: ColumnProps<ISysClient.Row>[] = [
+const columns: ColumnProps<SysClientRow>[] = [
   { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'clientId', label: 'ClientId' },
   { prop: 'clientKey', label: '客户端名称' },
@@ -84,7 +83,7 @@ const columns: ColumnProps<ISysClient.Row>[] = [
     prop: 'grantTypeCd',
     label: '授权类型',
     tag: true,
-    enum: optionsStore.getDictOptions('grant_type'),
+    enum: useDictOptions('grant_type'),
     fieldNames: {
       label: 'codeName',
       value: 'alias',
@@ -95,7 +94,7 @@ const columns: ColumnProps<ISysClient.Row>[] = [
     prop: 'deviceTypeCd',
     label: '设备类型',
     tag: true,
-    enum: optionsStore.getDictOptions('device_type'),
+    enum: useDictOptions('device_type'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -108,7 +107,7 @@ const columns: ColumnProps<ISysClient.Row>[] = [
     prop: 'clientStatusCd',
     label: '状态',
     tag: true,
-    enum: optionsStore.getDictOptions('sys_client_status'),
+    enum: useDictOptions('sys_client_status'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -156,12 +155,12 @@ const searchColumns: SearchProps[] = [
 ];
 
 // 获取table列表
-const getTableList = (params: ISysClient.Query) => {
+const getTableList = (params: SysClientQuery) => {
   let newParams = formatParams(params);
   return getSysClientListApi(newParams);
 };
 
-const formatParams = (params: ISysClient.Query) => {
+const formatParams = (params: SysClientQuery) => {
   let newParams = JSON.parse(JSON.stringify(params));
   return newParams;
 };
@@ -187,7 +186,7 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
 };
 
 // 删除信息
-const deleteInfo = async (params: ISysClient.Row) => {
+const deleteInfo = async (params: SysClientRow) => {
   await useHandleData(removeSysClientApi, { ids: [params.clientId] }, `删除【${params.clientId}】客户端管理`);
   proTableRef.value?.getTableList();
 };

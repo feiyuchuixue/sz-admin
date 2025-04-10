@@ -59,7 +59,7 @@ import DictTypeForm from '@/views/system/dictManage/components/DictTypeForm.vue'
 import { useHandleData } from '@/hooks/useHandleData';
 import DictData from '@/views/system/dictManage/components/DictData.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { IDict } from '@/api/interface/system/dict';
+import type { DictType, DictTypeQuery } from '@/api/types/system/dict';
 import { ref } from 'vue';
 import HighCode from '@/components/HighCode/index.vue';
 
@@ -68,7 +68,7 @@ defineOptions({
 });
 
 // 表格配置项
-const columns: ColumnProps<IDict.DictType>[] = [
+const columns: ColumnProps<DictType>[] = [
   { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'id', label: '编号', width: 100 },
   { prop: 'typeName', label: '名称' },
@@ -94,7 +94,7 @@ const sqlDialTitle = ref('');
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: IDict.DictTypeQuery) => getDictType(params);
+const getTableList = (params: DictTypeQuery) => getDictType(params);
 
 // 打开 drawer(新增、查看、编辑)
 const dictTypeRef = ref<InstanceType<typeof DictTypeForm>>();
@@ -113,7 +113,7 @@ const openAddEdit = (title: string, row = {}, isAdd = true) => {
 };
 
 // 删除信息
-const deleteInfo = async (params: IDict.DictType) => {
+const deleteInfo = async (params: DictType) => {
   await useHandleData(deleteDictType, { ids: [params.id] }, `删除【${params.typeCode}】字典类型`);
   proTableRef.value?.getTableList();
 };
@@ -126,7 +126,7 @@ const batchDelete = async (ids: (string | number)[]) => {
 };
 
 const dictDataRef = ref<InstanceType<typeof DictData> | null>();
-const openDictDta = (row: IDict.DictType) => {
+const openDictDta = (row: DictType) => {
   dictDataRef.value?.show(row);
 };
 const showSqlInfo = async (row: any = {}) => {

@@ -1,14 +1,14 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IPage } from '@/api/interface';
-import type { ISysClient } from '@/api/interface/system/client';
+import type { IPage } from '@/api/types';
+import type { SysClientForm, SysClientQuery, SysClientRow } from '@/api/types/system/client';
 /**
  * 查询列表
  * @param params
  * @returns {*}
  */
-export const getSysClientListApi = (params: ISysClient.Query) => {
-  return http.get<IPage<ISysClient.Row>>(ADMIN_MODULE + `/sys-client`, params);
+export const getSysClientListApi = (params: SysClientQuery) => {
+  return http.get<IPage<SysClientRow>>(ADMIN_MODULE + `/sys-client`, params);
 };
 
 /**
@@ -16,7 +16,7 @@ export const getSysClientListApi = (params: ISysClient.Query) => {
  * @param params
  * @returns {*}
  */
-export const createSysClientApi = (params: ISysClient.Form) => {
+export const createSysClientApi = (params: SysClientForm) => {
   return http.post(ADMIN_MODULE + `/sys-client`, params);
 };
 
@@ -25,7 +25,7 @@ export const createSysClientApi = (params: ISysClient.Form) => {
  * @param params
  * @returns {*}
  */
-export const updateSysClientApi = (params: ISysClient.Form) => {
+export const updateSysClientApi = (params: SysClientForm) => {
   return http.put(ADMIN_MODULE + `/sys-client`, params);
 };
 
@@ -45,5 +45,5 @@ export const removeSysClientApi = (params: { ids: number[] }) => {
  */
 export const getSysClientDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<ISysClient.Row>(ADMIN_MODULE + `/sys-client/${id}`);
+  return http.get<SysClientRow>(ADMIN_MODULE + `/sys-client/${id}`);
 };

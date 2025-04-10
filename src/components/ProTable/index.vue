@@ -183,8 +183,8 @@ const clearSelection = () => tableRef.value?.clearSelection();
 // 初始化表格数据 && 拖拽排序
 onMounted(() => {
   dragSort();
-  props.requestAuto && getTableList();
-  props.data && (pageable.value.total = props.data.length);
+  if (props.requestAuto) getTableList();
+  if (props.data) pageable.value.total = props.data.length;
 });
 
 // 处理表格数据

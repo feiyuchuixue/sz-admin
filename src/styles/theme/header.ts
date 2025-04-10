@@ -1,6 +1,6 @@
-import type { Theme } from '@/hooks/interface';
+import type { ThemeType } from '@/hooks/types';
 
-export const headerTheme: Record<Theme.ThemeType, { [key: string]: string }> = {
+export const headerTheme: Record<ThemeType, { [key: string]: string }> = {
   light: {
     '--el-header-logo-text-color': '#303133',
     '--el-header-bg-color': '#ffffff',

@@ -508,12 +508,12 @@
 <script lang="ts" setup>
 import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
-import type { IGenerator } from '@/api/interface/toolbox/generator';
+import type { GeneratorBaseInfo, GeneratorColumnInfo, GeneratorGeneratorInfo } from '@/api/types/toolbox/generator';
 import { getGeneratorInfo } from '@/api/modules/toolbox/generator';
 import { dictShowWayOptions, htmlTypeOptions, javaTypeOptions, queryTypeOptions } from '@/views/toolbox/generator/common/Options';
 import { getDictTypeOptions } from '@/api/modules/system/dict';
-import type { IDict } from '@/api/interface/system/dict';
-import type { IMenu } from '@/api/interface/system/menu';
+import type { DictCategory, DictType, DictOption } from '@/api/types/system/dict';
+import type { MenuTree } from '@/api/types/system/menu';
 import { getMenuTree } from '@/api/modules/system/menu';
 import { ref, watchEffect } from 'vue';
 import { ElMessage } from 'element-plus';
@@ -521,8 +521,8 @@ import { ElMessage } from 'element-plus';
 defineOptions({
   name: 'EditForm'
 });
-const columnsInfos = ref<IGenerator.ColumnInfo[]>([]);
-const generatorInfo = ref<IGenerator.GeneratorInfo>({
+const columnsInfos = ref<GeneratorColumnInfo[]>([]);
+const generatorInfo = ref<GeneratorGeneratorInfo>({
   businessName: '',
   functionName: '',
   moduleName: '',
@@ -541,7 +541,7 @@ const generatorInfo = ref<IGenerator.GeneratorInfo>({
 });
 const isShowExcel = ref<boolean>(true);
 
-const columns = ref<ColumnProps<IGenerator.ColumnInfo>[]>([
+const columns = ref<ColumnProps<GeneratorColumnInfo>[]>([
   { type: 'sort', width: 75, label: '拖拽排序' },
   { prop: 'columnName', label: '字段列名' },
   { prop: 'columnComment', label: '字段描述' },
@@ -573,7 +573,7 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
-const dictTypeOptions = ref<IDict.DictCategory[]>([]);
+const dictTypeOptions = ref<DictCategory[]>([]);
 const getDictTypes = () => {
   getDictTypeOptions().then(res => {
     dictTypeOptions.value = processDictionary(res.data);
@@ -581,11 +581,11 @@ const getDictTypes = () => {
 };
 
 // 字典分组处理逻辑
-const processDictionary = (data: IDict.DictType[]): IDict.DictCategory[] => {
+const processDictionary = (data: DictType[]): DictCategory[] => {
   const categorizedDict = data.reduce<{
-    [key: string]: IDict.DictCategory;
+    [key: string]: DictCategory;
   }>((acc, item) => {
-    const option: IDict.DictOption = { value: item.typeCode, label: item.typeName };
+    const option: DictOption = { value: item.typeCode, label: item.typeName };
     const category = item.isDynamic ? '动态字典' : '静态字典';
 
     if (!acc[category]) {
@@ -605,7 +605,7 @@ const treeProps = {
   label: 'title',
   value: 'id'
 };
-const parentMenus = ref<IMenu.Tree[]>([]);
+const parentMenus = ref<MenuTree[]>([]);
 
 const loadParentMenus = () => {
   getMenuTree({}).then(res => {
@@ -617,7 +617,7 @@ loadParentMenus();
 
 const editProTableRef = ref<ProTableInstance>();
 
-const baseInfo = ref<IGenerator.BaseInfo>({
+const baseInfo = ref<GeneratorBaseInfo>({
   tableId: 0,
   tableName: '',
   tableComment: '',

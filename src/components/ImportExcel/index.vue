@@ -57,7 +57,7 @@ export interface ExcelParameterProps {
   fileSize?: number; // 上传文件的大小
   fileType?: File.ExcelMimeType[]; // 上传文件的类型
   tempApi?: (params: any) => Promise<any>; // 下载模板的Api
-  importApi?: (params: any, config?: AxiosRequestConfig<{}> | undefined) => Promise<any>; // 批量导入的Api
+  importApi?: (params: any, config?: AxiosRequestConfig<any> | undefined) => Promise<any>; // 批量导入的Api
   getTableList?: () => void; // 获取表格数据的Api
 }
 
@@ -106,7 +106,7 @@ const uploadExcel = async (options: UploadRequestOptions) => {
       options.onProgress(new CustomUploadProgressEvent(progressEvent));
     }
   });
-  parameter.value.getTableList && parameter.value.getTableList();
+  if (parameter.value.getTableList) parameter.value.getTableList();
   dialogVisible.value = false;
 };
 
@@ -173,5 +173,5 @@ defineExpose({
 });
 </script>
 <style lang="scss" scoped>
-@import './index.scss';
+@use './index';
 </style>

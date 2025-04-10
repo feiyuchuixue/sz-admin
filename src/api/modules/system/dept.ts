@@ -1,15 +1,15 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IPage } from '@/api/interface';
-import type { ISysDept } from '@/api/interface/system/dept';
+import type { IPage } from '@/api/types';
+import type { SysDeptQuery, SysDeptRow, SysDeptForm, SysDeptTree, SysDeptLeaderData, SysDeptDept } from '@/api/types/system/dept';
 
 /**
  * 查询列表
  * @param params
  * @returns {*}
  */
-export const getSysDeptListApi = (params: ISysDept.Query) => {
-  return http.get<IPage<ISysDept.Row>>(ADMIN_MODULE + `/sys-dept`, params);
+export const getSysDeptListApi = (params: SysDeptQuery) => {
+  return http.get<IPage<SysDeptRow>>(ADMIN_MODULE + `/sys-dept`, params);
 };
 
 /**
@@ -17,7 +17,7 @@ export const getSysDeptListApi = (params: ISysDept.Query) => {
  * @param params
  * @returns {*}
  */
-export const createSysDeptApi = (params: ISysDept.Form) => {
+export const createSysDeptApi = (params: SysDeptForm) => {
   return http.post(ADMIN_MODULE + `/sys-dept`, params);
 };
 
@@ -26,7 +26,7 @@ export const createSysDeptApi = (params: ISysDept.Form) => {
  * @param params
  * @returns {*}
  */
-export const updateSysDeptApi = (params: ISysDept.Form) => {
+export const updateSysDeptApi = (params: SysDeptForm) => {
   return http.put(ADMIN_MODULE + `/sys-dept`, params);
 };
 
@@ -46,7 +46,7 @@ export const removeSysDeptApi = (params: { ids: number[] }) => {
  */
 export const getSysDeptDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<ISysDept.Row>(ADMIN_MODULE + `/sys-dept/${id}`);
+  return http.get<SysDeptRow>(ADMIN_MODULE + `/sys-dept/${id}`);
 };
 
 /**
@@ -55,7 +55,7 @@ export const getSysDeptDetailApi = (params: { id: number }) => {
  * @returns {*}
  */
 export const getMenuTree = (params: { excludeNodeId?: number; appendRoot?: boolean }) => {
-  return http.get<ISysDept.Tree[]>(ADMIN_MODULE + `/sys-dept/tree`, params);
+  return http.get<SysDeptTree[]>(ADMIN_MODULE + `/sys-dept/tree`, params);
 };
 
 /**
@@ -64,7 +64,7 @@ export const getMenuTree = (params: { excludeNodeId?: number; appendRoot?: boole
  * @returns {*}
  */
 export const getSysDeptLeaderApi = () => {
-  return http.get<ISysDept.LeaderData>(ADMIN_MODULE + `/sys-dept/leader`);
+  return http.get<SysDeptLeaderData>(ADMIN_MODULE + `/sys-dept/leader`);
 };
 
 /**
@@ -73,5 +73,5 @@ export const getSysDeptLeaderApi = () => {
  * @returns {*}
  */
 export const getDeptTrees = (params: { deptId?: number }) => {
-  return http.get<ISysDept.Dept>(ADMIN_MODULE + `/sys-dept/datascope`, params);
+  return http.get<SysDeptDept>(ADMIN_MODULE + `/sys-dept/datascope`, params);
 };

@@ -62,7 +62,7 @@ import { addRole, deleteRole, editRole, getRoleList, setRoleMenus } from '@/api/
 import RoleForm from '@/views/system/roleManage/components/RoleForm.vue';
 import RolePermissions from '@/views/system/roleManage/components/RolePermissions.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { IRole } from '@/api/interface/system/role';
+import type { RoleInfo, RoleQuery } from '@/api/types/system/role';
 import { ref } from 'vue';
 
 defineOptions({
@@ -70,7 +70,7 @@ defineOptions({
 });
 
 // 表格配置项
-const columns: ColumnProps<IRole.Info>[] = [
+const columns: ColumnProps<RoleInfo>[] = [
   { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'id', label: '编号', width: 80 },
   { prop: 'roleName', label: '角色名称' },
@@ -90,7 +90,7 @@ const searchColumns: SearchProps[] = [
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: IRole.Query) => getRoleList(params);
+const getTableList = (params: RoleQuery) => getRoleList(params);
 
 const roleFormRef = ref<InstanceType<typeof RoleForm>>();
 const openRoleForm = (title: string, row = {}, isAdd = true) => {
@@ -114,7 +114,7 @@ const openRolePermissions = (title: string, row = {}) => {
 };
 
 // 删除信息
-const deleteInfo = async (params: IRole.Info) => {
+const deleteInfo = async (params: RoleInfo) => {
   await useHandleData(deleteRole, { ids: [params.id] }, `删除【${params.roleName}】角色`);
   proTableRef.value?.getTableList();
 };

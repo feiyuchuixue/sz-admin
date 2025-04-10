@@ -10,6 +10,7 @@ export function localGet(key: string) {
   try {
     return JSON.parse(window.localStorage.getItem(key) as string);
   } catch (error) {
+    console.log('localGet', error);
     return value;
   }
 }
@@ -164,15 +165,10 @@ export function getFlatMenuList(menuList: Menu.MenuOptions[]): Menu.MenuOptions[
   return newMenuList.flatMap(item => [item, ...(item.children ? getFlatMenuList(item.children) : [])]);
 }
 
-/**
- * @description 使用递归过滤出需要渲染在左侧菜单的列表 (需剔除 isHidden == true 的菜单)
- * @param {Array} menuList 菜单列表
- * @returns {Array}
- * */
 export function getShowMenuList(menuList: Menu.MenuOptions[]): Menu.MenuOptions[] {
   const newMenuList: Menu.MenuOptions[] = JSON.parse(JSON.stringify(menuList));
   return newMenuList.filter(item => {
-    item.children?.length && (item.children = getShowMenuList(item.children));
+    if (item.children?.length) item.children = getShowMenuList(item.children);
     return item.meta?.isHidden === 'F';
   });
 }
@@ -243,8 +239,8 @@ export function findMenuByPath(menuList: Menu.MenuOptions[], path: string): Menu
  * */
 export function getKeepAliveRouterName(menuList: Menu.MenuOptions[], keepAliveNameArr: string[] = []): string[] {
   menuList.forEach(item => {
-    item.meta.isKeepAlive === 'T' && item.name && keepAliveNameArr.push(item.name);
-    item.children?.length && getKeepAliveRouterName(item.children, keepAliveNameArr);
+    if (item.meta.isKeepAlive === 'T' && item.name) keepAliveNameArr.push(item.name);
+    if (item.children?.length) getKeepAliveRouterName(item.children, keepAliveNameArr);
   });
   return keepAliveNameArr;
 }

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ISysDept } from '@/api/interface/system/dept';
+import type { SysDeptLeader } from '@/api/types/system/dept';
 import { ref } from 'vue';
 
 defineOptions({
@@ -43,7 +43,7 @@ defineProps({
   }
 });
 
-const leaderLists = ref<ISysDept.Leader[]>([]);
+const leaderLists = ref<SysDeptLeader[]>([]);
 const selectIds = ref<number[]>([]);
 const emits = defineEmits<{
   'update:modelValue': [number[]];

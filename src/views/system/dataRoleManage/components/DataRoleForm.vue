@@ -30,12 +30,7 @@
               @change="changeDataScope"
               :disabled="isLock"
             >
-              <el-option
-                v-for="item in optionsStore.getDictOptions('data_scope')"
-                :key="item.id"
-                :label="item.codeName"
-                :value="item.id"
-              />
+              <el-option v-for="item in dataScopeOptions" :key="item.id" :label="item.codeName" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -143,21 +138,23 @@
 <script setup lang="ts">
 import { ref, reactive, nextTick } from 'vue';
 import { type CheckboxValueType, ElForm, ElMessage } from 'element-plus';
-import { useOptionsStore } from '@/stores/modules/options';
-import type { IRole } from '@/api/interface/system/role';
-import type { ISysDept } from '@/api/interface/system/dept';
-import type { IUser } from '@/api/interface/system/user';
+import type { RoleMenuTree } from '@/api/types/system/role';
+import type { SysDeptTree } from '@/api/types/system/dept';
+import type { UserOptions } from '@/api/types/system/user';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'SysDataRoleForm'
 });
-const optionsStore = useOptionsStore();
+
+const dataScopeOptions = useDictOptions('data_scope');
+
 // 自定义数据权限
 const isCustom = ref(false);
 const isLock = ref(false);
-const userOptions = ref<IUser.Options[]>([]);
+const userOptions = ref<UserOptions[]>([]);
 // ------ 菜单树形
-const menuLists = ref<IRole.MenuTree[]>([]);
+const menuLists = ref<RoleMenuTree[]>([]);
 const selectMenuIds = ref<string[]>([]);
 const menuTreeRef = ref();
 const menuTreeProps = {
@@ -169,7 +166,7 @@ const isMenuExpand = ref(true);
 const isMenuCheckStrictly = ref(true);
 
 // ------ 部门树形
-const deptLists = ref<ISysDept.Tree[]>([]);
+const deptLists = ref<SysDeptTree[]>([]);
 const selectDeptIds = ref<string[]>([]);
 const deptTreeRef = ref();
 const deptTreeProps = {

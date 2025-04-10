@@ -1,13 +1,13 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IMenu } from '@/api/interface/system/menu';
+import type { MenuQuery, MenuForm, MenuTree, MenuPermissionQuery } from '@/api/types/system/menu';
 
 /**
  * 获取菜单列表
  * @param params
  * @returns {*}
  */
-export const getMenuList = (params: IMenu.Query) => {
+export const getMenuList = (params: MenuQuery) => {
   return http.get<Menu.MenuOptions[]>(ADMIN_MODULE + `/sys-menu`, params);
 };
 
@@ -16,7 +16,7 @@ export const getMenuList = (params: IMenu.Query) => {
  * @param params
  * @returns {*}
  */
-export const addMenu = (params: IMenu.Form) => {
+export const addMenu = (params: MenuForm) => {
   return http.post(ADMIN_MODULE + `/sys-menu`, params);
 };
 
@@ -25,7 +25,7 @@ export const addMenu = (params: IMenu.Form) => {
  * @param params
  * @returns {*}
  */
-export const editMenu = (params: IMenu.Form) => {
+export const editMenu = (params: MenuForm) => {
   return http.put(ADMIN_MODULE + `/sys-menu`, params);
 };
 
@@ -54,7 +54,7 @@ export const getMenuInfo = (params: { id: string }) => {
  * @returns {*}
  */
 export const getMenuTree = (params: { nodeId?: string }) => {
-  return http.get<IMenu.Tree[]>(ADMIN_MODULE + `/sys-menu/tree`, params);
+  return http.get<MenuTree[]>(ADMIN_MODULE + `/sys-menu/tree`, params);
 };
 
 /**
@@ -62,10 +62,8 @@ export const getMenuTree = (params: { nodeId?: string }) => {
  * @param params
  * @returns {*}
  */
-export const getBtnExits = (params: IMenu.PermissionQuery) => {
-  return http.get<{ permissionCount: number }>(ADMIN_MODULE + `/sys-menu/btn/exists`, params, {
-    loading: false
-  });
+export const getBtnExits = (params: MenuPermissionQuery) => {
+  return http.get<{ permissionCount: number }>(ADMIN_MODULE + `/sys-menu/btn/exists`, params);
 };
 
 /**

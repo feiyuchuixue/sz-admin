@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import ProTable from '@/components/ProTable/index.vue';
 import { Delete, Download, EditPen, Upload, View } from '@element-plus/icons-vue';
-import type { IGenerator } from '@/api/interface/toolbox/generator';
+import type { GeneratorInfo, GeneratorQuery } from '@/api/types/toolbox/generator';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import { ref } from 'vue';
 import {
@@ -80,7 +80,7 @@ defineOptions({
 });
 
 // 表格配置项
-const columns: ColumnProps<IGenerator.Info>[] = [
+const columns: ColumnProps<GeneratorInfo>[] = [
   { type: 'selection', width: 80 },
   { type: 'index', label: '#', width: 80 },
   { prop: 'tableName', label: '表名称' },
@@ -103,7 +103,7 @@ const generatorVisible = ref(false);
 const generatorCodeInfos = ref<string[]>([]);
 
 // 获取table列表
-const getTableList = (params: IGenerator.Query) => getGeneratorList(params);
+const getTableList = (params: GeneratorQuery) => getGeneratorList(params);
 
 const importRef = ref<InstanceType<typeof Import>>();
 const openImport = () => {
@@ -124,7 +124,7 @@ const openEditDialog = (title: string, row = {}) => {
   editFormRef.value?.acceptParams(params);
 };
 // 代码生成
-const codeGene = (row: IGenerator.Info) => {
+const codeGene = (row: GeneratorInfo) => {
   if (!isLocalEnv()) {
     ElMessage.warning({ message: '生成代码仅在dev或local环境可用！！' });
     return;
@@ -168,11 +168,11 @@ const codeGene = (row: IGenerator.Info) => {
 };
 
 // 压缩文件下载
-const download = (row: IGenerator.Info) => {
+const download = (row: GeneratorInfo) => {
   useDownload(downloadZip, '', { tableNames: [row.tableName] });
 };
 // 删除
-const delGene = (row: IGenerator.Info) => {
+const delGene = (row: GeneratorInfo) => {
   ElMessageBox.confirm('您是否确认删除?', '温馨提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -199,7 +199,7 @@ const delGeneBatch = useDebounceFn(() => {
 
 // 预览
 const previewRef = ref();
-const previewGene = (row: IGenerator.Info) => {
+const previewGene = (row: GeneratorInfo) => {
   const param = {
     title: '',
     tableName: row.tableName

@@ -24,7 +24,6 @@
         :filter-node-method="filterNode"
         :default-checked-keys="multiple ? selected : []"
         @node-click="handleNodeClick"
-        @check="handleCheckChange"
         v-loading="loading"
       >
         <template #default="scope">
@@ -149,13 +148,10 @@ const emit = defineEmits<{
 // 单选
 const handleNodeClick = (data: { [key: string]: any }) => {
   if (props.multiple) return;
+  console.log('data[props.id]', data[props.id]);
   emit('change', data[props.id]);
 };
 
-// 多选
-const handleCheckChange = () => {
-  emit('change', treeRef.value?.getCheckedKeys());
-};
 const reload = ref(true);
 const refresh = () => {
   reload.value = false;

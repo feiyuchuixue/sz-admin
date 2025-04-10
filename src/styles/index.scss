@@ -1,14 +1,14 @@
 // reset style sheet
 // color css
-@import '@/styles/color.scss';
-@import '@/styles/reset.scss';
+@use '@/styles/color';
+@use '@/styles/reset';
 // CSS common style sheet
-@import '@/styles/common.scss';
+@use '@/styles/common';
 // iconfont css
-@import '@/styles/iconfont/iconfont.scss';
+@use '@/styles/iconfont/iconfont';
 // font css
-@import '@/styles/fonts/font.scss';
+@use '@/styles/fonts/font';
 // custom element dark css
-@import '@/styles/element-dark.scss';
+@use '@/styles/element-dark';
 // custom element css
-@import '@/styles/element.scss';
+@use '@/styles/element';

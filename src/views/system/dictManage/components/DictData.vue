@@ -68,7 +68,7 @@ import { tagsTypeOptionsLabel, yesNoOptions, yesNoOptionsLabel } from '@/config/
 import { addDictData, deleteDictData, editDictData, getDictData } from '@/api/modules/system/dict';
 import DictDataForm from '@/views/system/dictManage/components/DictDataForm.vue';
 import { useHandleData } from '@/hooks/useHandleData';
-import type { IDict } from '@/api/interface/system/dict';
+import type { Dict, DictQuery, DictType } from '@/api/types/system/dict';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
@@ -79,10 +79,10 @@ defineOptions({
 });
 
 const visible = ref(false);
-const info = ref<IDict.DictType>();
+const info = ref<DictType>();
 
 // 接收父组件传过来的参数
-const show = (params: IDict.DictType) => {
+const show = (params: DictType) => {
   initParam.sysDictTypeId = params.id as number;
   info.value = params;
   visible.value = true;
@@ -93,7 +93,7 @@ defineExpose({
 });
 
 // 表格配置项
-const columns: ColumnProps<IDict.Dict>[] = [
+const columns: ColumnProps<Dict>[] = [
   { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'id', label: '编号', width: 120 },
   { prop: 'alias', label: '别名' },
@@ -116,7 +116,7 @@ const initParam = reactive({ sysDictTypeId: 0 });
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: IDict.DictQuery) => getDictData(params);
+const getTableList = (params: DictQuery) => getDictData(params);
 
 // 打开 drawer(新增、查看、编辑)
 const dictDataFormRef = ref<InstanceType<typeof DictDataForm>>();
@@ -131,7 +131,7 @@ const openAddEdit = (title: string, row = {}, isAdd = true) => {
 };
 
 // 删除信息
-const deleteInfo = async (params: IDict.Dict) => {
+const deleteInfo = async (params: Dict) => {
   if (IS_PREVIEW) {
     return ElMessage.warning({ message: '预览环境，禁止删除所选字典，请谅解！' });
   }

@@ -1,5 +1,5 @@
 import { reactive, computed, toRefs } from 'vue';
-import type { Table } from '@/hooks/interface';
+import type { Pageable, StateProps } from '@/hooks/types';
 
 /**
  * @description table 页面操作方法封装
@@ -18,7 +18,7 @@ export const useTable = (
   requestError?: (params: any) => void,
   loadingTime?: number
 ) => {
-  const state = reactive<Table.StateProps>({
+  const state = reactive<StateProps>({
     // 表格数据
     tableData: [],
     // 分页数据
@@ -66,7 +66,7 @@ export const useTable = (
       // 先把初始化参数和分页参数放到总参数里面
       Object.assign(state.totalParam, initParam, isPageable ? pageParam.value : {});
       let { data } = await api({ ...state.searchInitParam, ...state.totalParam });
-      dataCallBack && (data = dataCallBack(data));
+      if (dataCallBack) data = dataCallBack(data);
       if (typeof data === 'object' && Object.keys(data).length === 0) {
         state.tableData = isPageable ? data.rows : [];
       } else {
@@ -80,7 +80,7 @@ export const useTable = (
       }
     } catch (error) {
       state.loading = false;
-      requestError && requestError(error);
+      if (requestError) requestError(error);
     }
   };
 
@@ -91,7 +91,7 @@ export const useTable = (
   const updatedTotalParam = () => {
     state.totalParam = {};
     // 处理查询参数，可以给查询参数加自定义前缀操作
-    const nowSearchParam: Table.StateProps['searchParam'] = {};
+    const nowSearchParam: StateProps['searchParam'] = {};
     // 防止手动清空输入框携带参数（这里可以自定义查询参数前缀）
     for (const key in state.searchParam) {
       // * 某些情况下参数为 false/0 也应该携带参数
@@ -107,7 +107,7 @@ export const useTable = (
    * @param {Object} pageable 后台返回的分页数据
    * @return void
    * */
-  const updatePageable = (pageable: Table.Pageable) => {
+  const updatePageable = (pageable: Pageable) => {
     Object.assign(state.pageable, pageable);
   };
 

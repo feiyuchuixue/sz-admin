@@ -19,8 +19,8 @@
 
 <script setup lang="ts">
 import { previewCode } from '@/api/modules/toolbox/generator';
-import type { IGenerator } from '@/api/interface/toolbox/generator';
-import type { IResultData } from '@/api/interface';
+import type { GeneratorPreviewInfo } from '@/api/types/toolbox/generator';
+import type { IResultData } from '@/api/types';
 import HighCode from '@/components/HighCode/index.vue';
 import { ref } from 'vue';
 
@@ -29,7 +29,7 @@ defineOptions({
 });
 const activeName = ref('');
 const visible = ref(false);
-const codeList = ref<IGenerator.PreviewInfo[]>([]);
+const codeList = ref<GeneratorPreviewInfo[]>([]);
 
 // 父组件传过来的参数
 const parameter = ref<PreviewParameterProps>({
@@ -48,7 +48,7 @@ export interface PreviewParameterProps {
 }
 
 const getCode = () => {
-  previewCode(parameter.value.tableName).then((info: IResultData<IGenerator.PreviewInfo[]>) => {
+  previewCode(parameter.value.tableName).then((info: IResultData<GeneratorPreviewInfo[]>) => {
     codeList.value = info.data;
     visible.value = true;
     activeName.value = info?.data[0].alias || '';

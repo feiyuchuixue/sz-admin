@@ -1,14 +1,14 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IPage } from '@/api/interface';
-import type { ISysDataRole } from '@/api/interface/system/datarole';
+import type { IPage } from '@/api/types';
+import type { SysDataRoleQuery, SysDataRoleRow, SysDataRoleForm, SysDataRoleMeta } from '@/api/types/system/datarole';
 /**
  * 查询列表
  * @param params
  * @returns {*}
  */
-export const getSysDataRoleListApi = (params: ISysDataRole.Query) => {
-  return http.get<IPage<ISysDataRole.Row>>(ADMIN_MODULE + `/sys-data-role`, params);
+export const getSysDataRoleListApi = (params: SysDataRoleQuery) => {
+  return http.get<IPage<SysDataRoleRow>>(ADMIN_MODULE + `/sys-data-role`, params);
 };
 
 /**
@@ -16,7 +16,7 @@ export const getSysDataRoleListApi = (params: ISysDataRole.Query) => {
  * @param params
  * @returns {*}
  */
-export const createSysDataRoleApi = (params: ISysDataRole.Form) => {
+export const createSysDataRoleApi = (params: SysDataRoleForm) => {
   return http.post(ADMIN_MODULE + `/sys-data-role`, params);
 };
 
@@ -25,7 +25,7 @@ export const createSysDataRoleApi = (params: ISysDataRole.Form) => {
  * @param params
  * @returns {*}
  */
-export const updateSysDataRoleApi = (params: ISysDataRole.Form) => {
+export const updateSysDataRoleApi = (params: SysDataRoleForm) => {
   return http.put(ADMIN_MODULE + `/sys-data-role`, params);
 };
 
@@ -45,7 +45,7 @@ export const removeSysDataRoleApi = (params: { ids: (string | number)[] }) => {
  */
 export const getSysDataRoleDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<ISysDataRole.Row>(ADMIN_MODULE + `/sys-data-role/${id}`);
+  return http.get<SysDataRoleRow>(ADMIN_MODULE + `/sys-data-role/${id}`);
 };
 
 /**
@@ -54,5 +54,5 @@ export const getSysDataRoleDetailApi = (params: { id: number }) => {
  * @returns {*}
  */
 export const getSysDataRoleMenuApi = () => {
-  return http.get<ISysDataRole.Meta>(ADMIN_MODULE + `/sys-data-role/menu`);
+  return http.get<SysDataRoleMeta>(ADMIN_MODULE + `/sys-data-role/menu`);
 };

@@ -1,15 +1,21 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IPage } from '@/api/interface';
-import type { ISysTempFile } from '@/api/interface/system/sysTempFile';
+import type { IPage } from '@/api/types';
+import type {
+  SysTempFileQuery,
+  SysTempFileRow,
+  SysTempFileForm,
+  SysTempFileHistoryQuery,
+  SysTempFileHistory
+} from '@/api/types/system/sysTempFile';
 
 /**
  * 查询列表
  * @param params
  * @returns {*}
  */
-export const getSysTempFileListApi = (params: ISysTempFile.Query) => {
-  return http.get<IPage<ISysTempFile.Row>>(ADMIN_MODULE + `/sys-temp-file`, params);
+export const getSysTempFileListApi = (params: SysTempFileQuery) => {
+  return http.get<IPage<SysTempFileRow>>(ADMIN_MODULE + `/sys-temp-file`, params);
 };
 
 /**
@@ -17,7 +23,7 @@ export const getSysTempFileListApi = (params: ISysTempFile.Query) => {
  * @param params
  * @returns {*}
  */
-export const createSysTempFileApi = (params: ISysTempFile.Form) => {
+export const createSysTempFileApi = (params: SysTempFileForm) => {
   return http.post(ADMIN_MODULE + `/sys-temp-file`, params);
 };
 
@@ -26,7 +32,7 @@ export const createSysTempFileApi = (params: ISysTempFile.Form) => {
  * @param params
  * @returns {*}
  */
-export const updateSysTempFileApi = (params: ISysTempFile.Form) => {
+export const updateSysTempFileApi = (params: SysTempFileForm) => {
   return http.put(ADMIN_MODULE + `/sys-temp-file`, params);
 };
 
@@ -46,13 +52,13 @@ export const removeSysTempFileApi = (params: { ids: (string | number)[] }) => {
  */
 export const getSysTempFileDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<ISysTempFile.Row>(ADMIN_MODULE + `/sys-temp-file/${id}`);
+  return http.get<SysTempFileRow>(ADMIN_MODULE + `/sys-temp-file/${id}`);
 };
 
 /**
  * 获取历史记录
  * @param params
  */
-export const getSysTempFileHistoryListApi = (params: ISysTempFile.HistoryQuery) => {
-  return http.get<IPage<ISysTempFile.History>>(ADMIN_MODULE + `/sys-temp-file-history/history`, params);
+export const getSysTempFileHistoryListApi = (params: SysTempFileHistoryQuery) => {
+  return http.get<IPage<SysTempFileHistory>>(ADMIN_MODULE + `/sys-temp-file-history/history`, params);
 };

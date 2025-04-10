@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { getRoleMenus } from '@/api/modules/system/role';
-import type { IRole } from '@/api/interface/system/role';
+import type { RoleMenuTree } from '@/api/types/system/role';
 import { nextTick, ref } from 'vue';
 import { type CheckboxValueType, ElMessage } from 'element-plus';
 import { IS_PREVIEW } from '@/config';
@@ -109,7 +109,7 @@ const acceptParams = (params: View.DefaultParams) => {
   getInfo(params.row.id);
 };
 
-const menuLists = ref<IRole.MenuTree[]>([]);
+const menuLists = ref<RoleMenuTree[]>([]);
 const selectIds = ref<string[]>([]);
 
 /**

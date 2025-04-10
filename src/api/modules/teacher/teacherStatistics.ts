@@ -1,7 +1,7 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IPage } from '@/api/interface';
-import type { ITeacherStatistics } from '@/api/interface/teacher/teacherStatistics';
+import type { IPage } from '@/api/types';
+import type { TeacherStatisticsQuery, TeacherStatisticsRow, TeacherStatisticsForm } from '@/api/types/teacher/teacherStatistics';
 import type { UploadRawFile } from 'element-plus/es/components/upload/src/upload';
 import type { AxiosRequestConfig } from 'axios';
 /**
@@ -9,8 +9,8 @@ import type { AxiosRequestConfig } from 'axios';
  * @param params
  * @returns {*}
  */
-export const getTeacherStatisticsListApi = (params: ITeacherStatistics.Query) => {
-  return http.get<IPage<ITeacherStatistics.Row>>(ADMIN_MODULE + `/teacher-statistics`, params);
+export const getTeacherStatisticsListApi = (params: TeacherStatisticsQuery) => {
+  return http.get<IPage<TeacherStatisticsRow>>(ADMIN_MODULE + `/teacher-statistics`, params);
 };
 
 /**
@@ -18,7 +18,7 @@ export const getTeacherStatisticsListApi = (params: ITeacherStatistics.Query) =>
  * @param params
  * @returns {*}
  */
-export const createTeacherStatisticsApi = (params: ITeacherStatistics.Form) => {
+export const createTeacherStatisticsApi = (params: TeacherStatisticsForm) => {
   return http.post(ADMIN_MODULE + `/teacher-statistics`, params);
 };
 
@@ -27,7 +27,7 @@ export const createTeacherStatisticsApi = (params: ITeacherStatistics.Form) => {
  * @param params
  * @returns {*}
  */
-export const updateTeacherStatisticsApi = (params: ITeacherStatistics.Form) => {
+export const updateTeacherStatisticsApi = (params: TeacherStatisticsForm) => {
   return http.put(ADMIN_MODULE + `/teacher-statistics`, params);
 };
 
@@ -47,14 +47,14 @@ export const removeTeacherStatisticsApi = (params: { ids: (string | number)[] })
  */
 export const getTeacherStatisticsDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<ITeacherStatistics.Row>(ADMIN_MODULE + `/teacher-statistics/${id}`);
+  return http.get<TeacherStatisticsRow>(ADMIN_MODULE + `/teacher-statistics/${id}`);
 };
 
 /**
  * 导入excel
  * @param params
  */
-export const importTeacherStatisticsExcelApi = (params: UploadRawFile, config?: AxiosRequestConfig<{}> | undefined) => {
+export const importTeacherStatisticsExcelApi = (params: UploadRawFile, config?: AxiosRequestConfig<any> | undefined) => {
   return http.upload(ADMIN_MODULE + `/teacher-statistics/import`, params, config);
 };
 
@@ -63,7 +63,7 @@ export const importTeacherStatisticsExcelApi = (params: UploadRawFile, config?: 
  * @param params
  * @returns {*}
  */
-export const exportTeacherStatisticsExcelApi = (params: ITeacherStatistics.Query) => {
+export const exportTeacherStatisticsExcelApi = (params: TeacherStatisticsQuery) => {
   return http.download(ADMIN_MODULE + `/teacher-statistics/export`, params);
 };
 

@@ -21,7 +21,7 @@ export const useSelection = (rowKey: string = 'id') => {
    * @return void
    */
   const selectionChange = (rowArr: { [key: string]: any }[]) => {
-    rowArr.length ? (isSelected.value = true) : (isSelected.value = false);
+    isSelected.value = !!rowArr.length;
     selectedList.value = rowArr;
   };
 

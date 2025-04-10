@@ -66,13 +66,13 @@ import {
 import { useHandleData } from '@/hooks/useHandleData';
 import SysDataRoleForm from '@/views/system/dataRoleManage/components/DataRoleForm.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { ISysDataRole } from '@/api/interface/system/datarole';
+import type { SysDataRoleQuery, SysDataRoleRow } from '@/api/types/system/datarole';
 defineOptions({
   name: 'SysDataRoleView'
 });
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
-const columns: ColumnProps<ISysDataRole.Row>[] = [
+const columns: ColumnProps<SysDataRoleRow>[] = [
   { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'id', label: '编号', width: 150 },
   { prop: 'roleName', label: '角色名称' },
@@ -83,11 +83,11 @@ const columns: ColumnProps<ISysDataRole.Row>[] = [
 // 搜索条件项
 const searchColumns: SearchProps[] = [{ prop: 'roleName', label: '角色名称', el: 'input' }];
 // 获取table列表
-const getTableList = (params: ISysDataRole.Query) => {
+const getTableList = (params: SysDataRoleQuery) => {
   let newParams = formatParams(params);
   return getSysDataRoleListApi(newParams);
 };
-const formatParams = (params: ISysDataRole.Query) => {
+const formatParams = (params: SysDataRoleQuery) => {
   let newParams = JSON.parse(JSON.stringify(params));
   return newParams;
 };
@@ -109,7 +109,7 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   sysDataRoleRef.value?.acceptParams(params);
 };
 // 删除信息
-const deleteInfo = async (params: ISysDataRole.Row) => {
+const deleteInfo = async (params: SysDataRoleRow) => {
   await useHandleData(removeSysDataRoleApi, { ids: [params.id] }, `删除【${params.id}】数据权限`);
   proTableRef.value?.getTableList();
 };

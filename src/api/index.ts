@@ -4,7 +4,7 @@ import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } fr
 import router from '@/router';
 import { LOGIN_URL } from '@/config';
 import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL } from '@/api/helper';
-import type { IResultData } from '@/api/interface';
+import type { IResultData } from '@/api/types';
 import { useUserStore } from '@/stores/modules/user';
 import { useAuthStore } from '@/stores/modules/auth';
 import { useSocketStore } from '@/stores/modules/socket';
@@ -25,18 +25,18 @@ const config = {
 };
 
 class RequestHttp {
-  service: AxiosInstance;
+  instance: AxiosInstance;
 
   constructor(config: AxiosRequestConfig) {
     // instantiation
-    this.service = axios.create(config);
+    this.instance = axios.create(config);
 
     /**
      * @description 请求拦截器
      * 客户端发送请求 -> [请求拦截器] -> 服务器
      * token校验(JWT) : 接受服务器返回的 token,存储到 vuex/pinia/本地储存当中
      */
-    this.service.interceptors.request.use(
+    this.instance.interceptors.request.use(
       (config: CustomAxiosRequestConfig) => {
         const userStore = useUserStore();
         // 当前请求不需要显示 loading，在 api 服务中通过指定的第三个参数: { loading: false } 来控制
@@ -55,7 +55,7 @@ class RequestHttp {
      * @description 响应拦截器
      *  服务器换返回信息 -> [拦截统一处理] -> 客户端JS获取到信息
      */
-    this.service.interceptors.response.use(
+    this.instance.interceptors.response.use(
       response => {
         const { data } = response;
         const userStore = useUserStore();
@@ -112,33 +112,33 @@ class RequestHttp {
   /**
    * @description 常用请求方法封装
    */
-  get<T>(url: string, params: object = {}, _object = {}): Promise<IResultData<T>> {
-    return this.service.get(url, { params, ..._object });
+  get<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+    return this.instance.get(url, { params, ...config });
   }
 
-  post<T>(url: string, params: object = {}, _object = {}): Promise<IResultData<T>> {
-    return this.service.post(url, params, _object);
+  post<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+    return this.instance.post(url, params, config);
   }
 
-  put<T>(url: string, params: object = {}, _object = {}): Promise<IResultData<T>> {
-    return this.service.put(url, params, _object);
+  put<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+    return this.instance.put(url, params, config);
   }
 
-  delete<T>(url: string, data: object = {}, _object = {}): Promise<IResultData<T>> {
-    return this.service.delete(url, { data, ..._object });
+  delete<T>(url: string, data: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+    return this.instance.delete(url, { data, ...config });
   }
 
-  download(url: string, params = {}, _object = {}): Promise<BlobPart> {
-    return this.service.post(url, params, { ..._object, responseType: 'blob' });
+  download(url: string, params = {}, config?: AxiosRequestConfig<any> | undefined): Promise<BlobPart> {
+    return this.instance.post(url, params, { ...config, responseType: 'blob' });
   }
 
-  template(url: string, params = {}, _object = {}): Promise<BlobPart> {
-    return this.service.get(url, { params, ..._object, responseType: 'blob' });
+  template(url: string, params = {}, config?: AxiosRequestConfig<any> | undefined): Promise<BlobPart> {
+    return this.instance.get(url, { params, ...config, responseType: 'blob' });
   }
 
-  upload<T>(url: string, params: any = {}, _object: AxiosRequestConfig<{}> | undefined): Promise<IResultData<T>> {
-    return this.service.post(url, params, {
-      ..._object,
+  upload<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+    return this.instance.post(url, params, {
+      ...config,
       headers: {
         'Content-Type': 'multipart/form-data'
       }

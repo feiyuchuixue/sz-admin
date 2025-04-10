@@ -1,15 +1,21 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { IPage, IPageQuery } from '@/api/interface';
-import type { IGenerator } from '@/api/interface/toolbox/generator';
+import type { IPage, IPageQuery } from '@/api/types';
+import type {
+  GeneratorCheckInfo,
+  GeneratorForm,
+  GeneratorInfo,
+  GeneratorPreviewInfo,
+  GeneratorQuery
+} from '@/api/types/toolbox/generator';
 
 /**
  * 查询已经导入的表列表
  * @param params
  * @returns {*}
  */
-export const getGeneratorList = (params: IGenerator.Query) => {
-  return http.get<IPage<IGenerator.Info>>(ADMIN_MODULE + `/generator/list`, params);
+export const getGeneratorList = (params: GeneratorQuery) => {
+  return http.get<IPage<GeneratorInfo>>(ADMIN_MODULE + `/generator/list`, params);
 };
 
 /**
@@ -17,7 +23,7 @@ export const getGeneratorList = (params: IGenerator.Query) => {
  * @param params
  */
 export const getGeneratorSchemaList = (params: IPageQuery) => {
-  return http.get<IPage<IGenerator.Info>>(ADMIN_MODULE + `/generator/schema/list`, params);
+  return http.get<IPage<GeneratorInfo>>(ADMIN_MODULE + `/generator/schema/list`, params);
 };
 
 /**
@@ -32,7 +38,7 @@ export const importGenerator = (params: { tableName: (string | number)[] }) => {
  * 更新代码生成配置
  * @param params
  */
-export const saveGenerator = (params: IGenerator.Form) => {
+export const saveGenerator = (params: GeneratorForm) => {
   return http.put(ADMIN_MODULE + `/generator`, params);
 };
 
@@ -41,7 +47,7 @@ export const saveGenerator = (params: IGenerator.Form) => {
  * @param tableName
  */
 export const getGeneratorInfo = (tableName: string) => {
-  return http.get<IGenerator.Form>(ADMIN_MODULE + `/generator/${tableName}`);
+  return http.get<GeneratorForm>(ADMIN_MODULE + `/generator/${tableName}`);
 };
 
 /**
@@ -74,12 +80,12 @@ export const downloadZip = (params: { tableNames: string[] }) => {
  * @param tableName
  */
 export const previewCode = (tableName: string) => {
-  return http.get<IGenerator.PreviewInfo[]>(ADMIN_MODULE + `/generator/preview/${tableName}`);
+  return http.get<GeneratorPreviewInfo[]>(ADMIN_MODULE + `/generator/preview/${tableName}`);
 };
 /**
  * 验证磁盘
  * @param tableName
  */
 export const checkDisk = (tableName: string) => {
-  return http.get<IGenerator.CheckInfo>(ADMIN_MODULE + `/generator/check/${tableName}`);
+  return http.get<GeneratorCheckInfo>(ADMIN_MODULE + `/generator/check/${tableName}`);
 };

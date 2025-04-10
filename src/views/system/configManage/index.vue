@@ -32,7 +32,7 @@ import { addConfig, deleteConfig, editConfig, getConfigList } from '@/api/module
 import { useHandleData } from '@/hooks/useHandleData';
 import ConfigEditForm from '@/views/system/configManage/components/ConfigEditForm.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { IConfig } from '@/api/interface/system/config';
+import type { ConfigQuery, ConfigInfo } from '@/api/types/system/config';
 import { ref } from 'vue';
 
 defineOptions({
@@ -40,7 +40,7 @@ defineOptions({
 });
 
 // 表格配置项
-const columns: ColumnProps<IConfig.Info>[] = [
+const columns: ColumnProps<ConfigInfo>[] = [
   { type: 'selection', width: 80, selectable: row => row.isLock !== 'T' },
   { prop: 'configName', label: '参数名称' },
   { prop: 'configKey', label: 'Key', tag: true, width: 200 },
@@ -60,7 +60,7 @@ const searchColumns: SearchProps[] = [
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
-const getTableList = (params: IConfig.Query) => getConfigList(params);
+const getTableList = (params: ConfigQuery) => getConfigList(params);
 
 // 打开 drawer(新增、查看、编辑)
 const dictTypeRef = ref<InstanceType<typeof ConfigEditForm>>();
@@ -75,7 +75,7 @@ const openAddEdit = (title: string, row = {}, isAdd = true) => {
 };
 
 // 删除信息
-const deleteInfo = async (params: IConfig.Info) => {
+const deleteInfo = async (params: ConfigInfo) => {
   await useHandleData(deleteConfig, { ids: [params.id] }, `删除【${params.configName}】参数`);
   proTableRef.value?.getTableList();
 };

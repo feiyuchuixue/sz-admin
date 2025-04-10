@@ -70,7 +70,7 @@ const getLogo = async () => {
     await preloadImage(logo);
     avatarSrc.value = logo;
   } catch (error) {
-    console.error(`Error loading image: ${logo}`);
+    console.error(`Error loading image: ${logo}`, error);
     avatarSrc.value = defaultAvatar; // 默认头像地址
   }
 };

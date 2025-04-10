@@ -21,15 +21,14 @@ import { ref } from 'vue';
 import ProTable from '@/components/ProTable/index.vue';
 import { getSysFileListApi } from '@/api/modules/system/file';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { ISysFile } from '@/api/interface/system/file';
-import { useOptionsStore } from '@/stores/modules/options';
+import type { SysFileRow, SysFileQuery } from '@/api/types/system/file';
+import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
   name: 'SysFileView'
 });
-const optionsStore = useOptionsStore();
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
-const columns: ColumnProps<ISysFile.Row>[] = [
+const columns: ColumnProps<SysFileRow>[] = [
   { type: 'selection', width: 80 },
   { prop: 'id', label: '文件标识', width: 120 },
   { prop: 'filename', label: '文件名' },
@@ -44,7 +43,7 @@ const columns: ColumnProps<ISysFile.Row>[] = [
     prop: 'createId',
     label: '创建人',
     tag: true,
-    enum: optionsStore.getDictOptions('dynamic_user_options'),
+    enum: useDictOptions('dynamic_user_options'),
     fieldNames: {
       label: 'codeName',
       value: 'id',
@@ -56,20 +55,19 @@ const columns: ColumnProps<ISysFile.Row>[] = [
 // 搜索条件项
 const searchColumns: SearchProps[] = [{ prop: 'filename', label: '文件名', el: 'input' }];
 // 获取table列表
-const getTableList = (params: ISysFile.Query) => {
+const getTableList = (params: SysFileQuery) => {
   let newParams = formatParams(params);
   return getSysFileListApi(newParams);
 };
-const formatParams = (params: ISysFile.Query) => {
+const formatParams = (params: SysFileQuery) => {
   let newParams = JSON.parse(JSON.stringify(params));
-  newParams.createTime && (newParams.createTimeStart = newParams.createTime[0]);
-  newParams.createTime && (newParams.createTimeEnd = newParams.createTime[1]);
+  if (newParams.createTime) newParams.createTimeStart = newParams.createTime[0];
+  if (newParams.createTime) newParams.createTimeEnd = newParams.createTime[1];
   delete newParams.createTime;
   return newParams;
 };
 // 是否是图片
 const isImage = (contextType: string) => {
-  console.log('contextType', contextType);
   const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp', 'image/svg+xml'];
   return imageMimeTypes.includes(contextType);
 };

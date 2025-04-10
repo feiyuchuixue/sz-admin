@@ -60,7 +60,7 @@ import { useKeepAliveStore } from '@/stores/modules/keepAlive';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/modules/app';
 import { CircleClose, DArrowLeft, DArrowRight, FolderDelete, FullScreen, Remove } from '@element-plus/icons-vue';
-
+type refreshFunction = (val: boolean) => void;
 const route = useRoute();
 const router = useRouter();
 const tabStore = useTabsStore();
@@ -68,7 +68,7 @@ const appStore = useAppStore();
 const keepAliveStore = useKeepAliveStore();
 
 // refresh current page
-const refreshCurrentPage: Function = inject('refresh') as Function;
+const refreshCurrentPage = inject('refresh') as refreshFunction;
 const refresh = () => {
   setTimeout(() => {
     keepAliveStore.removeKeepAliveName(route.name as string);

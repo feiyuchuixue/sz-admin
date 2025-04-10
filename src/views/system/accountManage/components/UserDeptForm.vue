@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
-import type { ISysDept } from '@/api/interface/system/dept';
+import type { SysDeptTree, SysDeptLeader } from '@/api/types/system/dept';
 import { getMenuTree } from '@/api/modules/system/dept';
 import { bindUserDeptApi } from '@/api/modules/system/user';
 import { IS_PREVIEW } from '@/config';
@@ -56,12 +56,12 @@ import { IS_PREVIEW } from '@/config';
 defineOptions({
   name: 'UserDeptForm'
 });
-const parentMenus = ref<ISysDept.Tree[]>([]);
+const parentMenus = ref<SysDeptTree[]>([]);
 const treeProps = {
   label: 'name',
   value: 'id'
 };
-const leaders = ref<ISysDept.Leader[]>([]);
+const leaders = ref<SysDeptLeader[]>([]);
 
 const selectIds = ref<number[]>([]);
 
