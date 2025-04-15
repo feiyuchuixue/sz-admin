@@ -4,6 +4,7 @@
     :style="{ width: slideData.bigWidth + 70 + 'px' }"
     :close-on-click-modal="false"
     @close="closeSlider"
+    @opened="onDialogOpened"
     align-center
     destroy-on-close
     :close-on-press-escape="false"
@@ -29,30 +30,29 @@
         </div>
       </div>
       <div class="btnBox" ref="wrap">
-        <div class="sliderBox_text">向右滑动，完成验证</div>
+        <div class="sliderBox_text">
+          <span v-if="!isDragging && !slideData.isSuccess">向右滑动，完成验证</span>
+          <span v-if="isDragging">正在滑动，请松开完成验证</span>
+          <span v-if="slideData.isSuccess">验证通过</span>
+        </div>
         <!-- 滑块轨迹显示 -->
         <div class="sliderBox_track" :style="{ width: trackWidth + 'px' }" />
         <!-- 滑块按钮 -->
-        <div class="sliderBox_btn" ref="slider">&gt;</div>
+        <div class="sliderBox_btn" ref="slider" @mousedown="onMouseDown" @touchstart="onTouchStart" tabindex="0">&gt;</div>
       </div>
     </div>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, nextTick, onBeforeUnmount } from 'vue';
+import { ref, reactive, onBeforeUnmount } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
 import { getImageCodeApi, verifyImageCodeApi } from '@/api/modules/system/captcha';
 import { aesEncrypt } from '@/utils';
 
-// 定义组件选项
-defineOptions({
-  name: 'SliderCaptcha'
-});
+defineOptions({ name: 'SliderCaptcha' });
 
-const dialogVisible = ref(false); // 控制对话框可见性
-
-// 定义滑动验证数据结构
+const dialogVisible = ref(false);
 const slideData = reactive({
   big: '',
   small: '',
@@ -62,45 +62,47 @@ const slideData = reactive({
   bigWidth: 320,
   secretKey: ''
 });
+const slider = ref<HTMLDivElement | null>(null);
+const wrap = ref<HTMLDivElement | null>(null);
+const imgK = ref<HTMLImageElement | null>(null);
+const trackWidth = ref(0);
+const overlayMessage = ref('');
+const overlayVisible = ref(false);
+const isVerifying = ref(false);
+const emit = defineEmits(['success', 'close']);
 
-const slider = ref<HTMLDivElement | null>(null); // 滑块元素引用
-const wrap = ref<HTMLDivElement | null>(null); // 滑动容器引用
-const imgK = ref<HTMLImageElement | null>(null); // 小图元素引用
-const trackWidth = ref(0); // 滑动轨迹宽度
-const overlayMessage = ref(''); // 验证结果提示信息
-const overlayVisible = ref(false); // 验证结果提示可见性
-const isVerifying = ref(false); // 是否正在验证标志
-let clearEventListeners: (() => void) | null = null; // 清理事件监听器的函数
-const emit = defineEmits(['success']);
+let isDragging = false;
+let startX = 0;
+let startLeft = 0;
 
-// 检测是否为移动端
-const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-// 接收父组件的参数并初始化滑动验证
 const acceptParams = () => {
   fetchSlideData();
-  dialogVisible.value = true;
 };
 
-// 获取滑动验证数据
 const fetchSlideData = async () => {
-  const { data } = await getImageCodeApi();
-  // 将API返回的数据赋值给滑动验证数据
-  Object.assign(slideData, {
-    big: data.bigImageBase64,
-    small: data.smallImageBase64,
-    posY: data.posY,
-    requestId: data.requestId,
-    bigWidth: data.bigWidth,
-    isSuccess: false,
-    secretKey: data.secretKey
-  });
-  overlayVisible.value = false;
-  overlayMessage.value = '';
-  await nextTick(initializeSlider); // 等待DOM更新后初始化滑块
+  try {
+    const { data } = await getImageCodeApi();
+    Object.assign(slideData, {
+      big: data.bigImageBase64,
+      small: data.smallImageBase64,
+      posY: data.posY,
+      requestId: data.requestId,
+      bigWidth: data.bigWidth,
+      isSuccess: false,
+      secretKey: data.secretKey
+    });
+    overlayVisible.value = false;
+    overlayMessage.value = '';
+    trackWidth.value = 0;
+    dialogVisible.value = true;
+    setTimeout(resetSliderPosition, 50);
+  } catch (error) {
+    console.error('验证失败:', error);
+    overlayVisible.value = true;
+    overlayMessage.value = '获取验证码失败，请刷新重试';
+  }
 };
 
-// 刷新滑动验证
 const refreshSlider = async () => {
   slideData.isSuccess = false;
   overlayVisible.value = false;
@@ -108,14 +110,12 @@ const refreshSlider = async () => {
   await fetchSlideData();
 };
 
-// 关闭滑动验证对话框
 const closeSlider = () => {
   dialogVisible.value = false;
-  if (clearEventListeners) clearEventListeners(); // 清理事件监听器
   resetSlider();
+  emit('close');
 };
 
-// 重置滑块数据
 const resetSlider = () => {
   slideData.big = '';
   slideData.small = '';
@@ -124,125 +124,151 @@ const resetSlider = () => {
   slideData.isSuccess = false;
   slideData.secretKey = '';
   slideData.bigWidth = 320;
+  resetSliderPosition();
 };
 
-// 初始化滑块事件
-const initializeSlider = () => {
+const resetSliderPosition = () => {
+  if (slider.value && imgK.value) {
+    slider.value.style.left = '0px';
+    imgK.value.style.left = '0px';
+    ensureImageYPosition();
+    trackWidth.value = 0;
+  }
+};
+
+const onMouseDown = (e: MouseEvent) => {
+  if (!slider.value || !wrap.value || isVerifying.value || slideData.isSuccess) return;
+  e.preventDefault();
+  startDrag(e.clientX);
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+const onTouchStart = (e: TouchEvent) => {
+  if (!slider.value || !wrap.value || isVerifying.value || slideData.isSuccess) return;
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    startDrag(e.touches[0].clientX);
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd, { passive: false });
+  }
+};
+
+const startDrag = (clientX: number) => {
+  isDragging = true;
+  startX = clientX;
+  startLeft = parseInt(slider.value!.style.left || '0');
+};
+
+const onMouseMove = (e: MouseEvent) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  moveSlider(e.clientX);
+};
+const onTouchMove = (e: TouchEvent) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  if (e.touches.length === 1) moveSlider(e.touches[0].clientX);
+};
+const moveSlider = (clientX: number) => {
   if (!slider.value || !imgK.value || !wrap.value) return;
+  const moveX = clientX - startX;
+  const newLeft = Math.max(0, Math.min(startLeft + moveX, wrap.value.offsetWidth - slider.value.offsetWidth));
+  slider.value.style.left = `${newLeft}px`;
+  imgK.value.style.left = `${newLeft}px`;
+  ensureImageYPosition();
+  trackWidth.value = newLeft;
+};
 
-  slider.value.style.left = '0px';
-  imgK.value.style.left = '0px';
-  imgK.value.style.top = `${slideData.posY}px`;
-  trackWidth.value = 0;
-  const limit = wrap.value.offsetWidth - slider.value.offsetWidth;
-  let offsetX = 0;
-  let initX = 0;
-  let startTime = 0;
+const onMouseUp = async () => {
+  if (!isDragging) return;
+  endDrag();
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mouseup', onMouseUp);
+};
+const onTouchEnd = async () => {
+  if (!isDragging) return;
+  endDrag();
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+};
 
-  // 移动滑块
-  const moveSlider = (clientX: number) => {
-    offsetX = Math.max(0, Math.min(clientX - initX, limit));
-    slider.value!.style.left = `${offsetX}px`;
-    imgK.value!.style.left = `${offsetX}px`;
-    trackWidth.value = offsetX;
-  };
+const ensureImageYPosition = () => {
+  if (imgK.value && slideData.posY !== undefined && slideData.posY !== null) {
+    const yPos = parseInt(String(slideData.posY));
+    imgK.value.style.top = `${yPos}px`;
+    return yPos;
+  }
+  return 0;
+};
 
-  // 滑块鼠标和触摸按下事件处理
-  const handleStart = (e: MouseEvent | TouchEvent) => {
-    initX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
-    startTime = Date.now();
-
-    const handleMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
-      moveSlider(clientX);
-    };
-
-    const handleEnd = async () => {
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleEnd);
-      document.removeEventListener('touchmove', handleMove);
-      document.removeEventListener('touchend', handleEnd);
-      const { iv, encryptedData } = await aesEncrypt(offsetX + '', slideData.secretKey);
+const endDrag = async () => {
+  if (!slider.value || !imgK.value) return;
+  isDragging = false;
+  const currentLeft = parseInt(slider.value.style.left || '0');
+  ensureImageYPosition();
+  if (currentLeft > 0) {
+    try {
+      isVerifying.value = true;
+      const startTime = Date.now();
+      const { iv, encryptedData } = await aesEncrypt(currentLeft + '', slideData.secretKey);
       await verifyImageCode({
         requestId: slideData.requestId,
         startTime,
         moveEncrypted: encryptedData,
         iv: iv
       });
-    };
-
-    if (isMobile) {
-      document.addEventListener('touchmove', handleMove);
-      document.addEventListener('touchend', handleEnd);
-    } else {
-      document.addEventListener('mousemove', handleMove);
-      document.addEventListener('mouseup', handleEnd);
+    } catch (error) {
+      console.error('endDrag err:', error);
+      handleVerificationFailure();
+    } finally {
+      isVerifying.value = false;
     }
-  };
-
-  // 根据设备类型添加滑块按下事件监听
-  if (isMobile) {
-    slider.value.addEventListener('touchstart', handleStart);
-  } else {
-    slider.value.addEventListener('mousedown', handleStart);
   }
-
-  // 清理事件监听器
-  clearEventListeners = () => {
-    document.removeEventListener('mousemove', handleStart);
-    document.removeEventListener('mouseup', handleStart);
-    document.removeEventListener('touchmove', handleStart);
-    document.removeEventListener('touchend', handleStart);
-    slider.value?.removeEventListener('mousedown', handleStart);
-    slider.value?.removeEventListener('touchstart', handleStart);
-  };
 };
 
-// 验证滑动结果
 const verifyImageCode = async (params: { requestId: string; startTime: number; moveEncrypted: string; iv: string }) => {
-  if (isVerifying.value) return; // 防止重复验证
-  isVerifying.value = true;
-
   try {
     const { code } = await verifyImageCodeApi(params);
     const duration = ((Date.now() - params.startTime) / 1000).toFixed(2);
     overlayVisible.value = true;
-
     if (code === '0000') {
       slideData.isSuccess = true;
       overlayMessage.value = `验证成功, 耗时${duration}s`;
       setTimeout(() => {
         emit('success');
         closeSlider();
-      }, 2000); // 2秒后关闭
+      }, 1500);
     } else {
       handleVerificationFailure();
     }
   } catch {
     handleVerificationFailure();
-  } finally {
-    isVerifying.value = false;
   }
 };
 
-// 处理验证失败
 const handleVerificationFailure = () => {
   slideData.isSuccess = false;
   overlayMessage.value = '验证失败';
   overlayVisible.value = true;
-  setTimeout(refreshSlider, 2000); // 2秒后刷新
+  resetSliderPosition();
+  setTimeout(refreshSlider, 1000);
 };
 
-// 组件卸载前清理事件监听器
 onBeforeUnmount(() => {
-  if (clearEventListeners) clearEventListeners();
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mouseup', onMouseUp);
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
 });
 
-// 公开的组件方法
-defineExpose({
-  acceptParams,
-  dialogVisible
-});
+const onDialogOpened = () => {
+  setTimeout(() => {
+    ensureImageYPosition();
+  }, 100);
+};
+
+defineExpose({ acceptParams, dialogVisible });
 </script>
 
 <style scoped lang="scss">

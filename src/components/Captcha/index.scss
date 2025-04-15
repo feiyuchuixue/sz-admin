@@ -112,3 +112,12 @@
     background-color: rgba(217, 83, 79, 0.5); // 失败时的背景颜色
   }
 }
+
+.sliderBox_btn {
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.sliderBox_btn:active {
+  background: #eee;
+}
