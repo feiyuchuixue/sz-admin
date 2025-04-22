@@ -1,4 +1,55 @@
 # 更新日志
+
+## v1.2.0-beta （20250422）
+> [!NOTE]
+>
+> [升级指南](https://szadmin.cn/md/Help/doc/other/upgrade.html#v1-2-0-beta)
+- sz-boot-parent：
+  - 优化：[代码生成器] - 为生成代码增加是否忽略表前缀的功能。PR[#140](https://github.com/feiyuchuixue/sz-boot-parent/pull/140)（感谢[crash](https://github.com/processcrash)）。
+  - 优化：重构**数据权限**核心逻辑，修复部分问题。
+  - 修复：[数据填充]-deptScope属性失败问题
+  - 优化：Websocket相关：简化SocketMessage和TransferMessage类的泛型使用
+  - 新增：系统消息功能
+  - 新增：[演示] 消息发送接口
+  - 新增：[CICD] Docker Sz-Socket CI Prod.yml
+  - 优化：提高用户元数据变更性能
+- sz-admin：
+  - 修复：滑块验证码在某些浏览器无法滑动的问题
+  - 新增：分类筛选器组件
+  - 优化：滑块验证码的耗时计算逻辑
+  - 新增：系统消息功能（搭配Websocket可体验完整功能）
+  - 新增：功能演示
+  - 新增：关于项目
+  - 新增：全局菜单：[消息、功能演示菜、关于项目]
+
+## v1.1.0-beta （20250406）
+
+> [!NOTE]
+>
+> [升级指南](https://szadmin.cn/md/Help/doc/other/upgrade.html#v1-1-0-beta)
+
+- sz-boot-parent：
+  - 依赖升级：
+    - spring-boot-starter-parent：3.4.2  -> 3.4.4。
+    - mybatis-flex.version：1.10.8  -> 1.10.9。
+    - sa-token：1.40.0 -> 1.41.0。
+    - swagger-annotations：2.2.27 -> 2.2.29。
+    - aspectjweaver：1.9.22.10 -> 1.9.23。
+    - springdoc-openapi-starter-webmvc-ui: 2.8.3 -> 2.8.6
+    - aws-crt： 0.33.7 -> 0.37.0
+    - HikariCP：6.2.1 -> 6.3.0
+    - aws.s3：2.29.50 -> 2.31.11
+  - 优化：[代码生成器] - 添加/api/types/*.ts生成模板
+- sz-admin：
+  - 升级：Eslint8.x -> Eslint9
+    - <font color="red">可能的破坏性更新： </font>切换目录`/api/interface`至`/api/types`
+  - 新增：`useDictOptions` Hook
+  - 优化：同步`useDictOptions` Hook写法
+  - 修复：某些情况下部门树多选报错的问题
+  - 优化：@import scss 官方已不推荐使用，修改为 @use
+  - 更新：pnpm 依赖
+
+
 ## v1.0.2-beta （20250302）
 
 - sz-boot-parent：
