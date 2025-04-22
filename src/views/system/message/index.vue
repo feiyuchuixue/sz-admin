@@ -4,11 +4,6 @@
       <SelectFilter :data="selectFilterData" :default-values="selectFilterValues" @change="changeSelectFilter" />
     </div>
     <ProTable ref="proTableRef" title="消息列表" :indent="20" :columns="columns" :request-api="getTableList">
-      <!-- 表格 header 按钮 -->
-      <template #tableHeader="scope">
-        <ElButton type="danger" :icon="Delete" plain :disabled="!scope.isSelected"> 批量删除 </ElButton>
-      </template>
-
       <template #operation="{ row }">
         <el-button type="primary" link :icon="View" @click="handleDetail(row.id)"> 详情 </el-button>
       </template>
