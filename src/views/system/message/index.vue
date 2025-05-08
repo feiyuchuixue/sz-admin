@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { Delete, View } from '@element-plus/icons-vue';
+import { View } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import { onMounted, reactive, ref } from 'vue';
