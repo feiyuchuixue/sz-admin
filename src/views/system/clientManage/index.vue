@@ -69,7 +69,7 @@ import type { SysClientQuery, SysClientRow } from '@/api/types/system/client';
 import { ref } from 'vue';
 import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
-  name: 'SysClientView'
+  name: 'ClientManageView'
 });
 const proTableRef = ref<ProTableInstance>();
 

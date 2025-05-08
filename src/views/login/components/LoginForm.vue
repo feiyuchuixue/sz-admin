@@ -83,7 +83,7 @@ const performLogin = async () => {
     await initDynamicRouter();
 
     tabsStore.closeMultipleTab();
-    keepAliveStore.setKeepAliveName();
+    keepAliveStore.setKeepAliveName([]);
 
     router.push(HOME_URL);
     ElNotification({
