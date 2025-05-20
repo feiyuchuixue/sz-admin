@@ -7,6 +7,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import viteCompression from 'vite-plugin-compression';
+import pkg from './package.json';
 
 // 由于我们使用的是 ESM，不再需要 const path = require('node:path');
 // 直接使用 import { resolve } from 'path'; 即可
@@ -35,6 +36,9 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         deleteOriginFile: false // 不删除源文件
       })
     ],
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version)
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

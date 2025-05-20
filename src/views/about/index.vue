@@ -53,8 +53,7 @@
 </template>
 
 <script setup lang="ts" name="about">
-import pkg from 'package.json';
-const version: string = pkg.version;
+const version: string = __APP_VERSION__;
 </script>
 
 <style lang="scss" scoped>
