@@ -80,7 +80,7 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {
   type: 'image',
-  tip: '请上传符合标准格式的文件',
+  tip: '',
   multiple: false,
   drag: true,
   limit: 1,
