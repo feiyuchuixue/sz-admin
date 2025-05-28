@@ -9,9 +9,13 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles v-model:modelValue="fileUrls" multiple :file-size="3" @change="fileChange">
-          <template #tip> 文件大小不能超过 3M </template>
-        </UploadFiles>
+        <UploadFiles
+          v-model:modelValue="fileUrls"
+          multiple
+          :file-size="3"
+          @change="fileChange"
+          accept=".xlsx,.xls,.docx,.doc,.pdf"
+        />
       </el-form-item>
       <el-form-item label="模版名" prop="tempName">
         <el-input v-model="paramsProps.row.tempName" placeholder="请填写模版名" clearable />

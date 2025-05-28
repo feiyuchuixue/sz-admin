@@ -25,6 +25,7 @@
     <template #tip>
       <div class="el-upload__tip">
         <slot name="tip" />
+        {{ props.tip || `请上传 ${props.accept} 标准格式文件，大小不能超过 ${props.fileSize}M！` }}
       </div>
     </template>
     <template #file="{ file }">
@@ -79,12 +80,12 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {
   type: 'image',
-  tip: '',
+  tip: '请上传符合标准格式的文件',
   multiple: false,
   drag: true,
   limit: 1,
   fileSize: 5,
-  accept: '',
+  accept: '.xlsx,.xls,.docx,.doc,.pdf',
   modelValue: () => []
 });
 
@@ -139,8 +140,9 @@ watch(
  * @param rawFile 选择的文件
  * */
 const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
+  // 1. 校验文件大小
   const fileSize = rawFile.size / 1024 / 1024 < props.fileSize;
-  if (!fileSize)
+  if (!fileSize) {
     setTimeout(() => {
       ElNotification({
         title: '温馨提示',
@@ -148,7 +150,25 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
         type: 'warning'
       });
     }, 0);
-  return fileSize;
+    return false; // 阻止上传
+  }
+
+  // 2. 校验文件类型
+  const ext = rawFile.name.substring(rawFile.name.lastIndexOf('.')).toLowerCase();
+  const acceptList = props.accept.split(',').map(item => item.trim().toLowerCase());
+  console.log('acceptList', acceptList);
+  if (!acceptList.includes(ext)) {
+    setTimeout(() => {
+      ElNotification({
+        title: '温馨提示',
+        message: `仅支持 ${props.accept}格式的文件上传！`,
+        type: 'warning'
+      });
+    }, 0);
+    return false;
+  }
+
+  return true;
 };
 
 /**
