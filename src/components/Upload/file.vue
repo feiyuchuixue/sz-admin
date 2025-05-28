@@ -28,39 +28,34 @@
       </div>
     </template>
     <template #file="{ file }">
-      <ul class="el-upload-list el-upload-list--text">
-        <li class="el-upload-list__item is-success" tabindex="0">
-          <div class="el-upload-list__item-info">
-            <a class="el-upload-list__item-name">
-              <el-icon class="el-icon el-icon--document">
-                <Document />
-              </el-icon>
-              <span class="el-upload-list__item-file-name" :title="file.name" :style="{ width: `calc(${width} - 80px)` }">
-                {{ file.name }}
-              </span>
-            </a>
-          </div>
-          <el-progress
-            v-if="file.status === 'uploading'"
-            type="line"
-            :stroke-width="2"
-            :percentage="file.percentage"
-            style="margin-top: 0.5rem"
-          />
-          <el-icon v-if="file.status === 'success'" class="el-icon el-icon--remove" @click="handleRemove(file)">
-            <Close />
-          </el-icon>
-          <el-icon v-if="file.status === 'success'" class="el-icon el-icon--download" @click="handlerDownloadFile(file)">
+      <li class="el-upload-list__item is-success">
+        <div class="el-upload-list__item-row">
+          <el-icon class="el-icon--document"><Document /></el-icon>
+          <span class="el-upload-list__item-file-name" :title="file.name">{{ file.name }}</span>
+          <span v-if="file.status === 'uploading'" class="file-progress-text"> {{ Math.round(file.percentage || 0) }}% </span>
+          <el-icon v-if="file.status === 'success'" class="el-icon--download" @click="handlerDownloadFile(file)">
             <Download />
           </el-icon>
-        </li>
-      </ul>
+          <el-icon v-if="file.status === 'success'" class="el-icon--remove" @click="handleRemove(file)">
+            <Close />
+          </el-icon>
+        </div>
+        <!-- 上传中才显示进度条 -->
+        <el-progress
+          v-if="file.status === 'uploading'"
+          class="el-upload-list__item-progress"
+          type="line"
+          :stroke-width="2"
+          :percentage="file.percentage"
+          :show-text="false"
+        />
+      </li>
     </template>
   </el-upload>
 </template>
 
 <script setup lang="ts">
-import { Download, UploadFilled } from '@element-plus/icons-vue';
+import { Close, Document, Download, UploadFilled } from '@element-plus/icons-vue';
 import { ref, watch } from 'vue';
 import { uploadTmpFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
@@ -72,21 +67,17 @@ defineOptions({
 });
 
 type Props = {
-  fileList?: UploadUserFile[];
   type?: string;
   tip?: string;
   multiple?: boolean;
   drag?: boolean;
-  limit?: number; // 最大图片上传数 ==> 非必传（默认为 5张）
+  limit?: number; // 最大图片上传数 ==> 非必传（默认为 1张）
   fileSize?: number; // 图片大小限制 ==> 非必传（默认为 5M）
   accept?: string;
   modelValue?: string | string[];
-  height?: string; // 组件高度 ==> 非必传（默认为 150px）
-  width?: string; // 组件宽度 ==> 非必传（默认为 150px）
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  fileList: () => [],
   type: 'image',
   tip: '',
   multiple: false,
@@ -94,24 +85,53 @@ const props = withDefaults(defineProps<Props>(), {
   limit: 1,
   fileSize: 5,
   accept: '',
-  height: '150px',
-  width: '200px'
+  modelValue: () => []
 });
 
 const emit = defineEmits<{
-  'update:modelValue': [string | (string | undefined)[]];
-  'update:fileList': [value: UploadUserFile[]];
-  change: [value: IUploadResult];
+  'update:modelValue': [string | string[]];
+  change: [value: IUploadResult | null];
 }>();
 const _fileList = ref<UploadUserFile[]>([]);
 
-// 监听 props.fileList 列表默认值改变
+// 辅助：把modelValue（url数组）转换成UploadUserFile[]
+function urlsToUserFiles(urls: string[]): UploadUserFile[] {
+  return urls.filter(Boolean).map(url => {
+    // 尽量回显名字，如果url有文件名可以自行处理
+    const name = url.split('/').pop();
+    return { name, url, status: 'success' } as UploadUserFile;
+  });
+}
+
+// 辅助：fileList -> url数组
+function userFilesToUrls(list: UploadUserFile[]): string[] {
+  return list.filter(f => !!f.url).map(f => f.url as string);
+}
+
+// modelValue to fileList
 watch(
-  props.fileList,
-  (newFileList: UploadUserFile[]) => {
-    _fileList.value = [...newFileList]; // 深拷贝防止引用问题
+  () => props.modelValue,
+  newVal => {
+    const urls = Array.isArray(newVal) ? newVal : newVal ? [newVal] : [];
+    // 只有当外部变更和内部不一致时才同步
+    if (JSON.stringify(userFilesToUrls(_fileList.value)) !== JSON.stringify(urls)) {
+      _fileList.value = urlsToUserFiles(urls);
+    }
   },
-  { immediate: true } // 初始化时执行
+  { immediate: true }
+);
+
+// fileList to modelValue
+watch(
+  _fileList,
+  list => {
+    const urls = userFilesToUrls(list);
+    // 只有当变化时才 emit
+    if (JSON.stringify(props.modelValue) !== JSON.stringify(urls)) {
+      emit('update:modelValue', props.limit === 1 ? urls[0] || '' : urls);
+    }
+  },
+  { deep: true }
 );
 
 /**
@@ -120,13 +140,6 @@ watch(
  * */
 const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
   const fileSize = rawFile.size / 1024 / 1024 < props.fileSize;
-  /*  const imgType = props.fileType.includes(rawFile.type as File.ImageMimeType);
-    if (!imgType)
-      ElNotification({
-        title: '温馨提示',
-        message: '上传图片不符合所需的格式！',
-        type: 'warning'
-      });*/
   if (!fileSize)
     setTimeout(() => {
       ElNotification({
@@ -135,7 +148,7 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
         type: 'warning'
       });
     }, 0);
-  return /*imgType &&*/ fileSize;
+  return fileSize;
 };
 
 /**
@@ -175,13 +188,11 @@ const handleSuccess = (response: IUploadResult | undefined, file: UploadFile) =>
   if (!response) return;
   file.url = response.url;
   file.name = response.filename;
-  emit('update:fileList', _fileList.value);
   emit('change', response);
 };
 
 const handleRemove = (file: UploadFile) => {
   _fileList.value = _fileList.value.filter(item => item.url !== file.url || item.name !== file.name);
-  emit('update:fileList', _fileList.value);
   emit('change', null);
 };
 
@@ -206,126 +217,132 @@ class CustomUploadProgressEvent extends ProgressEvent {
 </script>
 
 <style scoped lang="scss">
-:deep(.el-upload-dragger) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: v-bind(width);
-  height: v-bind(height);
-  padding: 0;
-  overflow: hidden;
-  background-color: transparent;
-  border: 1px dashed var(--el-border-color-darker);
-
-  &:hover {
-    border: 1px dashed var(--el-color-primary);
-  }
-}
-
-.note-box {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  .upload_icon {
-    font-size: 32px;
-    margin-bottom: 1px;
-  }
-}
-
-.upload-info-box {
+.upload {
   width: 100%;
-
-  .upload-type {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
-    font-size: 24px;
-  }
-}
-
-.el-upload__tip {
-  line-height: 15px;
-  text-align: center;
-}
-
-.upload-box {
+  min-width: 240px;
+  min-height: 120px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
 }
-
-.upload-file-list .upload-file-item {
-  margin-top: 10px;
+.el-upload-list__item-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 3px;
+  min-width: 0;
 }
-
-.upload-file-list .file-name,
-.upload-file-list .file-size {
-  margin-right: 10px;
+.el-upload-list__item-row .el-icon--document {
+  color: #409eff; // 主色蓝
+  font-size: 18px; // 合适大小
+  margin-right: 5px; // 和文件名间距
+  vertical-align: middle;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
 .el-upload-list__item-file-name {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 60vw; // 或 100%，根据父容器调整
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: left;
-  font-size: 14px;
-}
-
-:deep(.el-upload-list__item) {
-  transition: none;
-}
-
-.el-upload-list__item .el-icon--remove {
-  font-size: medium;
-  color: var(--el-text-color-regular);
   cursor: pointer;
-  opacity: 0.75;
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  transition: opacity var(--el-transition-duration);
 }
-
-.el-upload-list__item .el-icon--remove:hover {
-  font-weight: bold;
-  color: crimson;
+.file-progress-text {
+  font-size: 13px;
+  color: #409eff;
+  min-width: 32px;
+  text-align: right;
+  margin-left: 6px;
 }
-
-.el-upload-list__item .el-icon--download {
-  font-size: medium;
-  color: var(--el-text-color-regular);
+.el-icon--download,
+.el-icon--remove {
+  margin-left: 8px;
   cursor: pointer;
-  opacity: 0.75;
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  padding-right: 10px;
-  transform: translateY(-50%);
-  transition: opacity var(--el-transition-duration);
+  color: #b0b0b0;
+  font-size: 17px;
+  transition:
+    color 0.18s,
+    transform 0.18s;
+  opacity: 0.88;
 }
 
-.el-upload-list__item .el-icon--download:hover {
-  font-weight: bold;
-  color: deepskyblue;
+.el-icon--download:hover {
+  color: #409eff; // 下载高亮为主题蓝
+  opacity: 1;
+  transform: scale(1.18); // 放大一点点
 }
 
-.el-upload-list .el-upload-list--text {
-  line-height: 24px;
-  font-size: 28px;
+.el-icon--remove:hover {
+  color: #e45757; // 删除高亮为红色
+  opacity: 1;
+  transform: scale(1.18);
 }
-
-:deep(.el-progress__text) {
+.el-upload-list__item-progress {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  width: 96%;
+  align-self: flex-start;
+}
+:deep(.el-upload-dragger) {
+  width: 100% !important;
+  min-height: 112px;
+  border: 1.5px dashed #d4d8dd; // 柔和浅灰色边框
+  border-radius: 8px;
+  background: #fafbfc; // 更淡的灰白底色
+  transition:
+    border-color 0.22s,
+    background 0.22s;
+  color: #999;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover,
+  &.is-dragover {
+    border-color: #6ea8fa; // 仅hover/drag时主色变蓝
+    background: #f3f8ff;
+  }
+}
+
+.upload_icon {
+  font-size: 32px;
+  color: #7fb8ec; // 柔和中性蓝
+  margin-bottom: 8px;
+  transition: color 0.18s;
+}
+
+.el-upload__text {
+  font-size: 16px;
+  color: #3a4256; // 深灰色更稳重
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.el-upload__text a {
+  color: #4594e3; // 低饱和蓝
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.el-upload__text a:hover {
+  color: #1867c0;
+}
+
+.el-upload__tip {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #b0b6bc;
+}
+.upload :deep(.el-list-enter-active),
+.upload :deep(.el-list-leave-active),
+.upload :deep(.el-list-move),
+.upload :deep(.el-upload-list__item) {
+  animation: none !important;
+  transition: none !important;
 }
 </style>

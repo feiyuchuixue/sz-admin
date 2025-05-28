@@ -2,22 +2,14 @@
   <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="580px" draggable>
     <el-form
       ref="ruleFormRef"
-      label-width="140px"
+      label-width="80px"
       label-suffix=" :"
       :rules="rules"
       :model="paramsProps.row"
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles
-          v-model:file-list="fileList"
-          multiple
-          :file-size="3"
-          width="300px"
-          height="200px"
-          @change="fileChange"
-          :accept="'.xlsx,.xls,.doc,.docx'"
-        >
+        <UploadFiles v-model:modelValue="fileUrls" multiple :file-size="3" @change="fileChange">
           <template #tip> 文件大小不能超过 3M </template>
         </UploadFiles>
       </el-form-item>
@@ -40,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
-import { type ElForm, ElMessage, type UploadUserFile } from 'element-plus';
+import { type ElForm, ElMessage } from 'element-plus';
 import UploadFiles from '@/components/Upload/file.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
 
@@ -58,20 +50,13 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
-const fileList = ref<UploadUserFile[]>();
+const fileUrls = ref<string[]>([]);
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
-  fileList.value = params.row.url
-    ? [
-        {
-          name: getFileNameFromUrl(params.row.url),
-          url: params.row.url
-        }
-      ]
-    : [];
+  fileUrls.value = params.row.url;
 };
 
 // 提交数据（新增/编辑）
@@ -80,6 +65,8 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
+      const urlArr = fileUrls.value;
+      paramsProps.value.row.url = urlArr[0];
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
@@ -94,12 +81,6 @@ const fileChange = (file: IUploadResult) => {
   if (paramsProps.value.isAdd) paramsProps.value.row.tempName = file?.filename; // 如果是新增，便利性带入文件名
   paramsProps.value.row.url = file?.url;
   paramsProps.value.row.sysFileId = file?.fileId;
-};
-const getFileNameFromUrl = (url: string) => {
-  // 使用正则表达式提取文件名
-  const regex = /\/([^/]+)$/;
-  const match = url.match(regex);
-  return match ? match[1] : '';
 };
 
 defineExpose({
