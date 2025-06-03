@@ -83,9 +83,9 @@ const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<TeacherStatisticsRow>[] = [
   { type: 'selection', width: 80 },
-  { prop: 'year', label: '统计年限' },
-  { prop: 'month', label: '统计月份' },
-  { prop: 'duringTime', label: '统计年月' },
+  { prop: 'year', label: '年限', width: 90 },
+  { prop: 'month', label: '月份', width: 90 },
+  { prop: 'duringTime', label: '年月' },
   { prop: 'teacherId', label: '教师id' },
   {
     prop: 'teacherCommonType',
@@ -96,11 +96,12 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
       label: 'codeName',
       value: 'id',
       tagType: 'callbackShowStyle'
-    }
+    },
+    width: 150
   },
-  { prop: 'totalTeaching', label: '授课总数' },
-  { prop: 'totalClassCount', label: '服务班次数' },
-  { prop: 'totalHours', label: '课时总数' },
+  { prop: 'totalTeaching', label: '授课总数', width: 90 },
+  { prop: 'totalClassCount', label: '服务班次', width: 90 },
+  { prop: 'totalHours', label: '课时总数', width: 90 },
   {
     prop: 'checkStatus',
     label: '核对状态',
@@ -110,11 +111,38 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
       label: 'codeName',
       value: 'id',
       tagType: 'callbackShowStyle'
-    }
+    },
+    width: 120
   },
-  { prop: 'checkTime', label: '核对时间' },
-  { prop: 'lastSyncTime', label: '最近一次同步时间' },
-  { prop: 'remark', label: '备注' },
+  { prop: 'checkTime', label: '核对时间', width: 160 },
+  { prop: 'lastSyncTime', label: '最近一次同步时间', width: 160 },
+  { prop: 'remark', label: '备注', width: 160 },
+  {
+    prop: 'createId',
+    label: '创建人',
+    tag: true,
+    enum: useDictOptions('dynamic_user_options'),
+    fieldNames: {
+      label: 'codeName',
+      value: 'id',
+      tagType: 'callbackShowStyle'
+    },
+    width: 150
+  },
+  { prop: 'createTime', label: '创建时间', width: 160 },
+  {
+    prop: 'updateId',
+    label: '更新人',
+    tag: true,
+    enum: useDictOptions('dynamic_user_options'),
+    fieldNames: {
+      label: 'codeName',
+      value: 'id',
+      tagType: 'callbackShowStyle'
+    },
+    width: 150
+  },
+  { prop: 'updateTime', label: '更新时间', width: 160 },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
 ];
 // 搜索条件项

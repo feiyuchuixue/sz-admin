@@ -6,8 +6,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import pkg from 'package.json';
-const version: string = pkg.version;
+const version: string = __APP_VERSION__;
 </script>
 <style scoped lang="scss">
 @use './index';

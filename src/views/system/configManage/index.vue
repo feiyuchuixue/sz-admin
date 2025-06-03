@@ -36,7 +36,7 @@ import type { ConfigQuery, ConfigInfo } from '@/api/types/system/config';
 import { ref } from 'vue';
 
 defineOptions({
-  name: 'DictManage'
+  name: 'ConfigManage'
 });
 
 // 表格配置项

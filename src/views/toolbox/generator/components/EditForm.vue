@@ -668,9 +668,6 @@ watchEffect(() => {
     updateColumnVisibility('isExport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasExport === '1');
     updateColumnVisibility('queryType', genType === 'all' || genType === 'server');
     updateColumnVisibility('htmlType', genType === 'all');
-    updateColumnVisibility('dictType', genType === 'all');
-    updateColumnVisibility('dictShowWay', genType === 'all');
-
     // 如果有其他类似的属性，也可以在这里进行处理
   } catch (error) {
     console.error('Error in watchEffect:', error);

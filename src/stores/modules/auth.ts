@@ -37,6 +37,98 @@ export const useAuthStore = defineStore('auth', () => {
   async function getAuthMenuList() {
     const { data } = await getAuthMenuListApi();
     authMenuList.value = data;
+
+    const beforeMenuList: Menu.MenuOptions[] = [
+      {
+        id: 'b6c6433509ab405f94796cc93752d417',
+        pid: '0',
+        path: '/system/message',
+        name: 'Message',
+        sort: 1,
+        component: '/system/message/index',
+        meta: {
+          icon: 'Bell',
+          title: '消息',
+          isLink: '',
+          isHidden: 'F',
+          isFull: 'F',
+          isAffix: 'F',
+          isKeepAlive: 'F',
+          useDataScope: 'F'
+        },
+        children: [],
+        permissions: '',
+        menuTypeCd: '1002002'
+      },
+      {
+        id: '6abae64123b746808837ae61bf8d08fb',
+        pid: '0',
+        path: '/system/message/:id',
+        name: 'MessagePopup',
+        sort: 2,
+        component: '/system/message/index',
+        meta: {
+          icon: 'Bell',
+          title: '消息详情',
+          isLink: '',
+          isHidden: 'T',
+          isFull: 'F',
+          isAffix: 'F',
+          isKeepAlive: 'F',
+          useDataScope: 'F'
+        },
+        children: [],
+        permissions: '',
+        menuTypeCd: '1002002'
+      }
+    ];
+    authMenuList.value.unshift(...beforeMenuList);
+
+    const afterMenuList: Menu.MenuOptions[] = [
+      {
+        id: 'c6328b228c2c4e6bb5b1beb83110dcfa',
+        pid: '0',
+        path: '/demo',
+        name: 'demo',
+        sort: 500,
+        component: '/demo/index',
+        meta: {
+          icon: 'Flag',
+          title: '功能演示',
+          isLink: '',
+          isHidden: 'F',
+          isFull: 'F',
+          isAffix: 'F',
+          isKeepAlive: 'F',
+          useDataScope: 'F'
+        },
+        children: [],
+        permissions: '',
+        menuTypeCd: '1002002'
+      },
+      {
+        id: 'c0a0eba2922346b0b8ae9d4dd951498e',
+        pid: '0',
+        path: '/about/index',
+        name: 'about',
+        sort: 600,
+        component: '/about/index',
+        meta: {
+          icon: 'InfoFilled',
+          title: '关于项目',
+          isLink: '',
+          isHidden: 'F',
+          isFull: 'F',
+          isAffix: 'F',
+          isKeepAlive: 'F',
+          useDataScope: 'F'
+        },
+        children: [],
+        permissions: '',
+        menuTypeCd: '1002002'
+      }
+    ];
+    authMenuList.value.push(...afterMenuList);
   }
 
   // Get AuthRoleList

@@ -1,12 +1,105 @@
 # 更新日志
 
+## v1.2.2-beta （20250528）
+
+> [!NOTE]
+>
+> [升级指南](https://szadmin.cn/md/Help/doc/other/upgrade.html#v1.2.2-beta)
+
+- sz-boot-parent：
+
+  - 优化：将**继承** `WebMvcConfigurationSupport`改为**实现** `WebMvcConfigurer`，提升框架兼容性。
+  - 修复：[数据权限]-一些已知问题。
+  - 优化：[代码生成器]
+    - 导入数据表添加对createId/updateId/createTime/updateTime常用字段的支持。
+    - 前端模版添加对useDict生成的支持
+    - SQL Insert 支持IGNORE
+    - Teacher演示案例的同步改造
+    - 代码模版格式优化
+  - 新增: [sz-common-wechat]-新增企业微信消息发送的支持。
+- sz-admin：
+
+  - 修复：版本号读取异常问题。
+  - 优化：[演示案例] - 教师统计。
+  - 优化：UploadFiles多文件上传组件, 简化使用方式并修复一些问题。
+
+## v1.2.1-beta （20250509）
+
+> [!NOTE]
+>
+> [升级指南](https://szadmin.cn/md/Help/doc/other/upgrade.html#v1.2.1-beta)
+
+- sz-boot-parent：
+
+  - 新增：Liquibase数据库管理，弃用Flyway配置 (**Flyway 将于v1.3.0-beta 版本弃用**)。
+  - 修改：已支持Liquibase，默认配置关闭Flyway（将于v1.3.0-beta版本弃用）。
+  - 修复：部分菜单路由名称与组件名称不一致时导致的菜单keep-alive缓存失效问题。
+  - 修改：README.md 添加deepwiki。感谢[dongyu6/main](https://github.com/dongyu6)。
+
+- sz-admin：
+
+  - 优化：.env环境变量，无需指定`.env.development.local `文件即可使用。
+  - 升级：sass 1.79.6 -> 1.87.0, vite 5.4.17 -> 6.3.4，以及其他依赖的同步升级。
+  - 修复：部分菜单路由名称与组件名称不一致时导致的菜单keep-alive缓存失效问题。
+  - 修改：README.md 添加deepwiki。（感谢[dongyu6/main](https://github.com/dongyu6)）。
+
+## v1.2.0-beta （20250422）
+> [!NOTE]
+>
+> [升级指南](https://szadmin.cn/md/Help/doc/other/upgrade.html#v1-2-0-beta)
+- sz-boot-parent：
+  - 优化：[代码生成器] - 为生成代码增加是否忽略表前缀的功能。PR[#140](https://github.com/feiyuchuixue/sz-boot-parent/pull/140)（感谢[crash](https://github.com/processcrash)）。
+  - 优化：重构**数据权限**核心逻辑，修复部分问题。
+  - 修复：[数据填充]-deptScope属性失败问题
+  - 优化：Websocket相关：简化SocketMessage和TransferMessage类的泛型使用
+  - 新增：系统消息功能
+  - 新增：[演示] 消息发送接口
+  - 新增：[CICD] Docker Sz-Socket CI Prod.yml
+  - 优化：提高用户元数据变更性能
+- sz-admin：
+  - 修复：滑块验证码在某些浏览器无法滑动的问题
+  - 新增：分类筛选器组件
+  - 优化：滑块验证码的耗时计算逻辑
+  - 新增：系统消息功能（搭配Websocket可体验完整功能）
+  - 新增：功能演示
+  - 新增：关于项目
+  - 新增：全局菜单：[消息、功能演示菜、关于项目]
+
+## v1.1.0-beta （20250406）
+
+> [!NOTE]
+>
+> [升级指南](https://szadmin.cn/md/Help/doc/other/upgrade.html#v1-1-0-beta)
+
+- sz-boot-parent：
+  - 依赖升级：
+    - spring-boot-starter-parent：3.4.2  -> 3.4.4。
+    - mybatis-flex.version：1.10.8  -> 1.10.9。
+    - sa-token：1.40.0 -> 1.41.0。
+    - swagger-annotations：2.2.27 -> 2.2.29。
+    - aspectjweaver：1.9.22.10 -> 1.9.23。
+    - springdoc-openapi-starter-webmvc-ui: 2.8.3 -> 2.8.6
+    - aws-crt： 0.33.7 -> 0.37.0
+    - HikariCP：6.2.1 -> 6.3.0
+    - aws.s3：2.29.50 -> 2.31.11
+  - 优化：[代码生成器] - 添加/api/types/*.ts生成模板
+- sz-admin：
+  - 升级：Eslint8.x -> Eslint9
+    - <font color="red">可能的破坏性更新： </font>切换目录`/api/interface`至`/api/types`
+  - 新增：`useDictOptions` Hook
+  - 优化：同步`useDictOptions` Hook写法
+  - 修复：某些情况下部门树多选报错的问题
+  - 优化：@import scss 官方已不推荐使用，修改为 @use
+  - 更新：pnpm 依赖
+
+
 ## v1.0.2-beta （20250302）
 
 - sz-boot-parent：
   - 依赖升级：
-    - mybatis-flex.version：1.10.7 -> 1.10.8。
+    - mybatis-flex.version：1.10.7  -> 1.10.8。
   - 优化：更新OSS配置，添加协议scheme支持并**弃用isHttps字段**。
-    - <font color="red">可能的破坏性更新： </font>请切换`isHttps=true/false"` 为` scheme="https/http"`
+    -  <font color="red">可能的破坏性更新： </font>请切换`isHttps=true/false"` 为` scheme="https/http"`
   - 优化：重构isNotNull方法，支持更广泛的集合类型。
   - 优化：重构BeanCopyUtils以使用单例ModelMapper实例。
   - 优化：【代码生成器】添加将bigint类型映射成long Java类型处理。
@@ -18,13 +111,12 @@
   - 新增：[Hook] useDict 的演示案例。
   - 修改：删除字典接口注释。**Issue**[#11](https://github.com/feiyuchuixue/sz-admin/issues/11)（感谢[Kang-Yang](https://github.com/Kang-Yang)）。
   - 修改：README中的地址更正。**Issue**[#12](https://github.com/feiyuchuixue/sz-admin/issues/12)（感谢[Kang-Yang](https://github.com/Kang-Yang)）。
-
 ## v1.0.1-beta （20250215）
 
 - sz-boot-parent：
   - 依赖升级：
-    - spring-boot-starter-parent：3.4.1 -> 3.4.2。
-    - mybatis-flex.version：1.10.5 -> 1.10.7。
+    - spring-boot-starter-parent：3.4.1  -> 3.4.2。
+    - mybatis-flex.version：1.10.5  -> 1.10.7。
     - sa-token：1.39.0 -> 1.40.0。
     - excel-fastexcel：1.0.0 -> 1.1.0。
     - mysql-connector-j：9.1.0 -> 9.2.0。
@@ -39,15 +131,13 @@
   - 修复：AES-GCM加密方法在某些场景（浏览器）不可用的问题（行为验证码）。
   - 优化：【代码生成器】- 生成信息中**上级菜单=目录**时与模块名的联动。
   - 新增：第三方开源库和许可证文件说明
-
 ## v1.0.0-beta （20250128）| 大型更新
 
 - sz-boot-parent：
   - 优化：sonar 代码（质量）规范化
 - sz-admin：
   - 优化：sonar 代码（质量）规范化
-  -
-
+  - 
 ## v0.9.0 （20250119）
 
 - sz-boot-parent：
@@ -57,7 +147,6 @@
   - 优化：qodana 代码（质量）规范化
 - sz-admin：
   - 无
-
 ## v0.8.8 （20250118）
 
 - sz-boot-parent：
@@ -73,16 +162,15 @@
   - 修复：[部门管理] 上级部门为`根部门`时编辑校验未通过的问题。
   - 依赖升级：
     - spotless-maven-plugin：2.43.0 -> 2.44.1。
-    - mybatis-flex.version：1.10.2 -> 1.10.5。
+    - mybatis-flex.version：1.10.2  -> 1.10.5。
     - aws.s3.version：2.29.23 -> 2.29.50。
-    - springdoc-openapi-starter-webmvc-ui：2.7.0 -> 2.8.3。
+    - springdoc-openapi-starter-webmvc-ui：2.7.0  ->  2.8.3。
     - modelmapper：3.2.1 -> 3.2.2。
     - swagger-annotations：2.2.26 -> 2.2.27。
 - sz-admin：
 
   - 修复：个别浏览器Socket异常的问题。
   - 优化：[行为验证码-滑块验证] 添加对移动端浏览器的支持。
-
 ## v0.8.7 （20250109）
 
 - sz-boot-parent：
@@ -97,12 +185,11 @@
   - 新增：行为验证码-滑块验证
   - 新增：远程搜索下拉选择组件
   - 新增：[演示案例] 远程搜索下拉选择组件
-
 ## v0.8.6 （20250102）
 
 - sz-boot-parent：
   - 修复: sys_config 缓存时间问题。
-  - 修改: 移动配置文件至项目【根目录】下。| <font color="red">可能的破坏性更新 </font>
+  - 修改: 移动配置文件至项目【根目录】下。|  <font color="red">可能的破坏性更新 </font>
   - 修改: 移除pom镜像源配置
   - 修改: Dockerfile 增加配置目录挂载的支持
   - 新增: GitHub Action workflow |
@@ -113,7 +200,6 @@
   - 新增：Dockerfile
   - 修改：.env.production 配置
   - 新增：GitHub Action workflow
-
 ## v0.8.5 （20241229）
 
 - sz-boot-parent：
@@ -121,7 +207,7 @@
   - 修复：部门编辑时层级deep赋值不正确问题。
   - 修复：前端module模板文件导入excel缺少参数问题。
   - 修复：部门列表节点数量展示问题。
-  - 优化：升级EasyExcel为FastExcel。 | <font color="red">可能的破坏性更新 （easyExcel -> fastExcel 的Package包切换）</font>
+  - 优化：升级EasyExcel为FastExcel。 |  <font color="red">可能的破坏性更新 （easyExcel -> fastExcel 的Package包切换）</font>
   - 优化：增强 Excel 导入异常处理，新增表头校验功能。详见[Excel导入导出](https://szadmin.cn/md/Help/doc/excel.html)
   - 依赖升级：
     - spring-boot-starter-parent：3.4.0 -> 3.4.1。
@@ -130,13 +216,12 @@
   - 优化：文件上传模板组件样式。（感谢[Alex-1116](https://github.com/Alex-1116)）
   - 优化：Excel导入组件，增加上传进度的支持。
   - 优化：axios对全局response error的处理。
-
 ## v0.8.4 （20241216）
 
 - sz-boot-parent：
   - 依赖升级：
-    - spring-boot-starter-parent：3.3.5 -> 3.4.0。
-    - mybatis-flex.version：1.9.7 -> 1.10.2。
+    - spring-boot-starter-parent：3.3.5  -> 3.4.0。
+    - mybatis-flex.version：1.9.7  -> 1.10.2。
     - aws-crt：0.33.0 -> 0.33.3。
     - hutool-jwt：5.8.32 -> 5.8.34。
     - aws.s3：2.29.0 -> 2.29.23。
@@ -144,9 +229,9 @@
     - common-io：2.17.0 -> 2.18.0。
     - lombok：1.18.34 -> 1.18.36。
     - jackson：2.17.2 -> 2.18.2。
-    - swagger-annotations：2.2.25 -> 2.2.26。
+    - swagger-annotations：2.2.25 ->  2.2.26。
     - mysql-connector-j：9.0.0 -> 9.1.0。
-  - 修改：SpringBoot升级3.4.0后对knife4j的兼容性处理 | <font color="red">兼容性更新，springboot升级3.4.0后knife4增强默认需禁用！！</font>
+  - 修改：SpringBoot升级3.4.0后对knife4j的兼容性处理 |  <font color="red">兼容性更新，springboot升级3.4.0后knife4增强默认需禁用！！</font>
   - 删除：minio dependency。
   - 优化：代码生成器查询。 **PR**[#57]([https://github.com/feiyuchuixue/sz-boot-parent/pull/57)。（感谢**[AiMing317](https://github.com/AiMing317)** ）。
   - 优化：[代码生成器] 修复若干问题。
@@ -169,11 +254,10 @@
 
 - sz-boot-parent：
 
-  - **删除：minio模块。** | <font color="red">可能的破坏性更新</font>
+  - **删除：minio模块。** |  <font color="red">可能的破坏性更新</font>
   - 新增：oss模块，使用**AWS S3**协议，支持更多云存储厂商（阿里、七牛、腾讯、minio等）。
   - 修改：切换minio模块至oss模块，切换上传方法至ossClient。请将minio.yml文件切换为oss.yml。
   - 优化：移除冗余NotNull注解。
-
 - sz-admin：
 
   - 新增：文件管理。
@@ -187,7 +271,6 @@
   - 新增：图片上传、批量图片上传组件 （感谢 **Geeker-Admin** https://github.com/HalseySpicy/Geeker-Admin）。
 
   - 修改：切换用户头像上传为新的组件。
-
 - 文档：
 
   - [oss存储](https://szadmin.cn/md/Help/doc/oss.html)
@@ -206,20 +289,18 @@
   - 修复：客户端管理列表，授权类型展示问题。
 
   - 新增：[代码生成] 对字典别名的支持。
-
 ## v0.8.1 （20241106）
 
 - sz-boot-parent：
   - 依赖升级：
-    - spring-boot-starter-data-redis：3.3.4 -> 3.3.5。
-    - spring-boot-starter-parent：3.3.4 -> 3.3.5。
+    - spring-boot-starter-data-redis：3.3.4  -> 3.3.5。
+    - spring-boot-starter-parent：3.3.4  -> 3.3.5。
   - 优化：sz-service-socket添加启动Banner与版本号。
   - 优化：部门列表-未设置部门节点用户数量查询逻辑调整
   - 优化：账户登录的查询。
   - 修复：excel导出字典CodeName为null时的异常问题。
   - 优化：Excel导入导出及字典转换，提升性能。
 - sz-admin：
-
   - 优化: vite.config.mts更新 SCSS 预处理器配。
   - 优化: 锁定sass版本为~1.79.x版本。
   - 优化: tsconfig.app.json 增加package.json的支持。
@@ -234,13 +315,13 @@
 
 - sz-boot-parent：
   - 依赖升级：
-    - spring-boot-starter-data-redis：3.3.3 -> 3.3.4。
+    - spring-boot-starter-data-redis：3.3.3  -> 3.3.4。
   - 修复：sql预览模版结尾多余空格问题。
   - 修复：无法正常解锁用户问题 **PR**[#26](https://github.com/feiyuchuixue/sz-boot-parent/issues/26#issue-2577509320)。（感谢[andyjia](https://github.com/andyjia)）
   - 优化：重构异常处理，引入错误前缀枚举，增强代码可读性和可维护。
   - 新增：spotless maven 格式化插件，全局格式化。
   - 新增：CHANGE.md 更新日志。
-  - 修改：将数据表中的自增ID字段类型升级为**bigint**，以支持更大的数据范围和避免潜在的溢出问题。| <font color="red">可能的破坏性更新</font>
+  - 修改：将数据表中的自增ID字段类型升级为**bigint**，以支持更大的数据范围和避免潜在的溢出问题。|  <font color="red">可能的破坏性更新</font>
   - 优化：自增ID字段升级为bigint：
     - 代码生成
     - 系统菜单
@@ -288,13 +369,13 @@
 
 - sz-boot-parent：
   - 依赖升级：
-    - spring-boot-starter-data-redis：3.3.3 -> 3.3.4。
+    - spring-boot-starter-data-redis：3.3.3  -> 3.3.4。
   - 修复：sql预览模版结尾多余空格问题。
   - 修复：无法正常解锁用户问题 **PR**[#26](https://github.com/feiyuchuixue/sz-boot-parent/issues/26#issue-2577509320)。（感谢[andyjia](https://github.com/andyjia)）
   - 优化：重构异常处理，引入错误前缀枚举，增强代码可读性和可维护。
   - 新增：spotless maven 格式化插件，全局格式化。
   - 新增：CHANGE.md 更新日志。
-  - 修改：将数据表中的自增ID字段类型升级为**bigint**，以支持更大的数据范围和避免潜在的溢出问题。| <font color="red">可能的破坏性更新</font>
+  - 修改：将数据表中的自增ID字段类型升级为**bigint**，以支持更大的数据范围和避免潜在的溢出问题。|  <font color="red">可能的破坏性更新</font>
   - 优化：自增ID字段升级为bigint：
     - 代码生成
     - 系统菜单
@@ -315,7 +396,7 @@
 
 - sz-boot-parent：
   - 依赖升级：
-    - com.alibaba:easyexcel：4.0.2 -> 4.0.3。
+    - com.alibaba:easyexcel：4.0.2  -> 4.0.3。
   - 修复：某些情况下账户列表查询的分页问题。
   - 修复：数据权限组合拼接条件时OR、AND的优先级问题。
   - 新增：接口防抖功能。
@@ -329,8 +410,8 @@
 
 - sz-boot-parent：
   - 依赖升级：
-    - org.apache.commons:commons-lang3：3.16.0 -> 3.17.0
-    - swagger-annotations： 2.2.21 -> 2.2.23.
+    - org.apache.commons:commons-lang3：3.16.0  -> 3.17.0
+    - swagger-annotations： 2.2.21  -> 2.2.23.
     - org.aspectj:aspectjweaver：1.9.22 -> 1.9.22.1
     - mysql-connector-j： 8.4.0 -> 9.0.0
     - hutool-jwt： 5.8.31 -> 5.8.32
@@ -349,7 +430,7 @@
 
 - sz-boot-parent：
   - 依赖升级：
-    - spring-boot-starter-parent：3.2.5 -> 3.3.3
+    - spring-boot-starter-parent：3.2.5  -> 3.3.3
     - jackson：2.16.1 -> 2.17.2
     - hutool-jwt：5.8.27 -> 5.8.31
     - easyexcel： 3.3.4 -> 4.0.2
@@ -414,7 +495,6 @@
 ## v0.7.4 （20240730）
 
 - sz-boot-parent：
-
   - 优化：业务与框架Flyway迁移脚本分离
 
     - 新增多 Flyway 实例配置，分别管理业务和框架迁移脚本。
@@ -422,7 +502,7 @@
     - 利用 `@ConfigurationProperties` 自动绑定配置项，创建独立的 Flyway 实例
     - 各自使用独立的历史版本表（t_db_version 和 t_db_version_business）以避免相互干扰
     - 优化迁移管理，提高数据库版本管理的灵活性和扩展性
-    - 更新了flyway的ddl脚本路径，在classpath:/db 路径下，新增framework、business路径，并**将原 classpath:/db 路径下 的DDL文件移动至 classpath:/db/framework下**。| <font color="red">可能的破坏性更新</font>
+    - 更新了flyway的ddl脚本路径，在classpath:/db 路径下，新增framework、business路径，并**将原 classpath:/db 路径下 的DDL文件移动至 classpath:/db/framework下**。|  <font color="red">可能的破坏性更新</font>
 
     > [!IMPORTANT]
     >
@@ -449,7 +529,6 @@
   - 优化：码生成器编辑Form表单的交互体验。
 - 官网文档：
   - 新增：[代码生成器](https://szadmin.cn/md/Help/gen/generator-tools.html)文档。
-
 ## v0.7.2 （20240719）
 
 > [!WARNING]
@@ -462,7 +541,6 @@
 
   - 修改：数据权限Form，优化交互逻辑。
   - 修复：数据权限，编辑后再新增操作项disable的问题。
-
 - 官网文档：
 
   - 修改：[数据权限文档](https://szadmin.cn/md/Help/doc/data-scope.html) 对部分逻辑进行了简化。
@@ -483,7 +561,7 @@
 
   - 新增：StringUtils toSnakeCase方法
 
-  - **修改：字典管理，添加业务类型，区分系统字典、业务字典** | <font color="red">可能的破坏性更新</font>
+  - **修改：字典管理，添加业务类型，区分系统字典、业务字典**  |  <font color="red">可能的破坏性更新</font>
 
     > [!IMPORTANT] ！重要
     >
@@ -503,10 +581,10 @@
   - 修复：查询条件项在某些条件下无法展示全的问题
   - 优化：代码清理，规范化命名
   - 新增：数据权限
-
 - 官网文档：
 
   - 新增：[数据权限文档](https://szadmin.cn/md/Help/doc/data-scope.html)
+
 
 ## v0.6.5 （20240619）
 
@@ -559,7 +637,7 @@
   - 修改：登陆页面placeholder
   - 优化：更新README文档
 
----
+----
 
 ## v0.6.0 （20240602）
 

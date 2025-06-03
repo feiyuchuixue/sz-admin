@@ -154,10 +154,12 @@ const onTouchStart = (e: TouchEvent) => {
   }
 };
 
+let startTime = 0; // 用于记录滑动开始时间
 const startDrag = (clientX: number) => {
   isDragging = true;
   startX = clientX;
   startLeft = parseInt(slider.value!.style.left || '0');
+  startTime = Date.now(); // 在滑动开始时记录时间
 };
 
 const onMouseMove = (e: MouseEvent) => {
@@ -210,7 +212,6 @@ const endDrag = async () => {
   if (currentLeft > 0) {
     try {
       isVerifying.value = true;
-      const startTime = Date.now();
       const { iv, encryptedData } = await aesEncrypt(currentLeft + '', slideData.secretKey);
       await verifyImageCode({
         requestId: slideData.requestId,

@@ -11,8 +11,10 @@ export type TeacherStatisticsQuery = IPageQuery & {
   totalClassCount?: number;
   totalHours?: number;
   checkStatus?: number;
-  checkTime?: string;
-  lastSyncTime?: string;
+  checkTimeStart?: string;
+  checkTimeEnd?: string;
+  lastSyncTimeStart?: string;
+  lastSyncTimeEnd?: string;
 };
 
 // 编辑form表单
@@ -47,4 +49,8 @@ export type TeacherStatisticsRow = {
   checkTime?: string;
   lastSyncTime?: string;
   remark?: string;
+  createId?: number;
+  createTime?: string;
+  updateId?: number;
+  updateTime?: string;
 };
