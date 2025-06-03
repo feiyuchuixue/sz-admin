@@ -90,7 +90,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  'update:modelValue': [string | string[]];
+  'update:modelValue': [string[]];
   change: [value: IUploadResult | null];
 }>();
 const _fileList = ref<UploadUserFile[]>([]);
@@ -129,7 +129,7 @@ watch(
     const urls = userFilesToUrls(list);
     // 只有当变化时才 emit
     if (JSON.stringify(props.modelValue) !== JSON.stringify(urls)) {
-      emit('update:modelValue', props.limit === 1 ? urls[0] || '' : urls);
+      emit('update:modelValue', urls);
     }
   },
   { deep: true }

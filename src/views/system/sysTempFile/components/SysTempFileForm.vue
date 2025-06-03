@@ -20,9 +20,6 @@
       <el-form-item label="模版名" prop="tempName">
         <el-input v-model="paramsProps.row.tempName" placeholder="请填写模版名" clearable />
       </el-form-item>
-      <el-form-item label="地址" prop="url">
-        <el-input v-model="paramsProps.row.url" placeholder="请填写地址" clearable disabled />
-      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
       </el-form-item>
@@ -69,8 +66,7 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
-      const urlArr = fileUrls.value;
-      paramsProps.value.row.url = urlArr[0];
+      paramsProps.value.row.url = fileUrls.value;
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
@@ -82,9 +78,7 @@ const handleSubmit = () => {
 };
 
 const fileChange = (file: IUploadResult) => {
-  if (paramsProps.value.isAdd) paramsProps.value.row.tempName = file?.filename; // 如果是新增，便利性带入文件名
-  paramsProps.value.row.url = file?.url;
-  paramsProps.value.row.sysFileId = file?.fileId;
+  if (paramsProps.value.isAdd || !paramsProps.value.row.tempName) paramsProps.value.row.tempName = file?.filename; // 如果是新增，便利性带入文件名
 };
 
 defineExpose({
