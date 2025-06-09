@@ -285,6 +285,7 @@ const settingDept = (record: any) => {
       isBatch: true
     };
     userDeptFormRef.value?.acceptParams(params);
+    proTableRef.value?.clearSelection();
   } else {
     const params = {
       title: '设置部门',
