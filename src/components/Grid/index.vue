@@ -84,7 +84,10 @@ const gridCols = computed(() => {
 provide('cols', gridCols);
 
 // 寻找需要开始折叠的字段 index
-const slots = useSlots().default!();
+const slots = (() => {
+  const s = useSlots();
+  return typeof s.default === 'function' ? s.default() : [];
+})();
 
 const findIndex = () => {
   let fields: VNodeArrayChildren = [];
@@ -100,26 +103,25 @@ const findIndex = () => {
   let suffixCols = 0;
   if (suffix) {
     suffixCols =
-      ((suffix as VNode).props![breakPoint.value]?.span ?? (suffix as VNode).props?.span ?? 1) +
-      ((suffix as VNode).props![breakPoint.value]?.offset ?? (suffix as VNode).props?.offset ?? 0);
+      ((suffix as VNode).props?.[breakPoint.value]?.span ?? (suffix as VNode).props?.span ?? 1) +
+      ((suffix as VNode).props?.[breakPoint.value]?.offset ?? (suffix as VNode).props?.offset ?? 0);
   }
-  try {
-    let find = false;
-    fields.reduce((prev = 0, current, index) => {
-      prev +=
-        ((current as VNode).props![breakPoint.value]?.span ?? (current as VNode).props?.span ?? 1) +
-        ((current as VNode).props![breakPoint.value]?.offset ?? (current as VNode).props?.offset ?? 0);
-      if (Number(prev) > props.collapsedRows * (gridCols.value as number) - suffixCols) {
-        hiddenIndex.value = index;
-        find = true;
-        throw new Error('find it');
-      }
-      return prev;
-    }, 0);
-    if (!find) hiddenIndex.value = -1;
-  } catch (error) {
-    console.warn(error);
+
+  let total = 0;
+  let found = false;
+  const colsNum = Number(gridCols.value) || 1;
+  for (let index = 0; index < fields.length; index++) {
+    const current = fields[index] as VNode;
+    const span = current.props?.[breakPoint.value]?.span ?? current.props?.span ?? 1;
+    const offset = current.props?.[breakPoint.value]?.offset ?? current.props?.offset ?? 0;
+    total += Number(span) + Number(offset);
+    if (total > props.collapsedRows * colsNum - suffixCols) {
+      hiddenIndex.value = index;
+      found = true;
+      break;
+    }
   }
+  if (!found) hiddenIndex.value = -1;
 };
 
 // 断点变化时 执行 findIndex
