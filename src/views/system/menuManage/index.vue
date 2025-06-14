@@ -71,7 +71,7 @@
 import { Delete, EditPen, CirclePlus, SoldOut, Sort } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import { addMenu, deleteMenu, editMenu, exportMenuSql, getMenuInfo, getMenuList, chaneDataRole } from '@/api/modules/system/menu';
-import MenuForm from '@/views/system/menuMange/components/MenuForm.vue';
+import MenuForm from '@/views/system/menuManage/components/MenuForm.vue';
 import { useHandleData } from '@/hooks/useHandleData';
 import { MENU_BTN, MENU_DIR, MENU_PAGE } from '@/config/consts';
 import type { MenuQuery } from '@/api/types/system/menu';
