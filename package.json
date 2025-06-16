@@ -1,6 +1,6 @@
 {
   "name": "sz-admin",
-  "version": "1.2.3-beta",
+  "version": "1.2.4-beta",
   "private": true,
   "type": "module",
   "scripts": {
