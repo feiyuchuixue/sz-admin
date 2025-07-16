@@ -160,11 +160,11 @@ const batchDelete = async (ids: (string | number)[]) => {
   proTableRef.value?.getTableList();
 };
 
-const downloadFile = (url: string) => {
+const downloadFile = (url: string[]) => {
   const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件
   link.style.display = 'none';
-  link.href = url;
-  const fileName = getFileNameFromUrl(url);
+  link.href = url[0];
+  const fileName = getFileNameFromUrl(url[0]);
   link.setAttribute('download', fileName);
   document.body.appendChild(link);
   link.click();
