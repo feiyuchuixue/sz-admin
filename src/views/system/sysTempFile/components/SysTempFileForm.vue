@@ -13,6 +13,7 @@
           v-model:modelValue="fileUrls"
           multiple
           :file-size="3"
+          :dir="'tmp'"
           @change="fileChange"
           accept=".xlsx,.xls,.docx,.doc,.pdf"
         />

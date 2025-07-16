@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { Close, Document, Download, UploadFilled } from '@element-plus/icons-vue';
 import { ref, watch } from 'vue';
-import { uploadTmpFile } from '@/api/modules/system/upload';
+import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
@@ -76,6 +76,7 @@ type Props = {
   fileSize?: number; // 图片大小限制 ==> 非必传（默认为 5M）
   accept?: string;
   modelValue?: string | string[];
+  dir?: string; // 上传文件的目录
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -86,7 +87,8 @@ const props = withDefaults(defineProps<Props>(), {
   limit: 1,
   fileSize: 5,
   accept: '.xlsx,.xls,.docx,.doc,.pdf',
-  modelValue: () => []
+  modelValue: () => [],
+  dir: 'tmp'
 });
 
 const emit = defineEmits<{
@@ -185,8 +187,8 @@ const handleExceed = () => {
 // 重新设置的上传
 const uploadFileRequest = async (options: UploadRequestOptions) => {
   try {
-    const { data } = await uploadTmpFile(
-      { file: options.file },
+    const { data } = await uploadFile(
+      { file: options.file, dirTag: props.dir },
       {
         onUploadProgress(event: AxiosProgressEvent) {
           const progressEvent = new ProgressEvent('upload', {
