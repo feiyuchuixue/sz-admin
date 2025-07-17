@@ -19,6 +19,6 @@ export type IPage<T = any> = {
 };
 
 export type IPageQuery = {
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
 };
