@@ -42,32 +42,50 @@
         >
           删除
         </el-button>
+        <el-button
+          v-auth="'sys.dept.role_set_btn'"
+          type="primary"
+          link
+          v-if="row.isLock === 'F'"
+          :icon="Setting"
+          @click="openDeptPermissions('设置角色', row)"
+        >
+          设置角色
+        </el-button>
       </template>
       <template #leaderInfo="{ row }">
         <el-tag class="user-item" v-for="tag in formatLeaderInfo(row.leaderInfo)" :key="tag.id" type="info">
           {{ tag.name }}
         </el-tag>
       </template>
+      <template #roleInfo="{ row }">
+        <el-tag class="user-item" v-for="tag in formatInfo(row.roleInfo)" :key="tag.id" type="info">
+          {{ tag.name }}
+        </el-tag>
+      </template>
     </ProTable>
     <SysDeptForm ref="sysDeptRef" />
+    <DeptPermissions ref="deptPermissionsRef" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { CirclePlus, Delete, EditPen, Sort } from '@element-plus/icons-vue';
+import { CirclePlus, Delete, EditPen, Sort, Setting } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import {
   createSysDeptApi,
   removeSysDeptApi,
   updateSysDeptApi,
   getSysDeptListApi,
-  getSysDeptDetailApi
+  getSysDeptDetailApi,
+  setDeptRole
 } from '@/api/modules/system/dept';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysDeptForm from '@/views/system/deptManage/components/SysDeptForm.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import type { SysDeptQuery, SysDeptRow } from '@/api/types/system/dept';
+import DeptPermissions from '@/views/system/deptManage/components/DeptPermissions.vue';
 
 defineOptions({
   name: 'SysDeptView'
@@ -78,6 +96,7 @@ const columns: ColumnProps<SysDeptRow>[] = [
   { prop: 'name', label: '部门名称', align: 'left' },
   { prop: 'sort', label: '排序', width: 60, align: 'left' },
   { prop: 'leaderInfo', label: '负责人' },
+  { prop: 'roleInfo', label: '角色' },
   { prop: 'remark', label: '备注', width: 120 },
   { prop: 'operation', label: '操作', width: 220, fixed: 'right' }
 ];
@@ -151,6 +170,40 @@ const formatLeaderInfo = (deptInfo: string): { id: string; name: string }[] => {
   // 使用逗号分割字符串
   let departmentArray = deptInfo.split(',');
 
+  // 遍历每个部门的键值对
+  departmentArray.forEach(function (department: string) {
+    // 使用冒号分割键值对
+    let keyValue = department.split(':');
+    // 构造部门对象
+    let departmentObj = {
+      id: keyValue[0],
+      name: keyValue[1]
+    };
+    // 添加到数组
+    departments.push(departmentObj);
+  });
+  return departments;
+};
+
+const deptPermissionsRef = ref<InstanceType<typeof DeptPermissions>>();
+const openDeptPermissions = (title: string, row = {}) => {
+  const params = {
+    title,
+    row: row,
+    api: setDeptRole,
+    getTableList: proTableRef.value?.getTableList
+  };
+  deptPermissionsRef.value?.acceptParams(params);
+  proTableRef.value?.getTableList();
+};
+
+const formatInfo = (info: string): { id: string; name: string }[] => {
+  if (info.trim() === '') {
+    return [];
+  }
+  let departments: { id: string; name: string }[] = [];
+  // 使用逗号分割字符串
+  let departmentArray = info.split(',');
   // 遍历每个部门的键值对
   departmentArray.forEach(function (department: string) {
     // 使用冒号分割键值对

@@ -1,7 +1,16 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
 import type { IPage } from '@/api/types';
-import type { SysDeptQuery, SysDeptRow, SysDeptForm, SysDeptTree, SysDeptLeaderData, SysDeptDept } from '@/api/types/system/dept';
+import type {
+  SysDeptQuery,
+  SysDeptRow,
+  SysDeptForm,
+  SysDeptTree,
+  SysDeptLeaderData,
+  SysDeptDept,
+  DeptRoleData,
+  DeptRoleForm
+} from '@/api/types/system/dept';
 
 /**
  * 查询列表
@@ -74,4 +83,22 @@ export const getSysDeptLeaderApi = () => {
  */
 export const getDeptTrees = (params: { deptId?: number }) => {
   return http.get<SysDeptDept>(ADMIN_MODULE + `/sys-dept/datascope`, params);
+};
+
+/**
+ * 获取部门角色
+ * @param params
+ * @returns {*}
+ */
+export const getDeptRole = (params: { deptId: number }) => {
+  return http.get<DeptRoleData>(ADMIN_MODULE + `/sys-dept/role`, params);
+};
+
+/**
+ * 设置部门角色
+ * @param params
+ * @returns {*}
+ */
+export const setDeptRole = (params: DeptRoleForm) => {
+  return http.put(ADMIN_MODULE + `/sys-dept/role`, params);
 };
