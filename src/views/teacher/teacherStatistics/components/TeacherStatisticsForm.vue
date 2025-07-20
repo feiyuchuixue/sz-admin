@@ -20,6 +20,9 @@
       <el-form-item label="教师id" prop="teacherId">
         <el-input v-model="paramsProps.row.teacherId" placeholder="请填写教师id" clearable />
       </el-form-item>
+      <el-form-item label="教师照片" prop="imageId">
+        <FileWithId v-model="paramsProps.row.imageId" :url="paramsProps.row.imageUrl" />
+      </el-form-item>
       <el-form-item label="讲师区分类型" prop="teacherCommonType">
         <el-select v-model="paramsProps.row.teacherCommonType" clearable placeholder="请选择讲师区分类型">
           <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" />
@@ -72,6 +75,7 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import FileWithId from '@/components/Upload/fileWithId.vue';
 
 defineOptions({
   name: 'TeacherStatisticsForm'
