@@ -7,10 +7,19 @@
     draggable
     append-to-body
   >
+    <el-alert
+      title="提示"
+      type="warning"
+      show-icon
+      :closable="false"
+      description="绑定角色后，该部门下的用户将自动继承此角色权限。若后续解除部门角色绑定，用户的已继承角色不会被自动移除，需手动调整用户角色。"
+      class="el-alert"
+    />
     <el-transfer
       v-model="selectIds"
       filterable
       :filter-method="filterMethod"
+      style="text-align: center"
       :titles="['未设置角色', '已设置角色']"
       filter-placeholder="筛选角色"
       :props="transferProps"
@@ -95,4 +104,9 @@ defineExpose({
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.el-alert {
+  width: 90%;
+  margin: 0 auto 20px;
+}
+</style>

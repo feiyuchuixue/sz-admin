@@ -98,7 +98,7 @@ const columns: ColumnProps<SysDeptRow>[] = [
   { prop: 'leaderInfo', label: '负责人' },
   { prop: 'roleInfo', label: '角色' },
   { prop: 'remark', label: '备注', width: 120 },
-  { prop: 'operation', label: '操作', width: 220, fixed: 'right' }
+  { prop: 'operation', label: '操作', width: 270, fixed: 'right' }
 ];
 const defaultExpandAllKey = ref(true);
 // 获取table列表
