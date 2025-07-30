@@ -25,7 +25,7 @@ jobs:
       VERSION: test
       SHELL_RUN_DIR: /home/run
       # 预览环境标识（预览环境某些功能将禁用）
-      VITE_PREVIEW: true
+      VITE_PREVIEW: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
