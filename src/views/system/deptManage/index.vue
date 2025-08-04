@@ -53,16 +53,6 @@
           设置角色
         </el-button>
       </template>
-      <template #leaderInfo="{ row }">
-        <el-tag class="user-item" v-for="tag in formatLeaderInfo(row.leaderInfo)" :key="tag.id" type="info">
-          {{ tag.name }}
-        </el-tag>
-      </template>
-      <template #roleInfo="{ row }">
-        <el-tag class="user-item" v-for="tag in formatInfo(row.roleInfo)" :key="tag.id" type="info">
-          {{ tag.name }}
-        </el-tag>
-      </template>
     </ProTable>
     <SysDeptForm ref="sysDeptRef" />
     <DeptPermissions ref="deptPermissionsRef" />
@@ -93,19 +83,25 @@ defineOptions({
   name: 'SysDeptView'
 });
 
-useDict(['dynamic_user_options']);
+useDict(['dynamic_user_options', 'dynamic_role_options']);
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<SysDeptRow>[] = [
   { prop: 'name', label: '部门名称', align: 'left' },
   { prop: 'sort', label: '排序', width: 60, align: 'left' },
-  { prop: 'leaderInfo', label: '负责人' },
-  { prop: 'roleInfo', label: '角色' },
   {
     prop: 'leaderIds',
     label: '负责人',
     tag: true,
     enum: useDictOptions('dynamic_user_options'),
+    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
+    tagLimit: -1
+  },
+  {
+    prop: 'roleIds',
+    label: '角色',
+    tag: true,
+    enum: useDictOptions('dynamic_role_options'),
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
     tagLimit: -1
   },
@@ -171,30 +167,6 @@ const deleteInfo = async (params: SysDeptRow) => {
 const changeExpand = () => {
   defaultExpandAllKey.value = !defaultExpandAllKey.value;
   proTableRef.value?.refresh();
-};
-
-const formatLeaderInfo = (deptInfo: string): { id: string; name: string }[] => {
-  if (deptInfo.trim() === '') {
-    return [];
-  }
-  let departments: { id: string; name: string }[] = [];
-
-  // 使用逗号分割字符串
-  let departmentArray = deptInfo.split(',');
-
-  // 遍历每个部门的键值对
-  departmentArray.forEach(function (department: string) {
-    // 使用冒号分割键值对
-    let keyValue = department.split(':');
-    // 构造部门对象
-    let departmentObj = {
-      id: keyValue[0],
-      name: keyValue[1]
-    };
-    // 添加到数组
-    departments.push(departmentObj);
-  });
-  return departments;
 };
 
 const deptPermissionsRef = ref<InstanceType<typeof DeptPermissions>>();
