@@ -94,6 +94,7 @@ export interface ColumnProps<T = any>
   extends Partial<Omit<TableColumnCtx<T>, 'type' | 'children' | 'renderCell' | 'renderHeader'>> {
   type?: TypeProps; // 列类型
   tag?: boolean | Ref<boolean>; // 是否是标签展示
+  tagLimit?: number; // 标签展示时，最多显示多少个标签，超过的会被隐藏, -1 为不限制
   isShow?: boolean | Ref<boolean>; // 是否显示在表格当中
   enum?: EnumProps[] | Ref<EnumProps[]> | ((params?: any) => Promise<any>); // 枚举字典
   isFilterEnum?: boolean | Ref<boolean>; // 当前单元格值是否根据 enum 格式化（示例：enum 只作为搜索项数据）

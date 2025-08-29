@@ -42,44 +42,71 @@
         >
           删除
         </el-button>
-      </template>
-      <template #leaderInfo="{ row }">
-        <el-tag class="user-item" v-for="tag in formatLeaderInfo(row.leaderInfo)" :key="tag.id" type="info">
-          {{ tag.name }}
-        </el-tag>
+        <el-button
+          v-auth="'sys.dept.role_set_btn'"
+          type="primary"
+          link
+          v-if="row.isLock === 'F'"
+          :icon="Setting"
+          @click="openDeptPermissions('设置角色', row)"
+        >
+          设置角色
+        </el-button>
       </template>
     </ProTable>
     <SysDeptForm ref="sysDeptRef" />
+    <DeptPermissions ref="deptPermissionsRef" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { CirclePlus, Delete, EditPen, Sort } from '@element-plus/icons-vue';
+import { CirclePlus, Delete, EditPen, Sort, Setting } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import {
   createSysDeptApi,
   removeSysDeptApi,
   updateSysDeptApi,
   getSysDeptListApi,
-  getSysDeptDetailApi
+  getSysDeptDetailApi,
+  setDeptRole
 } from '@/api/modules/system/dept';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysDeptForm from '@/views/system/deptManage/components/SysDeptForm.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import type { SysDeptQuery, SysDeptRow } from '@/api/types/system/dept';
+import { useDictOptions } from '@/hooks/useDictOptions';
+import { useDict } from '@/hooks/useDict';
+import DeptPermissions from '@/views/system/deptManage/components/DeptPermissions.vue';
 
 defineOptions({
   name: 'SysDeptView'
 });
+
+useDict(['dynamic_user_options', 'dynamic_role_options']);
 const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<SysDeptRow>[] = [
   { prop: 'name', label: '部门名称', align: 'left' },
   { prop: 'sort', label: '排序', width: 60, align: 'left' },
-  { prop: 'leaderInfo', label: '负责人' },
+  {
+    prop: 'leaderIds',
+    label: '负责人',
+    tag: true,
+    enum: useDictOptions('dynamic_user_options'),
+    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
+    tagLimit: -1
+  },
+  {
+    prop: 'roleIds',
+    label: '角色',
+    tag: true,
+    enum: useDictOptions('dynamic_role_options'),
+    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
+    tagLimit: -1
+  },
   { prop: 'remark', label: '备注', width: 120 },
-  { prop: 'operation', label: '操作', width: 220, fixed: 'right' }
+  { prop: 'operation', label: '操作', width: 270, fixed: 'right' }
 ];
 const defaultExpandAllKey = ref(true);
 // 获取table列表
@@ -142,15 +169,25 @@ const changeExpand = () => {
   proTableRef.value?.refresh();
 };
 
-const formatLeaderInfo = (deptInfo: string): { id: string; name: string }[] => {
-  if (deptInfo.trim() === '') {
+const deptPermissionsRef = ref<InstanceType<typeof DeptPermissions>>();
+const openDeptPermissions = (title: string, row = {}) => {
+  const params = {
+    title,
+    row: row,
+    api: setDeptRole,
+    getTableList: proTableRef.value?.getTableList
+  };
+  deptPermissionsRef.value?.acceptParams(params);
+  proTableRef.value?.getTableList();
+};
+
+const formatInfo = (info: string): { id: string; name: string }[] => {
+  if (info.trim() === '') {
     return [];
   }
   let departments: { id: string; name: string }[] = [];
-
   // 使用逗号分割字符串
-  let departmentArray = deptInfo.split(',');
-
+  let departmentArray = info.split(',');
   // 遍历每个部门的键值对
   departmentArray.forEach(function (department: string) {
     // 使用冒号分割键值对

@@ -57,19 +57,6 @@
           <el-image v-if="row.logo" :src="row.logo" />
           <div v-else>--</div>
         </template>
-
-        <template #deptInfo="{ row }">
-          <el-tag class="user-item" v-for="tag in formatInfo(row.deptInfo)" :key="tag.id" type="info">
-            {{ tag.name }}
-          </el-tag>
-        </template>
-
-        <template #roleInfo="{ row }">
-          <el-tag class="user-item" v-for="tag in formatInfo(row.roleInfo)" :key="tag.id" type="info">
-            {{ tag.name }}
-          </el-tag>
-        </template>
-
         <template #operation="{ row }">
           <div class="btn-group">
             <el-button v-auth="'sys.user.update_btn'" type="primary" link :icon="EditPen" @click="openUserEdit('编辑用户', row)">
@@ -168,9 +155,12 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import UserDataPermissions from '@/views/system/accountManage/components/UserDataPermissions.vue';
 import { IS_PREVIEW } from '@/config';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import { useDict } from '@/hooks/useDict';
 defineOptions({
   name: 'AccountManage'
 });
+
+useDict(['dynamic_dept_options', 'dynamic_role_options']);
 
 // 表格配置项
 const columns: ColumnProps<RoleInfo>[] = [
@@ -179,12 +169,20 @@ const columns: ColumnProps<RoleInfo>[] = [
   { prop: 'nickname', label: '昵称', width: 150, align: 'left' },
   { prop: 'phone', label: '手机号', width: 120 },
   {
-    prop: 'deptInfo',
-    label: '部门'
+    prop: 'deptIds',
+    label: '部门',
+    tag: true,
+    enum: useDictOptions('dynamic_dept_options'),
+    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
+    tagLimit: -1
   },
   {
-    prop: 'roleInfo',
-    label: '角色'
+    prop: 'roleIds',
+    label: '角色',
+    tag: true,
+    enum: useDictOptions('dynamic_role_options'),
+    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
+    tagLimit: -1
   },
   {
     prop: 'accountStatusCd',
@@ -334,28 +332,6 @@ const changeDeptTree = (val: number) => {
     initParam.deptId = val;
     proTableRef.value?.clearSelection();
   }
-};
-
-const formatInfo = (info: string): { id: string; name: string }[] => {
-  if (info.trim() === '') {
-    return [];
-  }
-  let departments: { id: string; name: string }[] = [];
-  // 使用逗号分割字符串
-  let departmentArray = info.split(',');
-  // 遍历每个部门的键值对
-  departmentArray.forEach(function (department: string) {
-    // 使用冒号分割键值对
-    let keyValue = department.split(':');
-    // 构造部门对象
-    let departmentObj = {
-      id: keyValue[0],
-      name: keyValue[1]
-    };
-    // 添加到数组
-    departments.push(departmentObj);
-  });
-  return departments;
 };
 
 const refreshDeptTree = () => {

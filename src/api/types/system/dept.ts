@@ -62,3 +62,18 @@ export type SysDeptDeptTree = {
   name: string;
   children: SysDeptDeptTree[];
 };
+
+export type DeptRoleForm = {
+  roleIds: number[];
+  userId: number;
+};
+
+export type DeptRoleData = {
+  selectIds: number[];
+  roleInfoVOS: DeptRoleInfo[];
+};
+
+export type DeptRoleInfo = {
+  id: number;
+  roleName: string;
+};

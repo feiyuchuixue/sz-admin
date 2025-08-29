@@ -10,21 +10,8 @@
       row-key="id"
     >
       <!-- 表格 header 按钮 -->
-      <template #tableHeader="scope">
-        <el-button
-          v-auth="'sys.login.log.remove'"
-          type="danger"
-          :icon="Delete"
-          plain
-          :disabled="!scope.isSelected"
-          @click="batchDelete(scope.selectedListIds)"
-        >
-          批量删除
-        </el-button>
+      <template>
         <el-button v-auth="'sys.login.log.export'" type="primary" :icon="Download" plain @click="downloadFile"> 导出 </el-button>
-      </template>
-      <template #operation="{ row }">
-        <el-button v-auth="'sys.login.log.remove'" type="primary" link :icon="Delete" @click="deleteInfo(row)"> 删除 </el-button>
       </template>
     </ProTable>
   </div>
@@ -32,10 +19,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Delete, Download } from '@element-plus/icons-vue';
+import { Download } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
-import { removeSysLoginLogApi, getSysLoginLogListApi, exportSysLoginLogExcelApi } from '@/api/modules/system/sysLoginLog';
-import { useHandleData } from '@/hooks/useHandleData';
+import { getSysLoginLogListApi, exportSysLoginLogExcelApi } from '@/api/modules/system/sysLoginLog';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { SysLoginLogQuery, SysLoginLogRow } from '@/api/types/system/sysLoginLog';
@@ -63,14 +49,13 @@ const columns: ColumnProps<SysLoginLogRow>[] = [
       tagType: 'callbackShowStyle'
     }
   },
-  { prop: 'loginTime', label: '登陆时间' },
-  { prop: 'ipAddress', label: '登陆ip地址' },
+  { prop: 'loginTime', label: '登陆时间', width: 180 },
+  { prop: 'ipAddress', label: 'ip地址' },
   { prop: 'loginLocation', label: '登陆地点' },
   { prop: 'browser', label: '浏览器类型' },
   { prop: 'os', label: '操作系统' },
   { prop: 'msg', label: '提示消息' },
-  { prop: 'remark', label: '备注' },
-  { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
+  { prop: 'remark', label: '备注' }
 ];
 // 搜索条件项
 const searchColumns: SearchProps[] = [
@@ -111,17 +96,6 @@ const formatParams = (params: SysLoginLogQuery) => {
   }
 
   return newParams;
-};
-// 删除信息
-const deleteInfo = async (params: SysLoginLogRow) => {
-  await useHandleData(removeSysLoginLogApi, { ids: [params.id] }, `删除【${params.id}】登陆日志表`);
-  proTableRef.value?.getTableList();
-};
-// 批量删除信息
-const batchDelete = async (ids: (string | number)[]) => {
-  await useHandleData(removeSysLoginLogApi, { ids }, '删除所选登陆日志表');
-  proTableRef.value?.clearSelection();
-  proTableRef.value?.getTableList();
 };
 // 导出
 const downloadFile = async () => {
