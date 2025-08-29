@@ -180,28 +180,6 @@ const openDeptPermissions = (title: string, row = {}) => {
   deptPermissionsRef.value?.acceptParams(params);
   proTableRef.value?.getTableList();
 };
-
-const formatInfo = (info: string): { id: string; name: string }[] => {
-  if (info.trim() === '') {
-    return [];
-  }
-  let departments: { id: string; name: string }[] = [];
-  // 使用逗号分割字符串
-  let departmentArray = info.split(',');
-  // 遍历每个部门的键值对
-  departmentArray.forEach(function (department: string) {
-    // 使用冒号分割键值对
-    let keyValue = department.split(':');
-    // 构造部门对象
-    let departmentObj = {
-      id: keyValue[0],
-      name: keyValue[1]
-    };
-    // 添加到数组
-    departments.push(departmentObj);
-  });
-  return departments;
-};
 </script>
 <style scoped lang="scss">
 .user-item {
