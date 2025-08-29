@@ -49,14 +49,13 @@ const columns: ColumnProps<SysLoginLogRow>[] = [
       tagType: 'callbackShowStyle'
     }
   },
-  { prop: 'loginTime', label: '登陆时间' },
-  { prop: 'ipAddress', label: '登陆ip地址' },
+  { prop: 'loginTime', label: '登陆时间', width: 180 },
+  { prop: 'ipAddress', label: 'ip地址' },
   { prop: 'loginLocation', label: '登陆地点' },
   { prop: 'browser', label: '浏览器类型' },
   { prop: 'os', label: '操作系统' },
   { prop: 'msg', label: '提示消息' },
-  { prop: 'remark', label: '备注' },
-  { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
+  { prop: 'remark', label: '备注' }
 ];
 // 搜索条件项
 const searchColumns: SearchProps[] = [
