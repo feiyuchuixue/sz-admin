@@ -106,7 +106,7 @@ const columns: ColumnProps<SysDeptRow>[] = [
     tagLimit: -1
   },
   { prop: 'remark', label: '备注', width: 120 },
-  { prop: 'operation', label: '操作', width: 270, fixed: 'right' }
+  { prop: 'operation', label: '操作', width: 320, fixed: 'right' }
 ];
 const defaultExpandAllKey = ref(true);
 // 获取table列表

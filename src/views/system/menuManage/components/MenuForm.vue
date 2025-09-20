@@ -2,7 +2,7 @@
   <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="800px" draggable append-to-body>
     <el-form
       ref="ruleFormRef"
-      label-width="100px"
+      label-width="120px"
       label-suffix=" :"
       :rules="rules"
       :model="paramsProps.row"
@@ -53,7 +53,7 @@
       </el-row>
 
       <el-row :gutter="20">
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_BTN">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_PAGE">
           <el-form-item label="是否外链" prop="isLink">
             <el-radio-group v-model="paramsProps.row.isLink">
               <el-radio value="T" border> 是 </el-radio>
@@ -62,32 +62,76 @@
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_BTN && paramsProps.row.isLink === 'T'">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_PAGE && paramsProps.row.isLink === 'T'">
           <el-form-item label="外链地址" prop="redirect">
             <el-input v-model="paramsProps.row.redirect" placeholder="请填写外链地址" clearable />
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_BTN">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_PAGE">
           <el-form-item label="路由名称" prop="name">
+            <template #label>
+              <el-space :size="4">
+                <span>路由名称</span>
+                <el-tooltip effect="dark" content="路由名称需与组件 defineOptions({ name }) 完全一致，否则 Keep-Alive 缓存无效，如：TeacherStatisticsView" placement="top">
+                  <i :class="'iconfont icon-yiwen'" />
+                </el-tooltip>
+              </el-space>
+              <span>&nbsp;:</span>
+            </template>
             <el-input v-model="paramsProps.row.name" placeholder="请填写路由名称" clearable />
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_BTN">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_PAGE">
           <el-form-item label="路由地址" prop="path">
+            <template #label>
+              <el-space :size="4">
+                <span>路由地址</span>
+                <el-tooltip
+                  effect="dark"
+                  content="路由地址可由用户自定义，不必与实际文件路径一致，如：/teacher/teacher-statistics"
+                  placement="top"
+                >
+                  <i :class="'iconfont icon-yiwen'" />
+                </el-tooltip>
+              </el-space>
+              <span>&nbsp;:</span>
+            </template>
             <el-input v-model="paramsProps.row.path" placeholder="请填写路由地址" clearable />
           </el-form-item>
         </el-col>
 
         <el-col :span="12" v-if="paramsProps.row.menuTypeCd === MENU_PAGE">
           <el-form-item label="组件路径" prop="component">
+            <template #label>
+              <el-space :size="4">
+                <span>组件路径</span>
+                <el-tooltip
+                  effect="dark"
+                  content="页面组件的相对路径，需与实际文件结构严格一致，如：/teacher/TeacherStatisticsView/index"
+                  placement="top"
+                >
+                  <i :class="'iconfont icon-yiwen'" />
+                </el-tooltip>
+              </el-space>
+              <span>&nbsp;:</span>
+            </template>
             <el-input v-model="paramsProps.row.component" placeholder="请填写组件路径" clearable />
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_DIR">
-          <el-form-item label="权限" prop="permissions">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_BTN">
+          <el-form-item label="权限标识" prop="permissions">
+            <template #label>
+              <el-space :size="4">
+                <span>权限标识</span>
+                <el-tooltip effect="dark" content="权限标识需与后端 @SaCheckPermission 注解保持一致，如：teacher.statistics.query_table" placement="top">
+                  <i :class="'iconfont icon-yiwen'" />
+                </el-tooltip>
+              </el-space>
+              <span>&nbsp;:</span>
+            </template>
             <el-input v-model="paramsProps.row.permissions" placeholder="请填写权限" clearable />
           </el-form-item>
         </el-col>
@@ -179,10 +223,6 @@ watch(
       case MENU_DIR:
         ruleData['icon'] = [{ required: true, message: '请填写图标' }];
         ruleData['name'] = [{ required: true, message: '请填写路由名称' }];
-        ruleData['path'] = [{ required: true, message: '请填写路由地址' }];
-        if (isLink === 'T') {
-          ruleData['redirect'] = [{ required: true, message: '请填写外链地址' }];
-        }
         break;
       case MENU_PAGE:
         ruleData['icon'] = [{ required: true, message: '请填写图标' }];
