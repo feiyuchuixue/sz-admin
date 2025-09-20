@@ -109,7 +109,7 @@
                 <span>组件路径</span>
                 <el-tooltip
                   effect="dark"
-                  content="页面组件的相对路径，需与实际文件结构严格一致，如：/teacher/TeacherStatisticsView/index"
+                  content="页面组件的相对路径，需与实际文件结构严格一致，如：/teacher/teacherStatistics/index"
                   placement="top"
                 >
                   <i :class="'iconfont icon-yiwen'" />
