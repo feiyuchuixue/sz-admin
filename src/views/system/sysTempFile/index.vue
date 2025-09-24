@@ -27,7 +27,7 @@
       </template>
 
       <template #url="{ row }">
-        <a href="#" target="_blank" @click="downloadFile(row?.url)">下载</a>
+        <FileDownloadList :files="row?.url" />
       </template>
       <template #history="{ row }">
         <span>
@@ -70,6 +70,7 @@ import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/Pr
 import type { SysTempFileQuery, SysTempFileRow } from '@/api/types/system/sysTempFile';
 import SysTemplateHistoryList from '@/views/system/sysTempFile/components/HistoryList.vue';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
 defineOptions({
   name: 'SysTempFileView'
 });
@@ -77,11 +78,11 @@ const proTableRef = ref<ProTableInstance>();
 // 表格配置项
 const columns: ColumnProps<SysTempFileRow>[] = [
   { type: 'selection', width: 80 },
-  { prop: 'id', label: '模板标识', width: 120 },
-  { prop: 'tempName', label: '模版名' },
-  { prop: 'url', label: '文件', width: 120 },
+  { prop: 'id', label: '模板标识', width: 100 },
+  { prop: 'tempName', label: '模版名', width: 180, align: 'center' },
+  { prop: 'url', label: '文件', width: 300 },
   { prop: 'remark', label: '备注' },
-  { prop: 'history', label: '历史' },
+  { prop: 'history', label: '历史', width: 100 },
   {
     prop: 'createId',
     label: '创建人',
@@ -106,7 +107,7 @@ const columns: ColumnProps<SysTempFileRow>[] = [
     }
   },
   { prop: 'updateTime', label: '更新时间' },
-  { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
+  { prop: 'operation', label: '操作', width: 180, fixed: 'right' }
 ];
 // 搜索条件项
 const searchColumns: SearchProps[] = [{ prop: 'tempName', label: '模版名', el: 'input' }];
@@ -158,24 +159,6 @@ const batchDelete = async (ids: (string | number)[]) => {
   await useHandleData(removeSysTempFileApi, { ids }, '删除所选模版文件管理');
   proTableRef.value?.clearSelection();
   proTableRef.value?.getTableList();
-};
-
-const downloadFile = (url: string[]) => {
-  const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件
-  link.style.display = 'none';
-  link.href = url[0];
-  const fileName = getFileNameFromUrl(url[0]);
-  link.setAttribute('download', fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-const getFileNameFromUrl = (url: string) => {
-  // 使用正则表达式提取文件名
-  const regex = /\/([^/]+)$/;
-  const match = url.match(regex);
-  return match ? match[1] : '';
 };
 
 // 打开历史记录页
