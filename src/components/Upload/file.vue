@@ -14,34 +14,56 @@
     :on-remove="handleRemove"
   >
     <div class="note-box">
-      <el-icon class="upload_icon">
-        <UploadFilled />
-      </el-icon>
+      <el-icon class="upload_icon"><UploadFilled /></el-icon>
       <div class="el-upload__text">
         <template v-if="drag"> 拖拽或<em>点击上传</em> </template>
         <template v-else> 点击上传 </template>
       </div>
     </div>
+
     <template #tip>
       <div class="el-upload__tip">
         <slot name="tip" />
         {{ props.tip || `请上传 ${props.accept} 标准格式文件，大小不能超过 ${props.fileSize}M！` }}
       </div>
     </template>
+
     <template #file="{ file }">
       <li class="el-upload-list__item is-success">
         <div class="el-upload-list__item-row">
           <el-icon class="el-icon--document"><Document /></el-icon>
-          <span class="el-upload-list__item-file-name" :title="file.name">{{ file.name }}</span>
+
+          <span class="el-upload-list__item-file-name" :title="file.name">
+            {{ file.name }}
+          </span>
+
           <span v-if="file.status === 'uploading'" class="file-progress-text"> {{ Math.round(file.percentage || 0) }}% </span>
-          <el-icon v-if="file.status === 'success'" class="el-icon--download" @click="handlerDownloadFile(file)">
-            <Download />
-          </el-icon>
-          <el-icon v-if="file.status === 'success'" class="el-icon--remove" @click="handleRemove(file)">
+
+          <el-tooltip
+            v-if="file.status === 'success'"
+            :content="downloadingMap[file.url!] ? '下载中...' : '下载'"
+            placement="top"
+            :show-after="120"
+          >
+            <el-icon
+              class="el-icon--download"
+              :class="{ loading: downloadingMap[file.url!] }"
+              @click="!downloadingMap[file.url!] && handleDownload(file)"
+            >
+              <component :is="downloadingMap[file.url!] ? Loading : Download" />
+            </el-icon>
+          </el-tooltip>
+
+          <el-icon
+            v-if="file.status === 'success'"
+            class="el-icon--remove"
+            :class="{ disabled: downloadingMap[file.url!] }"
+            @click="!downloadingMap[file.url!] && handleRemove(file)"
+          >
             <Close />
           </el-icon>
         </div>
-        <!-- 上传中才显示进度条 -->
+
         <el-progress
           v-if="file.status === 'uploading'"
           class="el-upload-list__item-progress"
@@ -56,27 +78,25 @@
 </template>
 
 <script setup lang="ts">
-import { Close, Document, Download, UploadFilled } from '@element-plus/icons-vue';
-import { ref, watch } from 'vue';
+import { Close, Document, Download, UploadFilled, Loading } from '@element-plus/icons-vue';
+import { ref, watch, nextTick } from 'vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
 
-defineOptions({
-  name: 'UploadFiles'
-});
+defineOptions({ name: 'UploadFiles' });
 
 type Props = {
   type?: string;
   tip?: string;
   multiple?: boolean;
   drag?: boolean;
-  limit?: number; // 最大图片上传数 ==> 非必传（默认为 1张）
-  fileSize?: number; // 图片大小限制 ==> 非必传（默认为 5M）
+  limit?: number;
+  fileSize?: number;
   accept?: string;
-  modelValue?: string | string[];
-  dir?: string; // 上传文件的目录
+  modelValue?: IUploadResult[] | string[];
+  dir?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -92,99 +112,172 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  'update:modelValue': [string[]];
+  'update:modelValue': [IUploadResult[]];
   change: [value: IUploadResult | null];
 }>();
+
+/* State */
 const _fileList = ref<UploadUserFile[]>([]);
+const _uploadResultList = ref<IUploadResult[]>([]);
+const downloadingMap = ref<Record<string, boolean>>({});
 
-// 辅助：把modelValue（url数组）转换成UploadUserFile[]
-function urlsToUserFiles(urls: string[]): UploadUserFile[] {
-  return urls.filter(Boolean).map(url => {
-    // 尽量回显名字，如果url有文件名可以自行处理
-    const name = url.split('/').pop();
-    return { name, url, status: 'success' } as UploadUserFile;
-  });
+/* Guard flags */
+let isSyncingFromParent = false;
+let needNormalizeEmit = false;
+
+/* Utils */
+function notifyWarn(message: string) {
+  setTimeout(() => ElNotification({ title: '温馨提示', message, type: 'warning' }), 0);
+}
+function getExt(name: string) {
+  const i = name.lastIndexOf('.');
+  return i >= 0 ? name.slice(i).toLowerCase() : '';
 }
 
-// 辅助：fileList -> url数组
-function userFilesToUrls(list: UploadUserFile[]): string[] {
-  return list.filter(f => !!f.url).map(f => f.url as string);
+function isUploadResult(r: any): r is IUploadResult {
+  return !!r && typeof r === 'object' && typeof r.url === 'string' && r.url.length > 0;
 }
 
-// modelValue to fileList
+/**
+ * 这里参数允许传入 IUploadResult | null | undefined，但我们会防御处理
+ * 以避免 TS 报 'r' possibly null 的错误。
+ */
+function createUserFileFromResult(r: IUploadResult | null | undefined): UploadUserFile {
+  const url = r?.url ?? '';
+  const name = r?.filename || url.split('/').pop() || '';
+  return { name, url, status: 'success' };
+}
+
+/**
+ * 归一化：不再返回接口之外的未知键（例如 id），以避免 TS2322。
+ * 如果你确实需要 id，请在一个 d.ts 中对 IUploadResult 进行模块扩展。
+ */
+function normalizeResult(r: (Partial<IUploadResult> & { url: string }) | null | undefined): IUploadResult {
+  const safe = r ?? { url: '' };
+  const eTag = (safe as any).eTag || (safe as any).etag || '';
+  return {
+    url: safe.url,
+    filename: safe.filename || safe.url.split('/').pop() || '',
+    eTag,
+    ...(eTag ? { etag: eTag } : {}),
+    objectName: (safe as any).objectName || '',
+    dirTag: (safe as any).dirTag || props.dir,
+    contextType: (safe as any).contextType || '',
+    size: (safe as any).size ?? 0,
+    fileId: (safe as any).fileId ?? 0,
+    // 移除 id: safe.id
+    // type 属性如果不在接口内，可视需要删除
+    type: (safe as any).type
+  } as IUploadResult;
+}
+
+/**
+ * 查找时加上 r?. 避免 r 可能为 null 的告警。
+ * 同时我们设计上保证 _uploadResultList 不含 null（赋值时过滤）。
+ */
+function findStoredResult(file: UploadUserFile): IUploadResult | undefined {
+  return _uploadResultList.value.find(
+    r => !!r && ((r.fileId && r.fileId > 0 && (file as any).fileId === r.fileId) || r.url === file.url)
+  );
+}
+
+function materializeResults(list: UploadUserFile[]): IUploadResult[] {
+  return list
+    .filter(f => !!f?.url)
+    .map(f => {
+      const stored = findStoredResult(f);
+      return stored ? stored : normalizeResult({ url: f.url as string, filename: f.name, dirTag: props.dir });
+    });
+}
+
+function shallowMetaEqual(a: any, b: any) {
+  return (
+    a?.url === b?.url &&
+    (a?.filename || '') === (b?.filename || '') &&
+    (a?.fileId || 0) === (b?.fileId || 0) &&
+    (a?.eTag || a?.etag || '') === (b?.eTag || b?.etag || '')
+  );
+}
+function isSameList(a: any, b: any) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (!shallowMetaEqual(a[i], b[i])) return false;
+  }
+  return true;
+}
+
+/* Watch: parent -> internal */
 watch(
   () => props.modelValue,
   newVal => {
-    const urls = Array.isArray(newVal) ? newVal : newVal ? [newVal] : [];
-    // 只有当外部变更和内部不一致时才同步
-    if (JSON.stringify(userFilesToUrls(_fileList.value)) !== JSON.stringify(urls)) {
-      _fileList.value = urlsToUserFiles(urls);
+    isSyncingFromParent = true;
+    try {
+      if (!Array.isArray(newVal) || newVal.length === 0) {
+        _fileList.value = [];
+        _uploadResultList.value = [];
+        return;
+      }
+
+      const first = newVal[0] as any;
+      const isObj = typeof first === 'object' && first?.url;
+      if (isObj) {
+        const full = (newVal as any[]).filter(isUploadResult).map(r => normalizeResult(r));
+        _uploadResultList.value = full;
+        _fileList.value = full.map(createUserFileFromResult);
+      } else {
+        const strs = (newVal as string[]).filter(Boolean);
+        const full = strs.map(url => normalizeResult({ url, filename: url.split('/').pop() || '', dirTag: props.dir }));
+        _uploadResultList.value = full;
+        _fileList.value = full.map(createUserFileFromResult);
+        needNormalizeEmit = true;
+        nextTick(() => {
+          if (needNormalizeEmit && !isSameList(props.modelValue, full)) {
+            emit('update:modelValue', full.slice());
+          }
+          needNormalizeEmit = false;
+        });
+      }
+    } finally {
+      isSyncingFromParent = false;
     }
   },
   { immediate: true }
 );
 
-// fileList to modelValue
+/* Watch: internal UI -> parent (用户操作) */
 watch(
   _fileList,
   list => {
-    const urls = userFilesToUrls(list);
-    // 只有当变化时才 emit
-    if (JSON.stringify(props.modelValue) !== JSON.stringify(urls)) {
-      emit('update:modelValue', urls);
+    if (isSyncingFromParent) return;
+    const newResults = materializeResults(list);
+    if (!isSameList(newResults, _uploadResultList.value)) {
+      _uploadResultList.value = newResults;
+    }
+    if (!isSameList(props.modelValue as any, newResults)) {
+      emit('update:modelValue', newResults.slice());
     }
   },
   { deep: true }
 );
 
-/**
- * @description 文件上传之前判断
- * @param rawFile 选择的文件
- * */
+/* Upload validation */
 const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
-  // 1. 校验文件大小
-  const fileSize = rawFile.size / 1024 / 1024 < props.fileSize;
-  if (!fileSize) {
-    setTimeout(() => {
-      ElNotification({
-        title: '温馨提示',
-        message: `上传文件大小不能超过 ${props.fileSize}M！`,
-        type: 'warning'
-      });
-    }, 0);
-    return false; // 阻止上传
-  }
-
-  // 2. 校验文件类型
-  const ext = rawFile.name.substring(rawFile.name.lastIndexOf('.')).toLowerCase();
-  const acceptList = props.accept.split(',').map(item => item.trim().toLowerCase());
-  console.log('acceptList', acceptList);
-  if (!acceptList.includes(ext)) {
-    setTimeout(() => {
-      ElNotification({
-        title: '温馨提示',
-        message: `仅支持 ${props.accept}格式的文件上传！`,
-        type: 'warning'
-      });
-    }, 0);
+  if (rawFile.size / 1024 / 1024 >= props.fileSize) {
+    notifyWarn(`上传文件大小不能超过 ${props.fileSize}M！`);
     return false;
   }
-
+  const ext = getExt(rawFile.name);
+  const accepts = props.accept.split(',').map(s => s.trim().toLowerCase());
+  if (!accepts.includes(ext)) {
+    notifyWarn(`仅支持 ${props.accept} 格式的文件上传！`);
+    return false;
+  }
   return true;
 };
+const handleExceed = () => notifyWarn(`当前最多只能上传 ${props.limit} 份文件，请移除后上传！`);
 
-/**
- * @description 文件数超出
- * */
-const handleExceed = () => {
-  ElNotification({
-    title: '温馨提示',
-    message: `当前最多只能上传 ${props.limit} 份文件，请移除后上传！`,
-    type: 'warning'
-  });
-};
-
-// 重新设置的上传
+/* Upload request */
 const uploadFileRequest = async (options: UploadRequestOptions) => {
   try {
     const { data } = await uploadFile(
@@ -201,39 +294,143 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
       }
     );
     options.onSuccess(data);
-  } catch (error) {
-    options.onError(error as any);
+  } catch (e) {
+    options.onError(e as any);
   }
 };
 
+/* Upload success */
 const handleSuccess = (response: IUploadResult | undefined, file: UploadFile) => {
-  if (!response) return;
+  if (!response || !response.url) return;
   file.url = response.url;
   file.name = response.filename;
-  emit('change', response);
+  // 明确标注类型；normalizeResult 不会返回 null
+  const norm = normalizeResult(response as any)!;
+
+  const idxByFileId = norm.fileId && norm.fileId > 0 ? _uploadResultList.value.findIndex(r => r?.fileId === norm.fileId) : -1;
+  let idx = idxByFileId;
+  if (idx === -1) {
+    idx = _uploadResultList.value.findIndex(r => r?.url === norm.url);
+  }
+  if (idx >= 0) _uploadResultList.value.splice(idx, 1, norm);
+  else _uploadResultList.value.push(norm);
+
+  const uiIdx = _fileList.value.findIndex(f => f.url === norm.url);
+  if (uiIdx >= 0) {
+    _fileList.value[uiIdx].name = norm.filename;
+  } else {
+    _fileList.value.push(createUserFileFromResult(norm));
+  }
+  if (!isSameList(props.modelValue as any, _uploadResultList.value)) {
+    emit('update:modelValue', _uploadResultList.value.slice());
+  }
+  emit('change', norm);
 };
 
+/* Remove */
 const handleRemove = (file: UploadFile) => {
-  _fileList.value = _fileList.value.filter(item => item.url !== file.url || item.name !== file.name);
-  emit('change', null);
+  _fileList.value = _fileList.value.filter(f => !(f.url === file.url && f.name === file.name));
+  const beforeLen = _uploadResultList.value.length;
+  _uploadResultList.value = _uploadResultList.value.filter(r => r?.url !== file.url);
+  if (_uploadResultList.value.length !== beforeLen) {
+    if (!isSameList(props.modelValue as any, _uploadResultList.value)) {
+      emit('update:modelValue', _uploadResultList.value.slice());
+    }
+    emit('change', null);
+  }
 };
 
-const handlerDownloadFile = (file: UploadFile) => {
-  const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件
-  link.style.display = 'none';
-  link.href = file.url + '';
-  const fileName = file.name;
-  link.setAttribute('download', fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+/* Download */
+function isPreviewLike(name: string) {
+  return /\.(png|jpe?g|gif|bmp|webp|svg|pdf|txt)$/i.test(name);
+}
+function shouldForceFetch(file: UploadFile) {
+  const url = file.url || '';
+  let cross = false;
+  try {
+    const u = new URL(url, location.href);
+    cross = u.origin !== location.origin;
+  } catch {
+    /* empty */
+  }
+  const name = (file.name || url).toLowerCase();
+  return cross || isPreviewLike(name);
+}
+function extractFileNameFromCD(cd?: string | null): string | undefined {
+  if (!cd) return;
 
+  const starMatch = /filename\*\s*=\s*([^;]+)/i.exec(cd);
+  if (starMatch) {
+    let value = starMatch[1].trim().replace(/^"(.*)"$/, '$1');
+    const rfc5987 = /^([^']*)'[^']*'(.*)$/.exec(value);
+    if (rfc5987) {
+      const encodedPart = rfc5987[2];
+      try {
+        return decodeURIComponent(encodedPart);
+      } catch {
+        /* ignore */
+      }
+    } else {
+      try {
+        return decodeURIComponent(value);
+      } catch {
+        /* ignore */
+      }
+      return value;
+    }
+  }
+
+  const normalMatch = /filename\s*=\s*([^;]+)/i.exec(cd);
+  if (normalMatch) {
+    return normalMatch[1].trim().replace(/^"(.*)"$/, '$1');
+  }
+}
+async function forceBlobDownload(url: string, filename?: string) {
+  const res = await fetch(url, { credentials: 'include' });
+  if (!res.ok) throw new Error(`下载失败: ${res.status}`);
+  const cdName = extractFileNameFromCD(res.headers.get('Content-Disposition'));
+  const finalName = filename || cdName || url.split('/').pop() || 'download';
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.style.display = 'none';
+  a.download = finalName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+async function handleDownload(file: UploadFile) {
+  if (!file.url) return;
+  if (downloadingMap.value[file.url]) return;
+  downloadingMap.value[file.url] = true;
+  try {
+    if (shouldForceFetch(file)) {
+      await forceBlobDownload(file.url, file.name);
+    } else {
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = file.url;
+      a.download = file.name || file.url.split('/').pop() || 'download';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  } catch (e) {
+    console.error('[download error]', e);
+    window.open(file.url, '_blank');
+  } finally {
+    downloadingMap.value[file.url] = false;
+  }
+}
+
+/* Progress wrapper */
 class CustomUploadProgressEvent extends ProgressEvent {
   percent: number;
-  constructor(event: ProgressEvent) {
-    super(event.type, event);
-    this.percent = event.lengthComputable ? Math.round((event.loaded / event.total) * 100) : 0;
+  constructor(e: ProgressEvent) {
+    super(e.type, e);
+    this.percent = e.lengthComputable ? Math.round((e.loaded / e.total) * 100) : 0;
   }
 }
 </script>
@@ -254,23 +451,20 @@ class CustomUploadProgressEvent extends ProgressEvent {
   min-width: 0;
 }
 .el-upload-list__item-row .el-icon--document {
-  color: #409eff; // 主色蓝
-  font-size: 18px; // 合适大小
-  margin-right: 5px; // 和文件名间距
-  vertical-align: middle;
+  color: #409eff;
+  font-size: 18px;
+  margin-right: 5px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 .el-upload-list__item-file-name {
   flex: 1 1 0;
   min-width: 0;
-  max-width: 60vw; // 或 100%，根据父容器调整
+  max-width: 60vw;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
 }
 .file-progress-text {
   font-size: 13px;
@@ -287,33 +481,56 @@ class CustomUploadProgressEvent extends ProgressEvent {
   font-size: 17px;
   transition:
     color 0.18s,
-    transform 0.18s;
+    transform 0.18s,
+    opacity 0.18s;
   opacity: 0.88;
+  display: inline-flex;
 }
-
 .el-icon--download:hover {
-  color: #409eff; // 下载高亮为主题蓝
+  color: #409eff;
   opacity: 1;
-  transform: scale(1.18); // 放大一点点
+  transform: scale(1.14);
 }
-
 .el-icon--remove:hover {
-  color: #e45757; // 删除高亮为红色
+  color: #e45757;
   opacity: 1;
-  transform: scale(1.18);
+  transform: scale(1.14);
+}
+.el-icon--download.loading {
+  color: #409eff;
+  cursor: default;
+  opacity: 0.9;
+  transform: none;
+}
+.el-icon--download.loading:hover {
+  transform: none;
+}
+.el-icon--remove.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+  transform: none;
+}
+.el-icon--download .loading,
+.el-icon--download.loading .loading {
+  animation: spin 1s linear infinite;
+  font-size: 16px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .el-upload-list__item-progress {
   margin-top: 8px;
   margin-bottom: 4px;
   width: 96%;
-  align-self: flex-start;
 }
 :deep(.el-upload-dragger) {
   width: 100% !important;
   min-height: 112px;
-  border: 1.5px dashed #d4d8dd; // 柔和浅灰色边框
+  border: 1.5px dashed #d4d8dd;
   border-radius: 8px;
-  background: #fafbfc; // 更淡的灰白底色
+  background: #fafbfc;
   transition:
     border-color 0.22s,
     background 0.22s;
@@ -323,38 +540,27 @@ class CustomUploadProgressEvent extends ProgressEvent {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-
   &:hover,
   &.is-dragover {
-    border-color: #6ea8fa; // 仅hover/drag时主色变蓝
+    border-color: #6ea8fa;
     background: #f3f8ff;
   }
 }
-
 .upload_icon {
   font-size: 32px;
-  color: #7fb8ec; // 柔和中性蓝
+  color: #7fb8ec;
   margin-bottom: 8px;
-  transition: color 0.18s;
 }
-
 .el-upload__text {
   font-size: 16px;
-  color: #3a4256; // 深灰色更稳重
+  color: #3a4256;
   font-weight: 500;
   margin-bottom: 2px;
+  em {
+    color: #409eff;
+    font-style: normal;
+  }
 }
-
-.el-upload__text a {
-  color: #4594e3; // 低饱和蓝
-  text-decoration: underline;
-  font-weight: 500;
-  transition: color 0.15s;
-}
-.el-upload__text a:hover {
-  color: #1867c0;
-}
-
 .el-upload__tip {
   margin-top: 8px;
   font-size: 13px;
