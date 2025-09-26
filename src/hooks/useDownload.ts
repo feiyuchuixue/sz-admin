@@ -3,16 +3,17 @@ import { ElNotification } from 'element-plus';
 /**
  * @description 接收数据流生成 blob，创建链接，下载文件
  * @param {Function} api 导出表格的api方法 (必传)
- * @param {String} tempName 导出的文件名 (必传)
+ * @param {String} tempName 导出的文件名 (非必填，优先使用)
  * @param {Object} params 导出的参数 (默认{})
  * @param {Boolean} isNotify 是否有导出消息提示 (默认为 true)
- * @param {String} fileType 导出的文件格式 (默认为.xlsx)
+ * @param {String} fileName 下载文件名 (非必填，优先级高于 tempName)
  * */
 export const useDownload = async (
   api: (param: any) => Promise<any>,
-  tempName: string,
+  tempName?: string,
   params: any = {},
-  isNotify: boolean = true
+  isNotify: boolean = true,
+  fileName?: string
 ) => {
   if (isNotify) {
     ElNotification({
@@ -23,33 +24,27 @@ export const useDownload = async (
     });
   }
   try {
-    // 如果params为空，构建请求参数
-    if (!params) {
-      params = {
-        templateName: tempName
-      };
-    }
+    if (!params) params = {};
     const res = await api(params);
-
-    // 提取文件名
-    const contentDisposition = res.headers['content-disposition'];
-    const filename = decodeURIComponent(
-      contentDisposition?.match(/filename\*?=(?:UTF-8'')?([^;]+)?/)?.[1]?.replace(/['"]/g, '') || '下载文件'
-    );
-
+    // 优先使用 fileName 或 tempName，否则用响应头
+    let downloadName = fileName || tempName;
+    if (!downloadName) {
+      const contentDisposition = res.headers['content-disposition'];
+      downloadName = decodeURIComponent(
+        contentDisposition?.match(/filename\*?=(?:UTF-8'')?([^;]+)?/)?.[1]?.replace(/['"]/g, '') || '下载文件'
+      );
+    }
     // 下载文件
     const blob = new Blob([res.data], { type: res.headers['content-type'] });
     const blobUrl = window.URL.createObjectURL(blob);
 
-    // 兼容 edge 不支持 createObjectURL 方法
-    if ('msSaveOrOpenBlob' in navigator) return window.navigator.msSaveOrOpenBlob(blob, filename);
+    if ('msSaveOrOpenBlob' in navigator) return window.navigator.msSaveOrOpenBlob(blob, downloadName);
     const exportFile = document.createElement('a');
     exportFile.style.display = 'none';
-    exportFile.download = filename;
+    exportFile.download = downloadName;
     exportFile.href = blobUrl;
     document.body.appendChild(exportFile);
     exportFile.click();
-    // 去除下载对 url 的影响
     document.body.removeChild(exportFile);
     window.URL.revokeObjectURL(blobUrl);
   } catch (error) {

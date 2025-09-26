@@ -80,6 +80,7 @@ const columns: ColumnProps<SysTempFileRow>[] = [
   { type: 'selection', width: 80 },
   { prop: 'id', label: '模板标识', width: 100 },
   { prop: 'tempName', label: '模版名', width: 180, align: 'center' },
+  { prop: 'alias', label: '标识', tag: true },
   { prop: 'url', label: '文件', width: 300 },
   { prop: 'remark', label: '备注' },
   { prop: 'history', label: '历史', width: 100 },

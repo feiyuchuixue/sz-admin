@@ -73,7 +73,11 @@
             <template #label>
               <el-space :size="4">
                 <span>路由名称</span>
-                <el-tooltip effect="dark" content="路由名称需与组件 defineOptions({ name }) 完全一致，否则 Keep-Alive 缓存无效，如：TeacherStatisticsView" placement="top">
+                <el-tooltip
+                  effect="dark"
+                  content="路由名称需与组件 defineOptions({ name }) 完全一致，否则 Keep-Alive 缓存无效，如：TeacherStatisticsView"
+                  placement="top"
+                >
                   <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>
@@ -126,7 +130,11 @@
             <template #label>
               <el-space :size="4">
                 <span>权限标识</span>
-                <el-tooltip effect="dark" content="权限标识需与后端 @SaCheckPermission 注解保持一致，如：teacher.statistics.query_table" placement="top">
+                <el-tooltip
+                  effect="dark"
+                  content="权限标识需与后端 @SaCheckPermission 注解保持一致，如：teacher.statistics.query_table"
+                  placement="top"
+                >
                   <i :class="'iconfont icon-yiwen'" />
                 </el-tooltip>
               </el-space>

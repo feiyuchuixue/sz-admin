@@ -21,6 +21,9 @@
       <el-form-item label="模版名" prop="tempName">
         <el-input v-model="paramsProps.row.tempName" placeholder="请填写模版名" clearable />
       </el-form-item>
+      <el-form-item label="标识" prop="alias">
+        <el-input v-model="paramsProps.row.alias" placeholder="请填写标识" clearable></el-input>
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
       </el-form-item>
@@ -42,7 +45,9 @@ defineOptions({
   name: 'SysTempFileForm'
 });
 
-const rules = reactive({});
+const rules = reactive({
+  alias: [{ required: true, message: '请填写标识' }]
+});
 
 const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({

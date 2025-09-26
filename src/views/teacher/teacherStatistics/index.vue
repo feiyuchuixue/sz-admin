@@ -268,10 +268,11 @@ const ImportExcelRef = ref<InstanceType<typeof ImportExcel>>();
 const importData = () => {
   const params = {
     title: '教师统计',
-    templateName: '教师统计模板',
     tempApi: downloadTemplate,
     importApi: importTeacherStatisticsExcelApi,
-    getTableList: proTableRef.value?.getTableList
+    getTableList: proTableRef.value?.getTableList,
+    alias: 'jstj',
+    fileName: '教师统计模板.xlsx'
   };
   ImportExcelRef.value?.acceptParams(params);
 };
