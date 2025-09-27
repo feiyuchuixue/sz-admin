@@ -65,7 +65,6 @@ const renderCellData = (item: ColumnProps, scope: RenderScope<any>) => {
 
   const fieldNames = item.fieldNames || {};
   const values = normalizeValues(rawValue);
-  console.log('values', values);
 
   if (dict && Array.isArray(dict) && dict.length > 0) {
     // tag===true 时，走 tag 渲染
@@ -79,9 +78,7 @@ const renderCellData = (item: ColumnProps, scope: RenderScope<any>) => {
 
       const tagNodes = displayedTags.map((val: any) => {
         const label = filterEnum(val, dict, fieldNames);
-        console.log('label', label);
         const tagType = getTagType(val, dict, fieldNames);
-        console.log('tagType', tagType);
         return (
           <el-tag type={tagType} class="tag-item" key={val}>
             {label}
