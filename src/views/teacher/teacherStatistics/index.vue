@@ -29,6 +29,9 @@
           导出
         </el-button>
       </template>
+      <template #url="{ row }">
+        <FileDownloadList :files="row?.url" :align="'left'" :max-rows="2" />
+      </template>
       <template #operation="{ row }">
         <el-button
           v-auth="'teacher.statistics.update'"
@@ -74,6 +77,7 @@ import { useDownload } from '@/hooks/useDownload';
 import RemoteSearchSelect from '@/components/RemoteSearchSelect/index.vue';
 import { useDict } from '@/hooks/useDict';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
 
 defineOptions({
   name: 'TeacherStatisticsView'
@@ -87,6 +91,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
   { prop: 'month', label: '月份', width: 90 },
   { prop: 'duringTime', label: '年月' },
   { prop: 'teacherId', label: '教师id' },
+  { prop: 'url', label: '附件', width: 300 },
   {
     prop: 'teacherCommonType',
     label: '讲师区分类型',

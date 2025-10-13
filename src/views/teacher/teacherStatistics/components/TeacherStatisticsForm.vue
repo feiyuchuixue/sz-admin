@@ -60,6 +60,9 @@
       <el-form-item label="备注" prop="remark">
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" clearable />
       </el-form-item>
+      <el-form-item label="附件" prop="url">
+        <UploadFiles v-model:modelValue="fileUrls" :limit="5" :file-size="3" :dir="'teacher'" />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false"> 取消 </el-button>
@@ -72,6 +75,7 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import UploadFiles from '@/components/Upload/file.vue';
 
 defineOptions({
   name: 'TeacherStatisticsForm'
@@ -94,9 +98,12 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
+const fileUrls = ref<string[]>([]);
+
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
+  fileUrls.value = params.row.url; // 附件回显--从表格数据传过来
   visible.value = true;
 };
 
@@ -106,6 +113,7 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
+      paramsProps.value.row.url = fileUrls.value; // 附件数据添加--从上传组件获取
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
