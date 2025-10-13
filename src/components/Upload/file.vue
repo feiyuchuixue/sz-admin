@@ -24,7 +24,12 @@
     <template #tip>
       <div class="el-upload__tip">
         <slot name="tip" />
-        {{ props.tip || `请上传 ${props.accept} 标准格式文件，大小不能超过 ${props.fileSize}M！` }}
+        {{
+          props.tip ||
+          (!props.accept || props.accept === '*'
+            ? `请上传文件，大小不能超过 ${props.fileSize}M！`
+            : `请上传 ${props.accept} 标准格式文件，大小不能超过 ${props.fileSize}M！`)
+        }}
       </div>
     </template>
 
@@ -106,7 +111,7 @@ const props = withDefaults(defineProps<Props>(), {
   drag: true,
   limit: 1,
   fileSize: 5,
-  accept: '.xlsx,.xls,.docx,.doc,.pdf',
+  accept: '',
   modelValue: () => [],
   dir: 'tmp'
 });
@@ -266,6 +271,10 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
   if (rawFile.size / 1024 / 1024 >= props.fileSize) {
     notifyWarn(`上传文件大小不能超过 ${props.fileSize}M！`);
     return false;
+  }
+  // accept 为空或为 * 时不校验类型
+  if (!props.accept || props.accept === '*') {
+    return true;
   }
   const ext = getExt(rawFile.name);
   const accepts = props.accept.split(',').map(s => s.trim().toLowerCase());
