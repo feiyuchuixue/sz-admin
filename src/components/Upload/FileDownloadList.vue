@@ -65,11 +65,16 @@ defineOptions({ name: 'FileDownloadList' });
 
 type FileType = IUploadResult & { url: string; filename?: string };
 
-const props = defineProps<{
-  files: FileType[] | string[];
-  align?: 'left' | 'center' | 'right';
-  maxRows?: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    files?: FileType[] | string[];
+    align?: 'left' | 'center' | 'right';
+    maxRows?: number;
+  }>(),
+  {
+    files: () => []
+  }
+);
 
 const align = props.align || 'left';
 const maxRows = props.maxRows ?? 0;
