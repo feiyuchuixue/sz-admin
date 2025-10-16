@@ -38,8 +38,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { HOME_URL, IS_PREVIEW } from '@/config';
-import { getTimeState } from '@/utils';
-import { loginApi } from '@/api/modules/system/login';
+import { aesEncrypt, getTimeState } from '@/utils';
+import { getChallengeApi, loginApi } from '@/api/modules/system/login';
 import { useUserStore } from '@/stores/modules/user';
 import { useTabsStore } from '@/stores/modules/tabs';
 import { useKeepAliveStore } from '@/stores/modules/keepAlive';
@@ -50,6 +50,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { ElNotification } from 'element-plus';
 import SliderCaptcha from '@/components/Captcha/SliderCaptcha.vue';
 import { getCaptchaStatus } from '@/api/modules/system/captcha';
+import type { LoginParams } from '@/api/types/system/login';
 const router = useRouter();
 const userStore = useUserStore();
 const tabsStore = useTabsStore();
@@ -66,17 +67,38 @@ const loginForm = reactive({
   username: '',
   password: '',
   clientId: '',
-  grantType: ''
+  grantType: '',
+  iv: '',
+  requestId: ''
 });
 
 const onSliderSuccess = async () => {
-  await performLogin();
+  // 缓存当前表单数据，避免后续被重置
+  const formData = { ...loginForm };
+  await performLogin(formData);
 };
 
-const performLogin = async () => {
+const performLogin = async (formData = loginForm) => {
   loading.value = true;
   try {
-    const { data } = await loginApi({ ...loginForm });
+    // 获取login的一次性校验接口
+    const challenge = await getChallengeApi();
+    const pwd = formData.password;
+    const secret = challenge.data.secretKey;
+    const requestId = challenge.data.requestId;
+    // 登录前校验，获取secretKey 和 requestId
+    const { iv, encryptedData } = aesEncrypt(pwd, secret);
+
+    const params: LoginParams = {
+      username: formData.username,
+      password: encryptedData, // aes加密后的密码
+      clientId: formData.clientId,
+      grantType: formData.grantType,
+      iv: iv, // aes加密的iv
+      requestId: requestId // 一次性请求id
+    };
+    const { data } = await loginApi(params);
+
     userStore.setToken(data.accessToken);
     userStore.setUserInfo(data.userInfo);
 
@@ -92,10 +114,18 @@ const performLogin = async () => {
       type: 'success',
       duration: 3000
     });
+  } catch (error) {
+    ElNotification({
+      title: '登录失败',
+      message: (error instanceof Error ? error.message : '未知错误'),
+      type: 'error',
+      duration: 3000
+    });
   } finally {
     loading.value = false;
   }
 };
+
 const captchaRef = ref<InstanceType<typeof SliderCaptcha>>();
 const login = () => {
   if (!loginFormRef.value) {
@@ -111,7 +141,7 @@ const login = () => {
       if (data) {
         captchaRef.value?.acceptParams(); // 打开验证码弹窗
       } else {
-        await performLogin(); // 执行登录
+        await performLogin({ ...loginForm }); // 执行登录
       }
     } finally {
       loading.value = false;

@@ -1,6 +1,6 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { LoginParams, LoginInfo } from '@/api/types/system/login';
+import type { LoginParams, LoginInfo, ChallengeInfo } from '@/api/types/system/login';
 
 // 用户登录
 export const loginApi = (params: LoginParams) => {
@@ -31,4 +31,9 @@ export const logoutApi = () => {
 // 获取用户角色
 export const getAuthRoleListApi = () => {
   return http.get<string[]>(ADMIN_MODULE + `/sys-menu/user/roles`, {});
+};
+
+// 获取一次性认证参数
+export const getChallengeApi = () => {
+  return http.get<ChallengeInfo>(ADMIN_MODULE + `/common/auth/challenge`, {});
 };
