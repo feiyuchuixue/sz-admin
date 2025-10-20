@@ -9,11 +9,10 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadUploadFiles
+        <upload-files
           v-model:modelValue="fileUrls"
-          multiple
           :file-size="3"
-          :dir="'tmp'"
+          :dir="'excel'"
           @change="fileChange"
           accept=".xlsx,.xls,.docx,.doc,.pdf"
         />
@@ -38,7 +37,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
-import UploadUploadFiles from '@/components/Upload/UploadFiles.vue';
+import UploadFiles from '@/components/Upload/UploadFiles.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
 
 defineOptions({
