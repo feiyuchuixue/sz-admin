@@ -9,7 +9,7 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles
+        <UploadUploadFiles
           v-model:modelValue="fileUrls"
           multiple
           :file-size="3"
@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
-import UploadFiles from '@/components/Upload/file.vue';
+import UploadUploadFiles from '@/components/Upload/UploadFiles.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
 
 defineOptions({

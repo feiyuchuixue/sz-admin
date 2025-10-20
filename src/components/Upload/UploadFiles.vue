@@ -90,7 +90,7 @@ import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOp
 import type { IUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
 
-defineOptions({ name: 'UploadFiles' });
+defineOptions({ name: 'UploadUploadFiles' });
 
 type Props = {
   type?: string;
@@ -129,6 +129,9 @@ const downloadingMap = ref<Record<string, boolean>>({});
 /* Guard flags */
 let isSyncingFromParent = false;
 let needNormalizeEmit = false;
+let isProcessingResults = false; // 防止递归处理
+// 暂存成功的上传结果，避免立即处理导致回调丢失
+const pendingSuccessResults = new Map<string, { file: UploadFile; response: IUploadResult }>();
 
 /* Utils */
 function notifyWarn(message: string) {
@@ -154,8 +157,7 @@ function createUserFileFromResult(r: IUploadResult | null | undefined): UploadUs
 }
 
 /**
- * 归一化：不再返回接口之外的未知键（例如 id），以避免 TS2322。
- * 如果你确实需要 id，请在一个 d.ts 中对 IUploadResult 进行模块扩展。
+ * 归一化：确保返回非 null 的 IUploadResult
  */
 function normalizeResult(r: (Partial<IUploadResult> & { url: string }) | null | undefined): IUploadResult {
   const safe = r ?? { url: '' };
@@ -212,6 +214,53 @@ function isSameList(a: any, b: any) {
   return true;
 }
 
+// 处理暂存的成功结果 - 添加防递归保护
+function processPendingResults() {
+  if (pendingSuccessResults.size === 0 || isProcessingResults) return;
+
+  isProcessingResults = true;
+
+  try {
+    const results = Array.from(pendingSuccessResults.values());
+    pendingSuccessResults.clear();
+
+    // 暂停 watch 监听，避免递归更新
+    isSyncingFromParent = true;
+
+    // 批量处理所有成功的上传
+    for (const { file, response } of results) {
+      const norm = normalizeResult(response); // normalizeResult 确保返回非 null 值
+
+      // 更新文件列表中对应的文件
+      const fileListIdx = _fileList.value.findIndex(f => (f as any).uid === file.uid);
+      if (fileListIdx >= 0) {
+        const existingFile = _fileList.value[fileListIdx];
+        existingFile.name = norm!.filename;
+        existingFile.url = norm!.url;
+        existingFile.status = 'success';
+      }
+
+      // 添加到结果列表（检查重复）
+      const existingResultIdx = _uploadResultList.value.findIndex(r => r && r.url === norm!.url);
+      if (existingResultIdx >= 0) {
+        _uploadResultList.value[existingResultIdx] = norm;
+      } else {
+        _uploadResultList.value.push(norm);
+      }
+
+      emit('change', norm);
+    }
+
+    // 重新启用 watch 监听
+    isSyncingFromParent = false;
+
+    // 批量触发更新
+    emit('update:modelValue', _uploadResultList.value.slice());
+  } finally {
+    isProcessingResults = false;
+  }
+}
+
 /* Watch: parent -> internal */
 watch(
   () => props.modelValue,
@@ -250,11 +299,12 @@ watch(
   { immediate: true }
 );
 
-/* Watch: internal UI -> parent (用户操作) */
+/* Watch: internal UI -> parent (用户操作) - 添加防递归保护 */
 watch(
   _fileList,
   list => {
-    if (isSyncingFromParent) return;
+    if (isSyncingFromParent || isProcessingResults) return;
+
     const newResults = materializeResults(list);
     if (!isSameList(newResults, _uploadResultList.value)) {
       _uploadResultList.value = newResults;
@@ -263,7 +313,7 @@ watch(
       emit('update:modelValue', newResults.slice());
     }
   },
-  { deep: true }
+  { deep: true, flush: 'post' } // 使用 flush: 'post' 确保在 DOM 更新后执行
 );
 
 /* Upload validation */
@@ -308,32 +358,25 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
   }
 };
 
-/* Upload success */
+/* Upload success - 修复并发问题，避免立即处理 */
 const handleSuccess = (response: IUploadResult | undefined, file: UploadFile) => {
   if (!response || !response.url) return;
-  file.url = response.url;
-  file.name = response.filename;
-  // 明确标注类型；normalizeResult 不会返回 null
-  const norm = normalizeResult(response as any)!;
 
-  const idxByFileId = norm.fileId && norm.fileId > 0 ? _uploadResultList.value.findIndex(r => r?.fileId === norm.fileId) : -1;
-  let idx = idxByFileId;
-  if (idx === -1) {
-    idx = _uploadResultList.value.findIndex(r => r?.url === norm.url);
-  }
-  if (idx >= 0) _uploadResultList.value.splice(idx, 1, norm);
-  else _uploadResultList.value.push(norm);
+  console.log('handleSuccess called for file:', file.name, 'uid:', file.uid);
 
-  const uiIdx = _fileList.value.findIndex(f => f.url === norm.url);
-  if (uiIdx >= 0) {
-    _fileList.value[uiIdx].name = norm.filename;
-  } else {
-    _fileList.value.push(createUserFileFromResult(norm));
-  }
-  if (!isSameList(props.modelValue as any, _uploadResultList.value)) {
-    emit('update:modelValue', _uploadResultList.value.slice());
-  }
-  emit('change', norm);
+  // 确保 file.uid 是字符串类型，如果不是则转换
+  const fileUid = String(file.uid);
+
+  // 暂存成功结果，避免立即处理导致后续回调丢失
+  pendingSuccessResults.set(fileUid, { file, response });
+
+  // 延迟批量处理，确保所有并发上传的 handleSuccess 都能被调用
+  nextTick(() => {
+    // 再次延迟，确保 Element Plus 内部状态稳定
+    setTimeout(() => {
+      processPendingResults();
+    }, 50); // 增加延迟时间到 50ms
+  });
 };
 
 /* Remove */
