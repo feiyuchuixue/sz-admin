@@ -90,7 +90,7 @@ import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOp
 import type { IUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
 
-defineOptions({ name: 'UploadUploadFiles' });
+defineOptions({ name: 'UploadFiles' });
 
 type Props = {
   type?: string;
