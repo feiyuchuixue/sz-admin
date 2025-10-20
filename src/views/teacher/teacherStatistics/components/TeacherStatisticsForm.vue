@@ -61,7 +61,7 @@
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" clearable />
       </el-form-item>
       <el-form-item label="附件" prop="url">
-        <UploadFiles v-model:modelValue="fileUrls" :limit="5" :file-size="3" :dir="'teacher'" />
+        <upload-files v-model:modelValue="fileUrls" :limit="5" :file-size="3" :dir="'teacher'" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -75,7 +75,8 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
-import UploadFiles from '@/components/Upload/file.vue';
+import UploadFiles from '@/components/Upload/UploadFiles.vue';
+import type { IUploadResult } from '@/api/types/system/upload';
 
 defineOptions({
   name: 'TeacherStatisticsForm'
@@ -98,7 +99,7 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
-const fileUrls = ref<string[]>([]);
+const fileUrls = ref<IUploadResult[] | string[]>([]);
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {

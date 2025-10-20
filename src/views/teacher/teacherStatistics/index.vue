@@ -30,7 +30,7 @@
         </el-button>
       </template>
       <template #url="{ row }">
-        <FileDownloadList :files="row?.url" :align="'left'" :max-rows="2" />
+        <file-download-list :files="row?.url" :align="'left'" :max-rows="3" />
       </template>
       <template #operation="{ row }">
         <el-button
@@ -89,8 +89,8 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
   { type: 'selection', width: 80 },
   { prop: 'year', label: '年限', width: 90 },
   { prop: 'month', label: '月份', width: 90 },
-  { prop: 'duringTime', label: '年月' },
-  { prop: 'teacherId', label: '教师id' },
+  { prop: 'duringTime', label: '年月', width: 120 },
+  { prop: 'teacherId', label: '教师id', width: 90 },
   { prop: 'url', label: '附件', width: 300 },
   {
     prop: 'teacherCommonType',
@@ -102,7 +102,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
       value: 'id',
       tagType: 'callbackShowStyle'
     },
-    width: 150
+    width: 90
   },
   { prop: 'totalTeaching', label: '授课总数', width: 90 },
   { prop: 'totalClassCount', label: '服务班次', width: 90 },
@@ -117,10 +117,8 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
       value: 'id',
       tagType: 'callbackShowStyle'
     },
-    width: 120
+    width: 90
   },
-  { prop: 'checkTime', label: '核对时间', width: 160 },
-  { prop: 'lastSyncTime', label: '最近一次同步时间', width: 160 },
   { prop: 'remark', label: '备注', width: 160 },
   {
     prop: 'createId',
@@ -147,7 +145,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     },
     width: 150
   },
-  { prop: 'updateTime', label: '更新时间', width: 160 },
+  { prop: 'updateTime', label: '更新时间', width: 80 },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
 ];
 // 搜索条件项

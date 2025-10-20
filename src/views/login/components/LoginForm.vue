@@ -117,7 +117,7 @@ const performLogin = async (formData = loginForm) => {
   } catch (error) {
     ElNotification({
       title: '登录失败',
-      message: (error instanceof Error ? error.message : '未知错误'),
+      message: error instanceof Error ? error.message : '未知错误',
       type: 'error',
       duration: 3000
     });
