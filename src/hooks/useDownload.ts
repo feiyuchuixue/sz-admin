@@ -26,13 +26,18 @@ export const useDownload = async (
   try {
     if (!params) params = {};
     const res = await api(params);
-    // 优先使用 fileName 或 tempName，否则用响应头
-    let downloadName = fileName || tempName;
+    // 优先从 content-disposition 获取文件名
+    let downloadName: string | undefined;
+    const contentDisposition = res.headers['content-disposition'];
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]+)?/);
+      if (match && match[1]) {
+        downloadName = decodeURIComponent(match[1].replace(/['"]/g, ''));
+      }
+    }
+    // 如果 content-disposition 没有文件名，再用 fileName 或 tempName
     if (!downloadName) {
-      const contentDisposition = res.headers['content-disposition'];
-      downloadName = decodeURIComponent(
-        contentDisposition?.match(/filename\*?=(?:UTF-8'')?([^;]+)?/)?.[1]?.replace(/['"]/g, '') || '下载文件'
-      );
+      downloadName = fileName || tempName || '下载文件';
     }
     // 下载文件
     const blob = new Blob([res.data], { type: res.headers['content-type'] });
