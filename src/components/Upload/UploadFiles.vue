@@ -87,7 +87,7 @@
 
 <script setup lang="ts">
 import { Close, Document, Download, UploadFilled, Loading } from '@element-plus/icons-vue';
-import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
+import { ref, watch, nextTick, onBeforeUnmount, defineExpose } from 'vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
@@ -107,6 +107,11 @@ type Props = {
   dir?: string;
   flushDelay?: number;
   debug?: boolean;
+  emitUploading?: boolean;
+  preserveRaw?: boolean;
+  autoAllSuccess?: boolean;
+  requireNewUploadForAllSuccess?: boolean; // 新增：是否必须有新上传才触发 all-success（默认 true）
+  emitAllSuccessOnInitialHydration?: boolean; // 新增：回显阶段是否触发 all-success（默认 false）
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -119,35 +124,42 @@ const props = withDefaults(defineProps<Props>(), {
   accept: '',
   modelValue: () => [],
   dir: 'tmp',
-  flushDelay: 50,
-  debug: false
+  flushDelay: 80,
+  debug: false,
+  emitUploading: false,
+  preserveRaw: true,
+  autoAllSuccess: true,
+  requireNewUploadForAllSuccess: true,
+  emitAllSuccessOnInitialHydration: false
 });
 
 const emit = defineEmits<{
   'update:modelValue': [IUploadResult[]];
   change: [value: IUploadResult | null];
+  'all-success': [list: IUploadResult[]];
 }>();
 
-/* ---------------- State ---------------- */
+/* ------------ State ------------ */
 const _fileList = ref<UploadUserFile[]>([]);
-const _uploadResultMap = ref<Map<string, IUploadResult>>(new Map());
-const _uploadResultList = ref<IUploadResult[]>([]);
+const _resultMap = ref<Map<string, IUploadResult>>(new Map());
 const downloadingMap = ref<Record<string, boolean>>({});
+let internalSnapshot: IUploadResult[] = [];
 
-/* ---------------- Guards & Flags ---------------- */
-let isSyncingFromParent = false;
-let needNormalizeEmit = false;
+/* ------------ Flags ------------ */
 let isProcessingResults = false;
-
-/* Pending success (batching) */
+let isInternalEmit = false;
+let initialHydrated = false; // 是否已完成首次回显
+let uploadCycleActive = false; // 当前上传周期是否激活
+let hasNewUploadSuccess = false; // 本周期是否有至少一个成功上传
 const pendingSuccessResults = new Map<string, { file: UploadFile; response: IUploadResult }>();
 let flushTimer: number | null = null;
 
-/* ---------------- Utils ---------------- */
+/* ------------ All-success 记忆签名 ------------ */
+let lastAllSuccessSignature = '';
+
+/* ------------ Utils ------------ */
 function logDebug(...args: any[]) {
-  if (props.debug) {
-    console.log('[UploadFiles]', ...args);
-  }
+  if (props.debug) console.log('[UploadFiles]', ...args);
 }
 function notifyWarn(message: string) {
   setTimeout(() => ElNotification({ title: '温馨提示', message, type: 'warning' }), 0);
@@ -156,39 +168,27 @@ function getExt(name: string) {
   const i = name.lastIndexOf('.');
   return i >= 0 ? name.slice(i).toLowerCase() : '';
 }
-function isUploadResult(r: any): r is IUploadResult {
-  return !!r && typeof r === 'object' && typeof r.url === 'string';
-}
-function normalizeResult(r: (Partial<IUploadResult> & { url?: string }) | null | undefined): IUploadResult {
-  const safe = r ?? {};
-  const url = safe.url || '';
-  const filename = safe.filename || (url ? url.split('/').pop() || '' : '');
-  const eTag = (safe as any).eTag || (safe as any).etag || '';
+function preserveNormalize(raw: any, dirTag: string): IUploadResult {
+  const url = raw?.url ?? '';
+  const filename = raw?.filename || raw?.name || (url ? url.split('/').pop() || '' : '');
+  const eTag = raw?.eTag || raw?.etag || '';
   return {
+    ...(props.preserveRaw ? raw : {}),
     url,
     filename,
     eTag,
     ...(eTag ? { etag: eTag } : {}),
-    objectName: (safe as any).objectName || '',
-    dirTag: (safe as any).dirTag || props.dir,
-    contextType: (safe as any).contextType || '',
-    size: (safe as any).size ?? 0,
-    fileId: (safe as any).fileId ?? 0,
-    type: (safe as any).type
+    dirTag: raw?.dirTag || dirTag,
+    objectName: raw?.objectName ?? '',
+    contextType: raw?.contextType ?? '',
+    size: raw?.size ?? 0,
+    fileId: raw?.fileId ?? 0
   } as IUploadResult;
 }
-function makeStableUid(r: IUploadResult, index: number): string {
-  if (r!.fileId && r!.fileId > 0) return 'fid-' + r!.fileId;
-  const base = r!.url || r!.filename || 'empty';
+function buildStableUid(source: { fileId?: number; url?: string; filename?: string }, index: number) {
+  if (source.fileId && source.fileId > 0) return 'fid-' + source.fileId;
+  const base = (source.url || source.filename || 'item').replace(/\s+/g, '_');
   return 'u:' + base + '#i:' + index;
-}
-function materializeResults(list: UploadUserFile[]): IUploadResult[] {
-  return list.map(f => {
-    const uid = String((f as any).uid);
-    const stored = _uploadResultMap.value.get(uid);
-    if (stored) return stored;
-    return normalizeResult({ url: f.url || '', filename: f.name, dirTag: props.dir });
-  });
 }
 function shallowMetaEqual(a: any, b: any) {
   return (
@@ -201,15 +201,71 @@ function shallowMetaEqual(a: any, b: any) {
 function isSameList(a: any, b: any) {
   if (!Array.isArray(a) || !Array.isArray(b)) return false;
   if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (!shallowMetaEqual(a[i], b[i])) return false;
-  }
+  for (let i = 0; i < a.length; i++) if (!shallowMetaEqual(a[i], b[i])) return false;
   return true;
 }
+function exportResultList(): IUploadResult[] {
+  const out: IUploadResult[] = [];
+  _fileList.value.forEach(f => {
+    const uid = String((f as any).uid);
+    const r = _resultMap.value.get(uid);
+    if (r) out.push(r);
+    else if (props.emitUploading) {
+      out.push(
+        preserveNormalize(
+          { url: '', filename: f.name, dirTag: props.dir, size: (f as any).size ?? 0, uploading: true },
+          props.dir
+        )
+      );
+    }
+  });
+  return out;
+}
 
-/* ---------------- Batch Scheduling ---------------- */
-function schedulePendingFlush() {
-  if (flushTimer !== null) return;
+/* ------------ All-success ------------ */
+function computeAllSuccessSignature(list: IUploadResult[]): string {
+  return list.map(r => `${r!.url}#${r!.fileId}#${r!.filename}`).join('|') + `|len:${list.length}`;
+}
+function isAllSuccess(): boolean {
+  if (_fileList.value.length === 0) return false;
+  if (pendingSuccessResults.size > 0) return false;
+  if (_resultMap.value.size !== _fileList.value.length) return false;
+  return _fileList.value.every(f => f.status === 'success');
+}
+function tryEmitAllSuccess(source: string) {
+  if (!props.autoAllSuccess) return;
+  if (!isAllSuccess()) return;
+
+  // 回显阶段的抑制
+  if (!initialHydrated && !props.emitAllSuccessOnInitialHydration) {
+    logDebug('跳过回显阶段 all-success');
+    return;
+  }
+
+  // 需要真实上传
+  if (props.requireNewUploadForAllSuccess && !hasNewUploadSuccess) {
+    logDebug('未发生新上传成功，跳过 all-success');
+    return;
+  }
+
+  const list = exportResultList();
+  const sig = computeAllSuccessSignature(list);
+  if (sig === lastAllSuccessSignature) {
+    logDebug('all-success 已触发过，跳过');
+    return;
+  }
+  lastAllSuccessSignature = sig;
+  emit('all-success', list.slice());
+  logDebug(`触发 all-success(${source}) 数量=`, list.length);
+
+  // 结束本上传周期
+  uploadCycleActive = false;
+  hasNewUploadSuccess = false;
+}
+
+/* ------------ Flush 调度 ------------ */
+function scheduleFlush() {
+  if (flushTimer != null) return;
   flushTimer = window.setTimeout(() => {
     flushTimer = null;
     processPendingResults();
@@ -217,163 +273,114 @@ function schedulePendingFlush() {
 }
 function resetPending() {
   pendingSuccessResults.clear();
-  if (flushTimer !== null) {
+  if (flushTimer != null) {
     clearTimeout(flushTimer);
     flushTimer = null;
   }
 }
 
-/* ---------------- Batch Processing ---------------- */
+/* ------------ 批处理 ------------ */
 function processPendingResults() {
   if (pendingSuccessResults.size === 0 || isProcessingResults) return;
   isProcessingResults = true;
-  isSyncingFromParent = true;
   try {
     const entries = Array.from(pendingSuccessResults.values());
     pendingSuccessResults.clear();
 
-    let changed = false;
-
     for (const { file, response } of entries) {
-      if (!response) continue;
       const uid = String(file.uid);
       const idx = _fileList.value.findIndex(f => String((f as any).uid) === uid);
       if (idx < 0) {
-        logDebug('跳过已移除文件 uid=', uid);
+        logDebug('文件已移除，忽略成功回调 uid=', uid);
         continue;
       }
-      const norm = normalizeResult(response);
+      const norm = preserveNormalize(response, props.dir)!;
+      const vf = _fileList.value[idx];
+      vf.name = norm.filename;
+      vf.url = norm.url;
+      vf.status = 'success';
 
-      // 更新显示用 file（允许后端改文件名）
-      const targetFile = _fileList.value[idx];
-      targetFile.name = norm!.filename;
-      targetFile.url = norm!.url;
-      targetFile.status = 'success';
-
-      _uploadResultMap.value.set(uid, norm);
+      const old = _resultMap.value.get(uid);
+      _resultMap.value.set(uid, old ? { ...old, ...norm } : norm);
       emit('change', norm);
-      changed = true;
+      hasNewUploadSuccess = true; // 标记本周期发生真实成功
+      if (!uploadCycleActive) uploadCycleActive = true;
     }
 
-    if (changed) {
-      const newResults = materializeResults(_fileList.value);
-      const listChanged = !isSameList(newResults, _uploadResultList.value);
-      if (listChanged) {
-        _uploadResultList.value = newResults;
-      }
-      if (!isSameList(props.modelValue as any, newResults)) {
-        emit('update:modelValue', newResults.slice());
-      }
-      logDebug('批处理完成 map.size=', _uploadResultMap.value.size, 'list.length=', _uploadResultList.value.length);
-    }
+    const out = exportResultList();
+    internalEmit(out);
+    logDebug('批处理完成 成功数=', out.length);
+    tryEmitAllSuccess('batch');
   } finally {
-    isSyncingFromParent = false;
     isProcessingResults = false;
   }
 }
 
-/* ---------------- Watch: parent -> internal ---------------- */
+/* ------------ 内部 emit ------------ */
+function internalEmit(list: IUploadResult[]) {
+  isInternalEmit = true;
+  emit('update:modelValue', list.slice());
+  internalSnapshot = list.slice();
+  nextTick(() => {
+    isInternalEmit = false;
+  });
+}
+
+/* ------------ 父 -> 子初始化/回显 ------------ */
 watch(
   () => props.modelValue,
   newVal => {
-    isSyncingFromParent = true;
-    try {
-      if (!Array.isArray(newVal) || newVal.length === 0) {
-        _fileList.value = [];
-        _uploadResultMap.value.clear();
-        _uploadResultList.value = [];
-        return;
-      }
+    if (!Array.isArray(newVal)) return;
+    if (isInternalEmit && isSameList(newVal, internalSnapshot)) {
+      logDebug('忽略父组件回声 modelValue');
+      return;
+    }
 
-      const first = newVal[0] as any;
-      const isObj = typeof first === 'object' && isUploadResult(first);
+    if (newVal.length === 0) {
+      _fileList.value = [];
+      _resultMap.value.clear();
+      internalSnapshot = [];
+      lastAllSuccessSignature = '';
+      initialHydrated = true;
+      return;
+    }
 
-      if (isObj) {
-        const normalized = (newVal as any[]).filter(isUploadResult).map(r => normalizeResult(r));
+    const first = newVal[0] as any;
+    const isObj = typeof first === 'object' && first !== null;
 
-        _uploadResultMap.value.clear();
-        _fileList.value = normalized.map((r, i) => {
-          const f: UploadUserFile = {
-            name: r!.filename,
-            url: r!.url,
-            status: 'success'
-          };
-          (f as any).uid = makeStableUid(r, i);
-          _uploadResultMap.value.set(String((f as any).uid), r);
-          return f;
-        });
-        _uploadResultList.value = materializeResults(_fileList.value);
-      } else {
-        const urls = (newVal as string[]).filter(Boolean);
-        const normalized = urls.map(u => normalizeResult({ url: u, filename: u.split('/').pop() || '', dirTag: props.dir }));
-        _uploadResultMap.value.clear();
-        _fileList.value = normalized.map((r, i) => {
-          const f: UploadUserFile = {
-            name: r!.filename,
-            url: r!.url,
-            status: 'success'
-          };
-          (f as any).uid = makeStableUid(r, i);
-          _uploadResultMap.value.set(String((f as any).uid), r);
-          return f;
-        });
-        _uploadResultList.value = materializeResults(_fileList.value);
-        needNormalizeEmit = true;
-        nextTick(() => {
-          if (needNormalizeEmit && !isSameList(props.modelValue as any, _uploadResultList.value)) {
-            emit('update:modelValue', _uploadResultList.value.slice());
-          }
-          needNormalizeEmit = false;
-        });
-      }
-    } finally {
-      // 延迟放开，避免立即触发内部 watch 造成递归
-      nextTick(() => {
-        isSyncingFromParent = false;
+    _fileList.value = [];
+    _resultMap.value.clear();
+
+    if (isObj) {
+      (newVal as any[]).forEach((raw, i) => {
+        const norm = preserveNormalize(raw, props.dir)!;
+        const uid = buildStableUid(norm, i);
+        const file: UploadUserFile = { name: norm.filename, url: norm.url, status: 'success' };
+        (file as any).uid = uid;
+        _fileList.value.push(file);
+        _resultMap.value.set(uid, norm);
       });
+    } else {
+      (newVal as string[]).filter(Boolean).forEach((u, i) => {
+        const norm = preserveNormalize({ url: u, filename: u.split('/').pop() || '' }, props.dir)!;
+        const uid = buildStableUid(norm, i);
+        const file: UploadUserFile = { name: norm.filename, url: norm.url, status: 'success' };
+        (file as any).uid = uid;
+        _fileList.value.push(file);
+        _resultMap.value.set(uid, norm);
+      });
+    }
+    internalSnapshot = exportResultList();
+    // 首次回显完成
+    if (!initialHydrated) {
+      initialHydrated = true;
+      tryEmitAllSuccess('initial-hydration');
     }
   },
   { immediate: true }
 );
 
-/* ---------------- Watch: internal fileList -> parent ---------------- */
-watch(
-  _fileList,
-  list => {
-    if (isSyncingFromParent || isProcessingResults) return;
-
-    const newResults = materializeResults(list);
-    const contentChanged = !isSameList(newResults, _uploadResultList.value);
-    if (contentChanged) {
-      _uploadResultList.value = newResults;
-    }
-
-    if (!isSameList(props.modelValue as any, newResults)) {
-      emit('update:modelValue', newResults.slice());
-      logDebug('fileList watch emit length=', newResults.length);
-    }
-  },
-  { deep: true, flush: 'post' }
-);
-
-/* ---------------- Validation ---------------- */
-const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
-  if (rawFile.size / 1024 / 1024 >= props.fileSize) {
-    notifyWarn(`上传文件大小不能超过 ${props.fileSize}M！`);
-    return false;
-  }
-  if (!props.accept || props.accept === '*') return true;
-  const ext = getExt(rawFile.name);
-  const accepts = props.accept.split(',').map(s => s.trim().toLowerCase());
-  if (!accepts.includes(ext)) {
-    notifyWarn(`仅支持 ${props.accept} 格式的文件上传！`);
-    return false;
-  }
-  return true;
-};
-const handleExceed = () => notifyWarn(`当前最多只能上传 ${props.limit} 份文件，请移除后上传！`);
-
-/* ---------------- Custom Request ---------------- */
+/* ------------ 上传请求 ------------ */
 const uploadFileRequest = async (options: UploadRequestOptions) => {
   try {
     const { data } = await uploadFile(
@@ -396,34 +403,51 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
   }
 };
 
-/* ---------------- Success (deferred batch) ---------------- */
+/* ------------ 成功回调 ------------ */
 const handleSuccess = (response: IUploadResult | undefined, file: UploadFile) => {
-  const uid = String(file.uid);
   if (!response) {
-    logDebug('成功回调 response 为空 uid=', uid);
+    logDebug('成功回调无 response uid=', file.uid);
     return;
   }
-  pendingSuccessResults.set(uid, { file, response });
-  logDebug('暂存成功 uid=', uid, 'name=', file.name, 'resp.url=', response.url);
-  schedulePendingFlush();
+  pendingSuccessResults.set(String(file.uid), { file, response });
+  if (!uploadCycleActive) uploadCycleActive = true; // 周期开始
+  scheduleFlush();
 };
 
-/* ---------------- Remove ---------------- */
+/* ------------ 删除 ------------ */
 const handleRemove = (file: UploadFile) => {
-  const uidToRemove = String((file as any).uid);
-  _fileList.value = _fileList.value.filter(f => String((f as any).uid) !== uidToRemove);
-  _uploadResultMap.value.delete(uidToRemove);
-
-  const newResults = materializeResults(_fileList.value);
-  const listChanged = !isSameList(newResults, _uploadResultList.value);
-  if (listChanged) {
-    _uploadResultList.value = newResults;
-  }
-  emit('update:modelValue', newResults.slice());
+  const uid = String((file as any).uid);
+  _fileList.value = _fileList.value.filter(f => String((f as any).uid) !== uid);
+  _resultMap.value.delete(uid);
+  pendingSuccessResults.delete(uid);
+  const out = exportResultList();
+  internalEmit(out);
   emit('change', null);
+  tryEmitAllSuccess('remove');
 };
 
-/* ---------------- Download Helpers ---------------- */
+/* ------------ 上传前校验 ------------ */
+const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
+  if (rawFile.size / 1024 / 1024 >= props.fileSize) {
+    notifyWarn(`上传文件大小不能超过 ${props.fileSize}M！`);
+    return false;
+  }
+  if (!props.accept || props.accept === '*') {
+    uploadCycleActive = true; // 有新上传加入
+    return true;
+  }
+  const ext = getExt(rawFile.name);
+  const accepts = props.accept.split(',').map(s => s.trim().toLowerCase());
+  if (!accepts.includes(ext)) {
+    notifyWarn(`仅支持 ${props.accept} 格式的文件上传！`);
+    return false;
+  }
+  uploadCycleActive = true;
+  return true;
+};
+const handleExceed = () => notifyWarn(`当前最多只能上传 ${props.limit} 份文件，请移除后上传！`);
+
+/* ------------ 下载 ------------ */
 function isPreviewLike(name: string) {
   return /\.(png|jpe?g|gif|bmp|webp|svg|pdf|txt)$/i.test(name);
 }
@@ -434,7 +458,7 @@ function shouldForceFetch(file: UploadFile) {
     const u = new URL(url, location.href);
     cross = u.origin !== location.origin;
   } catch {
-    console.log('[shouldForceFetch] 无法解析 URL:', url);
+    console.log('无法解析 URL，强制下载', url);
   }
   const name = (file.name || url).toLowerCase();
   return cross || isPreviewLike(name);
@@ -446,25 +470,22 @@ function extractFileNameFromCD(cd?: string | null): string | undefined {
     let value = starMatch[1].trim().replace(/^"(.*)"$/, '$1');
     const rfc5987 = /^([^']*)'[^']*'(.*)$/.exec(value);
     if (rfc5987) {
-      const encodedPart = rfc5987[2];
       try {
-        return decodeURIComponent(encodedPart);
+        return decodeURIComponent(rfc5987[2]);
       } catch {
-        console.log('[extractFileNameFromCD] 无法解码 RFC5987 编码的文件名:', encodedPart);
+        console.log('无法解码 RFC5987 编码的文件名');
       }
     } else {
       try {
         return decodeURIComponent(value);
       } catch {
-        console.log('[extractFileNameFromCD] 无法解码文件名:', value);
+        console.log('无法解码 URL 编码的文件名');
       }
       return value;
     }
   }
   const normalMatch = /filename\s*=\s*([^;]+)/i.exec(cd);
-  if (normalMatch) {
-    return normalMatch[1].trim().replace(/^"(.*)"$/, '$1');
-  }
+  if (normalMatch) return normalMatch[1].trim().replace(/^"(.*)"$/, '$1');
 }
 async function forceBlobDownload(url: string, filename?: string) {
   const res = await fetch(url, { credentials: 'include' });
@@ -506,7 +527,7 @@ async function handleDownload(file: UploadFile) {
   }
 }
 
-/* ---------------- Progress Wrapper ---------------- */
+/* ------------ 进度包装 ------------ */
 class CustomUploadProgressEvent extends ProgressEvent {
   percent: number;
   constructor(e: ProgressEvent) {
@@ -515,7 +536,35 @@ class CustomUploadProgressEvent extends ProgressEvent {
   }
 }
 
-/* ---------------- Lifecycle ---------------- */
+/* ------------ 对外暴露 ------------ */
+function getAllUploadResults(): IUploadResult[] {
+  const ordered: IUploadResult[] = [];
+  _fileList.value.forEach(f => {
+    const uid = String((f as any).uid);
+    const r = _resultMap.value.get(uid);
+    if (r) ordered.push(r);
+  });
+  return ordered;
+}
+function forceEmitAllSuccess() {
+  // 强制触发，不受 requireNewUploadForAllSuccess 约束
+  if (!isAllSuccess()) {
+    logDebug('forceEmitAllSuccess 条件未满足');
+    return;
+  }
+  const list = exportResultList();
+  lastAllSuccessSignature = ''; // 重置签名允许再次触发
+  emit('all-success', list.slice());
+  logDebug('forceEmitAllSuccess 触发 数量=', list.length);
+  return list;
+}
+
+defineExpose({
+  getAllUploadResults,
+  forceEmitAllSuccess
+});
+
+/* ------------ 生命周期 ------------ */
 onBeforeUnmount(() => {
   resetPending();
 });

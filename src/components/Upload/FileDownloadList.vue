@@ -24,7 +24,7 @@
       </div>
 
       <div v-if="needCollapse" class="collapse-toggle" @click="expanded = !expanded">
-        <span class="toggle-text"> {{ expanded ? '收起' : '展开' }} ({{ fileList.length }}) </span>
+        <span class="toggle-text"> {{ expanded ? '收起' : '展开' }} ({{ fileList.length - maxRows }}) </span>
         <i :class="['arrow', expanded ? 'up' : 'down']"></i>
       </div>
     </template>

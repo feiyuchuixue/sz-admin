@@ -36,7 +36,7 @@
       </el-form-item>
       <el-form-item label="核对状态" prop="checkStatus">
         <el-select v-model="paramsProps.row.checkStatus" clearable placeholder="请选择核对状态">
-          <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" />
+          <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" :debug="true" />
         </el-select>
       </el-form-item>
       <el-form-item label="核对时间" prop="checkTime">
@@ -61,7 +61,14 @@
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" clearable />
       </el-form-item>
       <el-form-item label="附件" prop="url">
-        <upload-files v-model:modelValue="fileUrls" :limit="5" :file-size="3" :dir="'teacher'" />
+        <upload-files
+          v-model:modelValue="fileUrls"
+          :limit="5"
+          :file-size="3"
+          :dir="'teacher'"
+          :debug="true"
+          @all-success="handleAllSuccess"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -124,6 +131,10 @@ const handleSubmit = () => {
     }
   });
 };
+
+function handleAllSuccess(list: IUploadResult[]) {
+  console.log('全部上传成功，共', list.length, '条：', list);
+}
 
 defineExpose({
   acceptParams
