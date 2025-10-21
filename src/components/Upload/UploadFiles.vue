@@ -34,7 +34,7 @@
     </template>
 
     <template #file="{ file }">
-      <li class="el-upload-list__item is-success">
+      <li class="el-upload-list__item" :class="['is-' + file.status]">
         <div class="el-upload-list__item-row">
           <el-icon class="el-icon--document"><Document /></el-icon>
 
@@ -44,29 +44,32 @@
 
           <span v-if="file.status === 'uploading'" class="file-progress-text"> {{ Math.round(file.percentage || 0) }}% </span>
 
-          <el-tooltip
-            v-if="file.status === 'success'"
-            :content="downloadingMap[file.url!] ? '下载中...' : '下载'"
-            placement="top"
-            :show-after="120"
-          >
-            <el-icon
-              class="el-icon--download"
-              :class="{ loading: downloadingMap[file.url!] }"
-              @click="!downloadingMap[file.url!] && handleDownload(file)"
-            >
-              <component :is="downloadingMap[file.url!] ? Loading : Download" />
-            </el-icon>
-          </el-tooltip>
+          <template v-if="file.status === 'success'">
+            <el-tooltip :content="downloadingMap[file.url!] ? '下载中...' : '下载'" placement="top" :show-after="120">
+              <el-icon
+                class="el-icon--download"
+                :class="{ loading: downloadingMap[file.url!] }"
+                @click="!downloadingMap[file.url!] && handleDownload(file)"
+              >
+                <component :is="downloadingMap[file.url!] ? Loading : Download" />
+              </el-icon>
+            </el-tooltip>
 
-          <el-icon
-            v-if="file.status === 'success'"
-            class="el-icon--remove"
-            :class="{ disabled: downloadingMap[file.url!] }"
-            @click="!downloadingMap[file.url!] && handleRemove(file)"
-          >
-            <Close />
-          </el-icon>
+            <el-icon
+              class="el-icon--remove"
+              :class="{ disabled: downloadingMap[file.url!] }"
+              @click="!downloadingMap[file.url!] && handleRemove(file)"
+            >
+              <Close />
+            </el-icon>
+          </template>
+
+          <template v-else-if="file.status === 'error'">
+            <span class="upload-error-text">上传失败</span>
+            <el-icon class="el-icon--remove" @click="handleRemove(file)">
+              <Close />
+            </el-icon>
+          </template>
         </div>
 
         <el-progress
@@ -84,7 +87,7 @@
 
 <script setup lang="ts">
 import { Close, Document, Download, UploadFilled, Loading } from '@element-plus/icons-vue';
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
@@ -102,6 +105,8 @@ type Props = {
   accept?: string;
   modelValue?: IUploadResult[] | string[];
   dir?: string;
+  flushDelay?: number;
+  debug?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -113,7 +118,9 @@ const props = withDefaults(defineProps<Props>(), {
   fileSize: 5,
   accept: '',
   modelValue: () => [],
-  dir: 'tmp'
+  dir: 'tmp',
+  flushDelay: 50,
+  debug: false
 });
 
 const emit = defineEmits<{
@@ -121,19 +128,27 @@ const emit = defineEmits<{
   change: [value: IUploadResult | null];
 }>();
 
-/* State */
+/* ---------------- State ---------------- */
 const _fileList = ref<UploadUserFile[]>([]);
+const _uploadResultMap = ref<Map<string, IUploadResult>>(new Map());
 const _uploadResultList = ref<IUploadResult[]>([]);
 const downloadingMap = ref<Record<string, boolean>>({});
 
-/* Guard flags */
+/* ---------------- Guards & Flags ---------------- */
 let isSyncingFromParent = false;
 let needNormalizeEmit = false;
-let isProcessingResults = false; // 防止递归处理
-// 暂存成功的上传结果，避免立即处理导致回调丢失
-const pendingSuccessResults = new Map<string, { file: UploadFile; response: IUploadResult }>();
+let isProcessingResults = false;
 
-/* Utils */
+/* Pending success (batching) */
+const pendingSuccessResults = new Map<string, { file: UploadFile; response: IUploadResult }>();
+let flushTimer: number | null = null;
+
+/* ---------------- Utils ---------------- */
+function logDebug(...args: any[]) {
+  if (props.debug) {
+    console.log('[UploadFiles]', ...args);
+  }
+}
 function notifyWarn(message: string) {
   setTimeout(() => ElNotification({ title: '温馨提示', message, type: 'warning' }), 0);
 }
@@ -141,30 +156,17 @@ function getExt(name: string) {
   const i = name.lastIndexOf('.');
   return i >= 0 ? name.slice(i).toLowerCase() : '';
 }
-
 function isUploadResult(r: any): r is IUploadResult {
-  return !!r && typeof r === 'object' && typeof r.url === 'string' && r.url.length > 0;
+  return !!r && typeof r === 'object' && typeof r.url === 'string';
 }
-
-/**
- * 这里参数允许传入 IUploadResult | null | undefined，但我们会防御处理
- * 以避免 TS 报 'r' possibly null 的错误。
- */
-function createUserFileFromResult(r: IUploadResult | null | undefined): UploadUserFile {
-  const url = r?.url ?? '';
-  const name = r?.filename || url.split('/').pop() || '';
-  return { name, url, status: 'success' };
-}
-
-/**
- * 归一化：确保返回非 null 的 IUploadResult
- */
-function normalizeResult(r: (Partial<IUploadResult> & { url: string }) | null | undefined): IUploadResult {
-  const safe = r ?? { url: '' };
+function normalizeResult(r: (Partial<IUploadResult> & { url?: string }) | null | undefined): IUploadResult {
+  const safe = r ?? {};
+  const url = safe.url || '';
+  const filename = safe.filename || (url ? url.split('/').pop() || '' : '');
   const eTag = (safe as any).eTag || (safe as any).etag || '';
   return {
-    url: safe.url,
-    filename: safe.filename || safe.url.split('/').pop() || '',
+    url,
+    filename,
     eTag,
     ...(eTag ? { etag: eTag } : {}),
     objectName: (safe as any).objectName || '',
@@ -172,31 +174,22 @@ function normalizeResult(r: (Partial<IUploadResult> & { url: string }) | null | 
     contextType: (safe as any).contextType || '',
     size: (safe as any).size ?? 0,
     fileId: (safe as any).fileId ?? 0,
-    // 移除 id: safe.id
-    // type 属性如果不在接口内，可视需要删除
     type: (safe as any).type
   } as IUploadResult;
 }
-
-/**
- * 查找时加上 r?. 避免 r 可能为 null 的告警。
- * 同时我们设计上保证 _uploadResultList 不含 null（赋值时过滤）。
- */
-function findStoredResult(file: UploadUserFile): IUploadResult | undefined {
-  return _uploadResultList.value.find(
-    r => !!r && ((r.fileId && r.fileId > 0 && (file as any).fileId === r.fileId) || r.url === file.url)
-  );
+function makeStableUid(r: IUploadResult, index: number): string {
+  if (r!.fileId && r!.fileId > 0) return 'fid-' + r!.fileId;
+  const base = r!.url || r!.filename || 'empty';
+  return 'u:' + base + '#i:' + index;
 }
-
 function materializeResults(list: UploadUserFile[]): IUploadResult[] {
-  return list
-    .filter(f => !!f?.url)
-    .map(f => {
-      const stored = findStoredResult(f);
-      return stored ? stored : normalizeResult({ url: f.url as string, filename: f.name, dirTag: props.dir });
-    });
+  return list.map(f => {
+    const uid = String((f as any).uid);
+    const stored = _uploadResultMap.value.get(uid);
+    if (stored) return stored;
+    return normalizeResult({ url: f.url || '', filename: f.name, dirTag: props.dir });
+  });
 }
-
 function shallowMetaEqual(a: any, b: any) {
   return (
     a?.url === b?.url &&
@@ -214,54 +207,72 @@ function isSameList(a: any, b: any) {
   return true;
 }
 
-// 处理暂存的成功结果 - 添加防递归保护
+/* ---------------- Batch Scheduling ---------------- */
+function schedulePendingFlush() {
+  if (flushTimer !== null) return;
+  flushTimer = window.setTimeout(() => {
+    flushTimer = null;
+    processPendingResults();
+  }, props.flushDelay);
+}
+function resetPending() {
+  pendingSuccessResults.clear();
+  if (flushTimer !== null) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
+}
+
+/* ---------------- Batch Processing ---------------- */
 function processPendingResults() {
   if (pendingSuccessResults.size === 0 || isProcessingResults) return;
-
   isProcessingResults = true;
-
+  isSyncingFromParent = true;
   try {
-    const results = Array.from(pendingSuccessResults.values());
+    const entries = Array.from(pendingSuccessResults.values());
     pendingSuccessResults.clear();
 
-    // 暂停 watch 监听，避免递归更新
-    isSyncingFromParent = true;
+    let changed = false;
 
-    // 批量处理所有成功的上传
-    for (const { file, response } of results) {
-      const norm = normalizeResult(response); // normalizeResult 确保返回非 null 值
-
-      // 更新文件列表中对应的文件
-      const fileListIdx = _fileList.value.findIndex(f => (f as any).uid === file.uid);
-      if (fileListIdx >= 0) {
-        const existingFile = _fileList.value[fileListIdx];
-        existingFile.name = norm!.filename;
-        existingFile.url = norm!.url;
-        existingFile.status = 'success';
+    for (const { file, response } of entries) {
+      if (!response) continue;
+      const uid = String(file.uid);
+      const idx = _fileList.value.findIndex(f => String((f as any).uid) === uid);
+      if (idx < 0) {
+        logDebug('跳过已移除文件 uid=', uid);
+        continue;
       }
+      const norm = normalizeResult(response);
 
-      // 添加到结果列表（检查重复）
-      const existingResultIdx = _uploadResultList.value.findIndex(r => r && r.url === norm!.url);
-      if (existingResultIdx >= 0) {
-        _uploadResultList.value[existingResultIdx] = norm;
-      } else {
-        _uploadResultList.value.push(norm);
-      }
+      // 更新显示用 file（允许后端改文件名）
+      const targetFile = _fileList.value[idx];
+      targetFile.name = norm!.filename;
+      targetFile.url = norm!.url;
+      targetFile.status = 'success';
 
+      _uploadResultMap.value.set(uid, norm);
       emit('change', norm);
+      changed = true;
     }
 
-    // 重新启用 watch 监听
-    isSyncingFromParent = false;
-
-    // 批量触发更新
-    emit('update:modelValue', _uploadResultList.value.slice());
+    if (changed) {
+      const newResults = materializeResults(_fileList.value);
+      const listChanged = !isSameList(newResults, _uploadResultList.value);
+      if (listChanged) {
+        _uploadResultList.value = newResults;
+      }
+      if (!isSameList(props.modelValue as any, newResults)) {
+        emit('update:modelValue', newResults.slice());
+      }
+      logDebug('批处理完成 map.size=', _uploadResultMap.value.size, 'list.length=', _uploadResultList.value.length);
+    }
   } finally {
+    isSyncingFromParent = false;
     isProcessingResults = false;
   }
 }
 
-/* Watch: parent -> internal */
+/* ---------------- Watch: parent -> internal ---------------- */
 watch(
   () => props.modelValue,
   newVal => {
@@ -269,63 +280,89 @@ watch(
     try {
       if (!Array.isArray(newVal) || newVal.length === 0) {
         _fileList.value = [];
+        _uploadResultMap.value.clear();
         _uploadResultList.value = [];
         return;
       }
 
       const first = newVal[0] as any;
-      const isObj = typeof first === 'object' && first?.url;
+      const isObj = typeof first === 'object' && isUploadResult(first);
+
       if (isObj) {
-        const full = (newVal as any[]).filter(isUploadResult).map(r => normalizeResult(r));
-        _uploadResultList.value = full;
-        _fileList.value = full.map(createUserFileFromResult);
+        const normalized = (newVal as any[]).filter(isUploadResult).map(r => normalizeResult(r));
+
+        _uploadResultMap.value.clear();
+        _fileList.value = normalized.map((r, i) => {
+          const f: UploadUserFile = {
+            name: r!.filename,
+            url: r!.url,
+            status: 'success'
+          };
+          (f as any).uid = makeStableUid(r, i);
+          _uploadResultMap.value.set(String((f as any).uid), r);
+          return f;
+        });
+        _uploadResultList.value = materializeResults(_fileList.value);
       } else {
-        const strs = (newVal as string[]).filter(Boolean);
-        const full = strs.map(url => normalizeResult({ url, filename: url.split('/').pop() || '', dirTag: props.dir }));
-        _uploadResultList.value = full;
-        _fileList.value = full.map(createUserFileFromResult);
+        const urls = (newVal as string[]).filter(Boolean);
+        const normalized = urls.map(u => normalizeResult({ url: u, filename: u.split('/').pop() || '', dirTag: props.dir }));
+        _uploadResultMap.value.clear();
+        _fileList.value = normalized.map((r, i) => {
+          const f: UploadUserFile = {
+            name: r!.filename,
+            url: r!.url,
+            status: 'success'
+          };
+          (f as any).uid = makeStableUid(r, i);
+          _uploadResultMap.value.set(String((f as any).uid), r);
+          return f;
+        });
+        _uploadResultList.value = materializeResults(_fileList.value);
         needNormalizeEmit = true;
         nextTick(() => {
-          if (needNormalizeEmit && !isSameList(props.modelValue, full)) {
-            emit('update:modelValue', full.slice());
+          if (needNormalizeEmit && !isSameList(props.modelValue as any, _uploadResultList.value)) {
+            emit('update:modelValue', _uploadResultList.value.slice());
           }
           needNormalizeEmit = false;
         });
       }
     } finally {
-      isSyncingFromParent = false;
+      // 延迟放开，避免立即触发内部 watch 造成递归
+      nextTick(() => {
+        isSyncingFromParent = false;
+      });
     }
   },
   { immediate: true }
 );
 
-/* Watch: internal UI -> parent (用户操作) - 添加防递归保护 */
+/* ---------------- Watch: internal fileList -> parent ---------------- */
 watch(
   _fileList,
   list => {
     if (isSyncingFromParent || isProcessingResults) return;
 
     const newResults = materializeResults(list);
-    if (!isSameList(newResults, _uploadResultList.value)) {
+    const contentChanged = !isSameList(newResults, _uploadResultList.value);
+    if (contentChanged) {
       _uploadResultList.value = newResults;
     }
+
     if (!isSameList(props.modelValue as any, newResults)) {
       emit('update:modelValue', newResults.slice());
+      logDebug('fileList watch emit length=', newResults.length);
     }
   },
-  { deep: true, flush: 'post' } // 使用 flush: 'post' 确保在 DOM 更新后执行
+  { deep: true, flush: 'post' }
 );
 
-/* Upload validation */
+/* ---------------- Validation ---------------- */
 const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
   if (rawFile.size / 1024 / 1024 >= props.fileSize) {
     notifyWarn(`上传文件大小不能超过 ${props.fileSize}M！`);
     return false;
   }
-  // accept 为空或为 * 时不校验类型
-  if (!props.accept || props.accept === '*') {
-    return true;
-  }
+  if (!props.accept || props.accept === '*') return true;
   const ext = getExt(rawFile.name);
   const accepts = props.accept.split(',').map(s => s.trim().toLowerCase());
   if (!accepts.includes(ext)) {
@@ -336,7 +373,7 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
 };
 const handleExceed = () => notifyWarn(`当前最多只能上传 ${props.limit} 份文件，请移除后上传！`);
 
-/* Upload request */
+/* ---------------- Custom Request ---------------- */
 const uploadFileRequest = async (options: UploadRequestOptions) => {
   try {
     const { data } = await uploadFile(
@@ -354,45 +391,39 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
     );
     options.onSuccess(data);
   } catch (e) {
+    logDebug('上传失败', e);
     options.onError(e as any);
   }
 };
 
-/* Upload success - 修复并发问题，避免立即处理 */
+/* ---------------- Success (deferred batch) ---------------- */
 const handleSuccess = (response: IUploadResult | undefined, file: UploadFile) => {
-  if (!response || !response.url) return;
-
-  console.log('handleSuccess called for file:', file.name, 'uid:', file.uid);
-
-  // 确保 file.uid 是字符串类型，如果不是则转换
-  const fileUid = String(file.uid);
-
-  // 暂存成功结果，避免立即处理导致后续回调丢失
-  pendingSuccessResults.set(fileUid, { file, response });
-
-  // 延迟批量处理，确保所有并发上传的 handleSuccess 都能被调用
-  nextTick(() => {
-    // 再次延迟，确保 Element Plus 内部状态稳定
-    setTimeout(() => {
-      processPendingResults();
-    }, 50); // 增加延迟时间到 50ms
-  });
-};
-
-/* Remove */
-const handleRemove = (file: UploadFile) => {
-  _fileList.value = _fileList.value.filter(f => !(f.url === file.url && f.name === file.name));
-  const beforeLen = _uploadResultList.value.length;
-  _uploadResultList.value = _uploadResultList.value.filter(r => r?.url !== file.url);
-  if (_uploadResultList.value.length !== beforeLen) {
-    if (!isSameList(props.modelValue as any, _uploadResultList.value)) {
-      emit('update:modelValue', _uploadResultList.value.slice());
-    }
-    emit('change', null);
+  const uid = String(file.uid);
+  if (!response) {
+    logDebug('成功回调 response 为空 uid=', uid);
+    return;
   }
+  pendingSuccessResults.set(uid, { file, response });
+  logDebug('暂存成功 uid=', uid, 'name=', file.name, 'resp.url=', response.url);
+  schedulePendingFlush();
 };
 
-/* Download */
+/* ---------------- Remove ---------------- */
+const handleRemove = (file: UploadFile) => {
+  const uidToRemove = String((file as any).uid);
+  _fileList.value = _fileList.value.filter(f => String((f as any).uid) !== uidToRemove);
+  _uploadResultMap.value.delete(uidToRemove);
+
+  const newResults = materializeResults(_fileList.value);
+  const listChanged = !isSameList(newResults, _uploadResultList.value);
+  if (listChanged) {
+    _uploadResultList.value = newResults;
+  }
+  emit('update:modelValue', newResults.slice());
+  emit('change', null);
+};
+
+/* ---------------- Download Helpers ---------------- */
 function isPreviewLike(name: string) {
   return /\.(png|jpe?g|gif|bmp|webp|svg|pdf|txt)$/i.test(name);
 }
@@ -403,14 +434,13 @@ function shouldForceFetch(file: UploadFile) {
     const u = new URL(url, location.href);
     cross = u.origin !== location.origin;
   } catch {
-    /* empty */
+    console.log('[shouldForceFetch] 无法解析 URL:', url);
   }
   const name = (file.name || url).toLowerCase();
   return cross || isPreviewLike(name);
 }
 function extractFileNameFromCD(cd?: string | null): string | undefined {
   if (!cd) return;
-
   const starMatch = /filename\*\s*=\s*([^;]+)/i.exec(cd);
   if (starMatch) {
     let value = starMatch[1].trim().replace(/^"(.*)"$/, '$1');
@@ -420,18 +450,17 @@ function extractFileNameFromCD(cd?: string | null): string | undefined {
       try {
         return decodeURIComponent(encodedPart);
       } catch {
-        /* ignore */
+        console.log('[extractFileNameFromCD] 无法解码 RFC5987 编码的文件名:', encodedPart);
       }
     } else {
       try {
         return decodeURIComponent(value);
       } catch {
-        /* ignore */
+        console.log('[extractFileNameFromCD] 无法解码文件名:', value);
       }
       return value;
     }
   }
-
   const normalMatch = /filename\s*=\s*([^;]+)/i.exec(cd);
   if (normalMatch) {
     return normalMatch[1].trim().replace(/^"(.*)"$/, '$1');
@@ -470,14 +499,14 @@ async function handleDownload(file: UploadFile) {
       a.remove();
     }
   } catch (e) {
-    console.error('[download error]', e);
+    logDebug('[download error]', e);
     window.open(file.url, '_blank');
   } finally {
     downloadingMap.value[file.url] = false;
   }
 }
 
-/* Progress wrapper */
+/* ---------------- Progress Wrapper ---------------- */
 class CustomUploadProgressEvent extends ProgressEvent {
   percent: number;
   constructor(e: ProgressEvent) {
@@ -485,6 +514,11 @@ class CustomUploadProgressEvent extends ProgressEvent {
     this.percent = e.lengthComputable ? Math.round((e.loaded / e.total) * 100) : 0;
   }
 }
+
+/* ---------------- Lifecycle ---------------- */
+onBeforeUnmount(() => {
+  resetPending();
+});
 </script>
 
 <style scoped lang="scss">
@@ -624,5 +658,10 @@ class CustomUploadProgressEvent extends ProgressEvent {
 .upload :deep(.el-upload-list__item) {
   animation: none !important;
   transition: none !important;
+}
+.upload-error-text {
+  font-size: 12px;
+  color: #e45757;
+  margin-left: 6px;
 }
 </style>
