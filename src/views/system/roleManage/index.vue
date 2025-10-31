@@ -30,9 +30,11 @@
           v-auth="[{ type: 'and', conditions: ['sys.role.setting_btn', 'sys.role.update_btn'] }]"
           type="primary"
           link
-          :icon="Lock"
-          @click="openRolePermissions('设置权限', row)"
+          @click="openRoleSimple('设置权限', row)"
         >
+          <el-icon style="margin-right: 5px">
+            <SvgIcon name="scope" />
+          </el-icon>
           权限
         </el-button>
         <el-button
@@ -50,20 +52,21 @@
       </template>
     </ProTable>
     <RoleForm ref="roleFormRef" />
-    <RolePermissions ref="rolePermissionsRef" />
+    <RoleSimpleDialog ref="roleSimpleDialogRef" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { CirclePlus, Delete, EditPen, Lock } from '@element-plus/icons-vue';
+import { CirclePlus, Delete, EditPen } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import { useHandleData } from '@/hooks/useHandleData';
 import { addRole, deleteRole, editRole, getRoleList, setRoleMenus } from '@/api/modules/system/role';
 import RoleForm from '@/views/system/roleManage/components/RoleForm.vue';
-import RolePermissions from '@/views/system/roleManage/components/RolePermissions.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { RoleInfo, RoleQuery } from '@/api/types/system/role';
 import { ref } from 'vue';
+import RoleSimpleDialog from '@/views/system/roleManage/components/RoleSimpleDialog.vue';
+import SvgIcon from '@/components/SvgIcon/index.vue';
 
 defineOptions({
   name: 'RoleManage'
@@ -103,14 +106,16 @@ const openRoleForm = (title: string, row = {}, isAdd = true) => {
   roleFormRef.value?.acceptParams(params);
 };
 
-const rolePermissionsRef = ref<InstanceType<typeof RolePermissions>>();
-const openRolePermissions = (title: string, row = {}) => {
+const roleSimpleDialogRef = ref<InstanceType<typeof RoleSimpleDialog>>();
+
+const openRoleSimple = (title: string, row = {}) => {
   const params: View.DefaultParams = {
     title,
     row: { ...row },
-    api: setRoleMenus
+    api: setRoleMenus,
+    getTableList: proTableRef.value?.getTableList
   };
-  rolePermissionsRef.value?.acceptParams(params);
+  roleSimpleDialogRef.value?.acceptParams(params);
 };
 
 // 删除信息

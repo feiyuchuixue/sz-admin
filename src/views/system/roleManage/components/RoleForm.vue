@@ -24,6 +24,16 @@
           clearable
         />
       </el-form-item>
+      <el-form-item label="数据权限" prop="dataScopeCd">
+        <el-select
+          v-model="paramsProps.row.dataScopeCd"
+          clearable
+          placeholder="请选择数据权限"
+          :disabled="paramsProps.row.isLock == 'T'"
+        >
+          <el-option v-for="item in dataScopeOptions" :key="item.id" :label="item.codeName" :value="item.id" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
       </el-form-item>
@@ -38,10 +48,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'RoleForm'
 });
+
+const dataScopeOptions = useDictOptions('data_scope');
 
 const rules = ref({
   roleName: [{ required: true, message: '请填写角色名称' }]

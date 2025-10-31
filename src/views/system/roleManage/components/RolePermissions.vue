@@ -110,7 +110,7 @@ const acceptParams = (params: View.DefaultParams) => {
 };
 
 const menuLists = ref<RoleMenuTree[]>([]);
-const selectIds = ref<string[]>([]);
+const selectMenuIds = ref<string[]>([]);
 
 /**
  * 获取权限信息
@@ -119,9 +119,9 @@ const selectIds = ref<string[]>([]);
 const getInfo = (roleId: number) => {
   getRoleMenus({ roleId }).then(res => {
     menuLists.value = res.data.menuLists;
-    selectIds.value = res.data.selectIds;
+    selectMenuIds.value = res.data.selectMenuIds;
     nextTick(() => {
-      selectIds.value.forEach(item => {
+      selectMenuIds.value.forEach(item => {
         const node = treeRef.value!.getNode(item);
         if (node?.isLeaf) {
           treeRef.value!.setChecked(node, true, false);
