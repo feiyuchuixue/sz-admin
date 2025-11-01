@@ -64,6 +64,7 @@
           :filter-node-method="filterNode"
           :props="treeProps"
           :current-node-key="selectedMenuId"
+          @node-click="handleNodeClick"
         >
           <template #default="{ data }">
             <div
@@ -75,7 +76,6 @@
                   'has-config': menuConfigMap[data.id]
                 }
               ]"
-              @click.stop="isMenu(data) && selectMenu(data)"
             >
               <el-icon
                 v-if="isMenu(data)"
@@ -89,7 +89,7 @@
               <el-icon v-else-if="isDirectory(data)" style="margin-right: 4px">
                 <Folder />
               </el-icon>
-              <span v-if="hasMenuConfig(data.id)" class="menu-config-dot" />
+              <span v-if="hasMenuConfigDeep(data.id)" class="menu-config-dot" />
               <span>{{ data.title }}</span>
               <el-tag
                 v-if="isMenu(data) && data.useDataScope === 'T'"
@@ -124,7 +124,6 @@
                 <el-checkbox :value="btn.id">
                   {{ btn.title }}
                 </el-checkbox>
-                <!-- 标识和复制按钮放在checkbox外部，避免冒泡 -->
                 <template v-if="showPermissionsTag">
                   <el-tag size="small" effect="dark" type="info" class="permission-tag">
                     {{ btn.permissions }}
@@ -221,7 +220,7 @@ const dataPermissionForm = reactive<{
   users: string[];
   depts: string[];
 }>({
-  dataScope: '1006001', // 默认全部数据权限
+  dataScope: '1006001',
   users: [],
   depts: []
 });
@@ -332,7 +331,15 @@ const saveCurrentMenuConfig = () => {
   menuConfigMap[selectedMenu.value.id] = hasMenuConfig(selectedMenu.value.id);
 };
 
+// 使用 el-tree 的 node-click 事件
+const handleNodeClick = (data: RoleMenuTree) => {
+  if (isMenu(data)) {
+    selectMenu(data);
+  }
+};
+
 const selectMenu = (menu: RoleMenuTree) => {
+  if (!isMenu(menu)) return;
   if (selectedMenu.value) saveCurrentMenuConfig();
   selectedMenu.value = menu;
   selectedMenuId.value = menu.id;
@@ -364,11 +371,9 @@ const buttonList = computed(() => {
   return menuButtonMap.value[selectedMenu.value.id] || [];
 });
 
-// 新增：全选checkbox和标识checkbox控制
-const showPermissionsTag = ref(false); // el-tag 显隐
-const allChecked = ref(false); // 全选/全不选
+const showPermissionsTag = ref(false);
+const allChecked = ref(false);
 
-// 监听全选checkbox
 watch(allChecked, val => {
   if (val) {
     selectedButtonIds.value = buttonList.value.map(btn => btn.id);
@@ -378,7 +383,6 @@ watch(allChecked, val => {
   saveCurrentMenuConfig();
 });
 
-// 监听按钮选中变化，同步全选checkbox
 watch([selectedButtonIds, buttonList], ([ids, btns]) => {
   allChecked.value = ids.length === btns.length && btns.length > 0;
 });
@@ -390,18 +394,54 @@ const copyPermission = (perm: string) => {
     .catch(() => ElMessage.error('复制失败，请手动复制'));
 };
 
+const findAllParentIds = (tree: RoleMenuTree[], targetId: string): string[] => {
+  let result: string[] = [];
+  function helper(nodes: RoleMenuTree[], parents: string[]) {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        result = parents.slice();
+        return true;
+      }
+      if (node.children && node.children.length) {
+        if (helper(node.children, [...parents, node.id])) return true;
+      }
+    }
+    return false;
+  }
+  helper(tree, []);
+  return result;
+};
+
+const getAllMenuIdsWithParentAndButton = (): string[] => {
+  const idsSet = new Set<string>();
+  Object.entries(menuAuthMap).forEach(([menuId, cfg]) => {
+    if (cfg.buttonIds && cfg.buttonIds.length) {
+      cfg.buttonIds.forEach(btnId => {
+        idsSet.add(btnId);
+        findAllParentIds(rawMenuTree.value, btnId).forEach(pid => idsSet.add(pid));
+      });
+    }
+    if (menuConfigMap[menuId]) {
+      idsSet.add(menuId);
+      findAllParentIds(rawMenuTree.value, menuId).forEach(pid => idsSet.add(pid));
+    }
+  });
+  return Array.from(idsSet);
+};
+
+const hasMenuConfigDeep = (menuId: string): boolean => {
+  if (hasMenuConfig(menuId)) return true;
+  const node = findMenu(menuLists.value, menuId);
+  if (node && node.children && node.children.length) {
+    return node.children.some(child => hasMenuConfigDeep(child.id));
+  }
+  return false;
+};
+
 const handleSubmit = async () => {
   if (selectedMenu.value) saveCurrentMenuConfig();
 
-  const menuIdsSet = new Set<string>();
-  Object.entries(menuAuthMap).forEach(([menuId, cfg]) => {
-    if (cfg.buttonIds && cfg.buttonIds.length) {
-      cfg.buttonIds.forEach(id => menuIdsSet.add(id));
-    }
-    if (menuConfigMap[menuId]) {
-      menuIdsSet.add(menuId);
-    }
-  });
+  const menuIds = getAllMenuIdsWithParentAndButton();
 
   const scope = Object.entries(menuAuthMap)
     .filter(([, cfg]) => cfg.useDataScope === 'T' && cfg.dataScope)
@@ -415,7 +455,7 @@ const handleSubmit = async () => {
   const result = {
     roleId: paramsProps.value.row.id,
     menu: {
-      menuIds: Array.from(menuIdsSet)
+      menuIds
     },
     scope
   };
@@ -582,7 +622,7 @@ const hasMenuConfig = (menuId: string): boolean => {
   const cfg = menuAuthMap[menuId];
   if (!cfg) return false;
   const hasButtons = Array.isArray(cfg.buttonIds) && cfg.buttonIds.length > 0;
-  const hasDataScope = cfg.useDataScope === 'T' && !!cfg.dataScope; // or加上 !== '1006001'
+  const hasDataScope = cfg.useDataScope === 'T' && !!cfg.dataScope;
   const hasUsers = Array.isArray(cfg.users) && cfg.users.length > 0;
   const hasDepts = Array.isArray(cfg.depts) && cfg.depts.length > 0;
   return hasButtons || hasDataScope || hasUsers || hasDepts;
