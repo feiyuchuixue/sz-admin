@@ -174,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, nextTick, defineExpose, watch } from 'vue';
+import { ref, reactive, computed, nextTick, defineExpose } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { Folder, Menu, CopyDocument } from '@element-plus/icons-vue';
 import { getRoleMenus } from '@/api/modules/system/role';
@@ -372,19 +372,16 @@ const buttonList = computed(() => {
 });
 
 const showPermissionsTag = ref(false);
-const allChecked = ref(false);
-
-watch(allChecked, val => {
-  if (val) {
-    selectedButtonIds.value = buttonList.value.map(btn => btn.id);
-  } else {
-    selectedButtonIds.value = [];
+const allChecked = computed({
+  get: () => buttonList.value.length > 0 && selectedButtonIds.value.length === buttonList.value.length,
+  set: (val: boolean) => {
+    if (val) {
+      selectedButtonIds.value = buttonList.value.map(btn => btn.id);
+    } else {
+      selectedButtonIds.value = [];
+    }
+    saveCurrentMenuConfig();
   }
-  saveCurrentMenuConfig();
-});
-
-watch([selectedButtonIds, buttonList], ([ids, btns]) => {
-  allChecked.value = ids.length === btns.length && btns.length > 0;
 });
 
 const copyPermission = (perm: string) => {
@@ -614,7 +611,6 @@ const onDialogClosed = () => {
   menuButtonMap.value = {};
   deptTrees.value = [];
   userInfos.value = [];
-  allChecked.value = false;
   showPermissionsTag.value = false;
 };
 
