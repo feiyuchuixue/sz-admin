@@ -112,56 +112,63 @@
               <el-tag size="small" type="success">数据权限</el-tag>
             </span>
           </div>
-          <div class="menu-buttons-row">
-            <div class="label-row">
-              功能权限：
-              <el-checkbox v-model="allChecked" class="checkbox-primary-style"> 全选 </el-checkbox>
-              <el-checkbox v-model="showPermissionsTag" class="checkbox-primary-style"> 标识 </el-checkbox>
-            </div>
-            <div class="divider-line"></div>
-            <el-checkbox-group v-model="selectedButtonIds" @change="saveCurrentMenuConfig">
-              <div v-for="btn in buttonList" :key="btn.id" class="permission-checkbox-item">
-                <el-checkbox :value="btn.id">
-                  {{ btn.title }}
-                </el-checkbox>
-                <template v-if="showPermissionsTag">
-                  <el-tag size="small" effect="dark" type="info" class="permission-tag">
-                    {{ btn.permissions }}
-                  </el-tag>
-                  <el-button
-                    text
-                    size="small"
-                    style="vertical-align: middle; margin-left: 2px"
-                    @click.stop="copyPermission(btn.permissions)"
-                    title="复制标识"
-                  >
-                    <el-icon :size="18">
-                      <CopyDocument />
-                    </el-icon>
-                  </el-button>
-                </template>
-              </div>
-            </el-checkbox-group>
+          <!-- 如果没有权限点和数据权限，则显示菜单授权checkbox -->
+          <div v-if="buttonList.length === 0 && !canEditDataScope">
+            <el-checkbox v-model="menuSelected" @change="saveCurrentMenuConfig">菜单授权</el-checkbox>
           </div>
-          <el-divider />
-          <RoleDataPermission
-            :form="dataPermissionForm"
-            :dataScopeOptions="dataScopeOptions"
-            :canEditDataScope="canEditDataScope"
-            :userInfos="userInfos"
-            :deptTrees="deptTrees"
-            :userTreeProps="userTreeProps"
-            :deptTreeProps="deptTreeProps"
-            @update:form="
-              val => {
-                dataPermissionForm.dataScope = val.dataScope;
-                dataPermissionForm.users = val.users;
-                dataPermissionForm.depts = val.depts;
-                saveCurrentMenuConfig();
-              }
-            "
-            @change="saveCurrentMenuConfig"
-          />
+          <!-- 否则显示功能权限等区块 -->
+          <div v-else>
+            <div class="menu-buttons-row">
+              <div class="label-row">
+                功能权限：
+                <el-checkbox v-model="allChecked" class="checkbox-primary-style"> 全选 </el-checkbox>
+                <el-checkbox v-model="showPermissionsTag" class="checkbox-primary-style"> 标识 </el-checkbox>
+              </div>
+              <div class="divider-line"></div>
+              <el-checkbox-group v-model="selectedButtonIds" @change="saveCurrentMenuConfig">
+                <div v-for="btn in buttonList" :key="btn.id" class="permission-checkbox-item">
+                  <el-checkbox :value="btn.id">
+                    {{ btn.title }}
+                  </el-checkbox>
+                  <template v-if="showPermissionsTag">
+                    <el-tag size="small" effect="dark" type="info" class="permission-tag">
+                      {{ btn.permissions }}
+                    </el-tag>
+                    <el-button
+                      text
+                      size="small"
+                      style="vertical-align: middle; margin-left: 2px"
+                      @click.stop="copyPermission(btn.permissions)"
+                      title="复制标识"
+                    >
+                      <el-icon :size="18">
+                        <CopyDocument />
+                      </el-icon>
+                    </el-button>
+                  </template>
+                </div>
+              </el-checkbox-group>
+            </div>
+            <el-divider />
+            <RoleDataPermission
+              :form="dataPermissionForm"
+              :dataScopeOptions="dataScopeOptions"
+              :canEditDataScope="canEditDataScope"
+              :userInfos="userInfos"
+              :deptTrees="deptTrees"
+              :userTreeProps="userTreeProps"
+              :deptTreeProps="deptTreeProps"
+              @update:form="
+                val => {
+                  dataPermissionForm.dataScope = val.dataScope;
+                  dataPermissionForm.users = val.users;
+                  dataPermissionForm.depts = val.depts;
+                  saveCurrentMenuConfig();
+                }
+              "
+              @change="saveCurrentMenuConfig"
+            />
+          </div>
         </div>
         <div v-else style="color: #bbb; text-align: center; margin-top: 100px">请选择菜单进行权限配置</div>
       </div>
@@ -205,6 +212,7 @@ const menuAuthMap = reactive<
       users: string[];
       depts: string[];
       useDataScope?: string;
+      menuSelected?: boolean; // 新增字段，菜单本身授权
     }
   >
 >({});
@@ -321,13 +329,23 @@ const expandCollapseAll = (expand: boolean) => {
 
 const saveCurrentMenuConfig = () => {
   if (!selectedMenu.value) return;
-  menuAuthMap[selectedMenu.value.id] = {
-    buttonIds: [...selectedButtonIds.value],
-    dataScope: dataPermissionForm.dataScope,
-    users: Array.isArray(dataPermissionForm.users) ? [...dataPermissionForm.users] : [],
-    depts: Array.isArray(dataPermissionForm.depts) ? [...dataPermissionForm.depts] : [],
-    useDataScope: selectedMenu.value.useDataScope
-  };
+  // 没有按钮/数据权限时，用menuSelected，否则用其它权限点
+  // menuSelected在v-model里已经更新，无需额外设定
+  if (!menuAuthMap[selectedMenu.value.id]) {
+    menuAuthMap[selectedMenu.value.id] = {
+      buttonIds: [],
+      dataScope: '',
+      users: [],
+      depts: [],
+      useDataScope: selectedMenu.value.useDataScope,
+      menuSelected: false
+    };
+  }
+  menuAuthMap[selectedMenu.value.id].buttonIds = [...selectedButtonIds.value];
+  menuAuthMap[selectedMenu.value.id].dataScope = dataPermissionForm.dataScope;
+  menuAuthMap[selectedMenu.value.id].users = Array.isArray(dataPermissionForm.users) ? [...dataPermissionForm.users] : [];
+  menuAuthMap[selectedMenu.value.id].depts = Array.isArray(dataPermissionForm.depts) ? [...dataPermissionForm.depts] : [];
+  menuAuthMap[selectedMenu.value.id].useDataScope = selectedMenu.value.useDataScope;
   menuConfigMap[selectedMenu.value.id] = hasMenuConfig(selectedMenu.value.id);
 };
 
@@ -343,17 +361,23 @@ const selectMenu = (menu: RoleMenuTree) => {
   if (selectedMenu.value) saveCurrentMenuConfig();
   selectedMenu.value = menu;
   selectedMenuId.value = menu.id;
-  const cfg = menuAuthMap[menu.id] || { buttonIds: [], dataScope: '', users: [], depts: [], useDataScope: menu.useDataScope };
+
+  // 初始化menuAuthMap
+  const cfg = menuAuthMap[menu.id] || {
+    buttonIds: [],
+    dataScope: '',
+    users: [],
+    depts: [],
+    useDataScope: menu.useDataScope,
+    menuSelected: false
+  };
+
   selectedButtonIds.value = [...cfg.buttonIds];
   dataPermissionForm.dataScope = cfg.dataScope || '1006001';
   dataPermissionForm.users = Array.isArray(cfg.users) ? [...cfg.users] : [];
   dataPermissionForm.depts = Array.isArray(cfg.depts) ? [...cfg.depts] : [];
-  menuConfigMap[menu.id] = !!(
-    cfg.buttonIds.length ||
-    cfg.dataScope ||
-    (cfg.users && cfg.users.length) ||
-    (cfg.depts && cfg.depts.length)
-  );
+  menuConfigMap[menu.id] = hasMenuConfig(menu.id);
+
   nextTick(() => {
     if (userTreeRef.value) {
       userTreeRef.value.setCheckedKeys(dataPermissionForm.users || []);
@@ -381,6 +405,28 @@ const allChecked = computed({
       selectedButtonIds.value = [];
     }
     saveCurrentMenuConfig();
+  }
+});
+
+const menuSelected = computed({
+  get: () => {
+    if (!selectedMenu.value) return false;
+    return !!menuAuthMap[selectedMenu.value.id]?.menuSelected;
+  },
+  set: (val: boolean) => {
+    if (!selectedMenu.value) return;
+    if (!menuAuthMap[selectedMenu.value.id]) {
+      menuAuthMap[selectedMenu.value.id] = {
+        buttonIds: [],
+        dataScope: '',
+        users: [],
+        depts: [],
+        useDataScope: selectedMenu.value.useDataScope,
+        menuSelected: false
+      };
+    }
+    menuAuthMap[selectedMenu.value.id].menuSelected = val;
+    menuConfigMap[selectedMenu.value.id] = hasMenuConfig(selectedMenu.value.id);
   }
 });
 
@@ -515,15 +561,18 @@ const getInfo = (roleId: number) => {
         if (isMenu(node)) {
           const btns = menuButtonMap.value[node.id] || [];
           const selectedBtns = btns.filter(btn => selectedMenuIds.has(btn.id)).map(btn => btn.id);
-          const menuSelected = selectedMenuIds.has(node.id);
+          // 是否是菜单本身被授权，无功能点/数据权限
+          const justMenuSelected = btns.length === 0 && node.useDataScope !== 'T' && selectedMenuIds.has(node.id);
+
           menuAuthMap[node.id] = {
             buttonIds: selectedBtns,
             dataScope: '',
             users: [],
             depts: [],
-            useDataScope: node.useDataScope
+            useDataScope: node.useDataScope,
+            menuSelected: justMenuSelected
           };
-          menuConfigMap[node.id] = selectedBtns.length > 0 || menuSelected;
+          menuConfigMap[node.id] = hasMenuConfig(node.id);
         }
         if (Array.isArray(node.children)) {
           initMenuAuth(node.children);
@@ -545,7 +594,8 @@ const getInfo = (roleId: number) => {
               dataScope: '',
               users: [],
               depts: [],
-              useDataScope: menuNode?.useDataScope || 'T'
+              useDataScope: menuNode?.useDataScope || 'T',
+              menuSelected: undefined
             };
           }
           menuAuthMap[menuId].dataScope = scopeItem.dataScope || '';
@@ -617,11 +667,12 @@ const onDialogClosed = () => {
 const hasMenuConfig = (menuId: string): boolean => {
   const cfg = menuAuthMap[menuId];
   if (!cfg) return false;
+  const hasMenuSelected = !!cfg.menuSelected;
   const hasButtons = Array.isArray(cfg.buttonIds) && cfg.buttonIds.length > 0;
   const hasDataScope = cfg.useDataScope === 'T' && !!cfg.dataScope;
   const hasUsers = Array.isArray(cfg.users) && cfg.users.length > 0;
   const hasDepts = Array.isArray(cfg.depts) && cfg.depts.length > 0;
-  return hasButtons || hasDataScope || hasUsers || hasDepts;
+  return hasMenuSelected || hasButtons || hasDataScope || hasUsers || hasDepts;
 };
 
 const acceptParams = (params: any) => {
