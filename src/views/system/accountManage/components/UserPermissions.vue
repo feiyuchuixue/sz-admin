@@ -36,7 +36,8 @@ defineOptions({
 
 const transferProps = {
   key: 'id',
-  label: 'roleName'
+  label: 'roleName',
+  disabled: 'disabled'
 };
 
 /**

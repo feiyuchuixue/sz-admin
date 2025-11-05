@@ -72,3 +72,8 @@ export type UserOptions = {
   username: string;
   nickname: string;
 };
+
+export type UserTagOptions = {
+  userIds: number[];
+  userTagCd: string;
+};
