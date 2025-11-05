@@ -29,6 +29,9 @@
           导出
         </el-button>
       </template>
+      <template #url="{ row }">
+        <file-download-list :files="row?.url" :align="'left'" :max-rows="3" />
+      </template>
       <template #operation="{ row }">
         <el-button
           v-auth="'teacher.statistics.update'"
@@ -74,6 +77,7 @@ import { useDownload } from '@/hooks/useDownload';
 import RemoteSearchSelect from '@/components/RemoteSearchSelect/index.vue';
 import { useDict } from '@/hooks/useDict';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
 
 defineOptions({
   name: 'TeacherStatisticsView'
@@ -85,8 +89,9 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
   { type: 'selection', width: 80 },
   { prop: 'year', label: '年限', width: 90 },
   { prop: 'month', label: '月份', width: 90 },
-  { prop: 'duringTime', label: '年月' },
-  { prop: 'teacherId', label: '教师id' },
+  { prop: 'duringTime', label: '年月', width: 120 },
+  { prop: 'teacherId', label: '教师id', width: 90 },
+  { prop: 'url', label: '附件', width: 300 },
   {
     prop: 'teacherCommonType',
     label: '讲师区分类型',
@@ -97,7 +102,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
       value: 'id',
       tagType: 'callbackShowStyle'
     },
-    width: 150
+    width: 90
   },
   { prop: 'totalTeaching', label: '授课总数', width: 90 },
   { prop: 'totalClassCount', label: '服务班次', width: 90 },
@@ -112,10 +117,8 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
       value: 'id',
       tagType: 'callbackShowStyle'
     },
-    width: 120
+    width: 90
   },
-  { prop: 'checkTime', label: '核对时间', width: 160 },
-  { prop: 'lastSyncTime', label: '最近一次同步时间', width: 160 },
   { prop: 'remark', label: '备注', width: 160 },
   {
     prop: 'createId',
@@ -142,7 +145,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     },
     width: 150
   },
-  { prop: 'updateTime', label: '更新时间', width: 160 },
+  { prop: 'updateTime', label: '更新时间', width: 80 },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
 ];
 // 搜索条件项
@@ -268,10 +271,11 @@ const ImportExcelRef = ref<InstanceType<typeof ImportExcel>>();
 const importData = () => {
   const params = {
     title: '教师统计',
-    templateName: '教师统计模板',
     tempApi: downloadTemplate,
     importApi: importTeacherStatisticsExcelApi,
-    getTableList: proTableRef.value?.getTableList
+    getTableList: proTableRef.value?.getTableList,
+    alias: 'jstj',
+    fileName: '教师统计模板.xlsx'
   };
   ImportExcelRef.value?.acceptParams(params);
 };

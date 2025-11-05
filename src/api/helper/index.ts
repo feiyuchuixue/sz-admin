@@ -52,7 +52,7 @@ export const checkStatus = (status: number, message?: string) => {
       ElMessage.error(message || '网关超时！');
       break;
     // 自定义响应码，处理 blob流异常时的返回信息
-    case 1004:
+    case 1003:
       ElMessage.error(message || '模板文件不存在！');
       break;
     default:

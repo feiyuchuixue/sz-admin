@@ -17,6 +17,7 @@ export type SysTempFileForm = {
   tempName?: string;
   url?: string;
   remark?: string;
+  alias?: string;
 };
 
 // list或detail返回结构
@@ -31,6 +32,7 @@ export type SysTempFileRow = {
   createTime?: string;
   updateId?: number;
   updateTime?: string;
+  alias?: string;
 };
 
 // 历史记录

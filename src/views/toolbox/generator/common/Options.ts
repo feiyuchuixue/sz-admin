@@ -32,6 +32,10 @@ export const javaTypeOptions: Options[] = [
   {
     label: 'LocalTime',
     value: 'LocalTime'
+  },
+  {
+    label: 'List<UploadResult>',
+    value: 'List<UploadResult>'
   }
 ];
 
@@ -88,16 +92,20 @@ export const htmlTypeOptions: Options[] = [
     value: 'select'
   },
   {
+    label: 'datetime ',
+    value: 'datetime'
+  },
+  {
+    label: 'fileUpload',
+    value: 'fileUpload'
+  },
+  {
     label: 'radio-group [未完待续]',
     value: 'radio-group'
   },
   {
     label: 'checkbox [未完待续]',
     value: 'checkbox'
-  },
-  {
-    label: 'datetime ',
-    value: 'datetime'
   },
   {
     label: 'date [未完待续]',
@@ -110,10 +118,6 @@ export const htmlTypeOptions: Options[] = [
   {
     label: 'imageUpload [未完待续]',
     value: 'imageUpload'
-  },
-  {
-    label: 'fileUpload [未完待续]',
-    value: 'fileUpload'
   },
   {
     label: 'editor [未完待续]',

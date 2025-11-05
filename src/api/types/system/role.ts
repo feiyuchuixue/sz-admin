@@ -22,8 +22,11 @@ export type RoleInfo = {
 };
 
 export type RoleMenu = {
+  selectMenuIds: string[];
   menuLists: RoleMenuTree[];
-  selectIds: string[];
+  deptLists: DeptTree[];
+  userLists: UserInfo[];
+  scope: Scope;
 };
 
 export type RoleMenuTree = {
@@ -31,9 +34,32 @@ export type RoleMenuTree = {
   pid: string;
   title: string;
   children: RoleMenuTree[];
+  useDataScope: string;
+  menuTypeCd: string;
+  permissions: string;
+};
+
+export type DeptTree = {
+  id: number;
+  pid: string;
+  name: string;
+  children: RoleMenuTree[];
+};
+
+export type UserInfo = {
+  id: number;
+  nickname: string;
+  username: string;
 };
 
 export type RoleMenuForm = {
   menuIds: string[];
   roleId: number;
+};
+
+export type Scope = {
+  menuId: string;
+  dataScope: string;
+  deptIds: number[];
+  userIds: number[];
 };

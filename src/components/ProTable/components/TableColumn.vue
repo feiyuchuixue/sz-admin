@@ -20,10 +20,13 @@ const enumMap = inject('enumMap', ref(new Map<string, DictItem[]>()));
 
 // 获取 tag 的类型
 const getTagType = (val: any, dict: DictItem[] | undefined, fieldNames: { value?: string; tagType?: string }): string => {
-  if (!dict || !Array.isArray(dict) || !fieldNames.value || !fieldNames.tagType) return 'primary';
-  const item = dict.find(d => d[fieldNames.value!] === val);
+  if (!dict || !Array.isArray(dict) || !fieldNames) return 'primary';
+  // 兼容 fieldNames.value/tagType 缺失的情况
+  const valueKey = fieldNames.value || 'id';
+  const tagTypeKey = fieldNames.tagType || 'callbackShowStyle';
+  const item = dict.find(d => String(d[valueKey]) === String(val));
   if (item) {
-    const type = item[fieldNames.tagType];
+    const type = item[tagTypeKey];
     if (typeof type === 'function') {
       try {
         return type(item) || 'primary';

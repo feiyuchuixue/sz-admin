@@ -17,7 +17,7 @@
         :init-param="initParam"
       >
         <template #url="{ row }">
-          <a href="#" target="_blank" @click="downloadFile(row?.url)">下载</a>
+          <FileDownloadList :files="row?.url" />
         </template>
       </ProTable>
     </el-dialog>
@@ -32,6 +32,7 @@ import { reactive, ref } from 'vue';
 import { getSysTempFileHistoryListApi } from '@/api/modules/system/sysTempFile';
 import type { SysTempFileHistory, SysTempFileRow, SysTempFileHistoryQuery } from '@/api/types/system/sysTempFile';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
 
 defineOptions({
   name: 'SysTemplateHistoryList'
@@ -52,10 +53,9 @@ defineExpose({
 });
 
 const columns: ColumnProps<Dict>[] = [
-  { prop: 'sysTempFileId', label: '模板标识', width: 120 },
-  { prop: 'sysFileId', label: '文件标识', width: 120 },
+  { prop: 'sysTempFileId', label: '模板标识', width: 100 },
   { prop: 'tempName', label: '模版名', tag: true },
-  { prop: 'url', label: '文件', width: 120 },
+  { prop: 'url', label: '文件', width: 350 },
   { prop: 'remark', label: '备注' },
   {
     prop: 'createId',
@@ -66,9 +66,10 @@ const columns: ColumnProps<Dict>[] = [
       label: 'codeName',
       value: 'id',
       tagType: 'callbackShowStyle'
-    }
+    },
+    width: 120
   },
-  { prop: 'createTime', label: '创建时间' }
+  { prop: 'createTime', label: '创建时间', width: 180 }
 ];
 
 // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
@@ -79,24 +80,6 @@ const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
 const getTableList = (params: SysTempFileHistoryQuery) => getSysTempFileHistoryListApi(params);
-
-const downloadFile = (url: string) => {
-  const link = document.createElement('a'); // 创建一个 a 标签用来模拟点击事件
-  link.style.display = 'none';
-  link.href = url;
-  const fileName = getFileNameFromUrl(url);
-  link.setAttribute('download', fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-const getFileNameFromUrl = (url: string) => {
-  // 使用正则表达式提取文件名
-  const regex = /\/([^/]+)$/;
-  const match = url.match(regex);
-  return match ? match[1] : '';
-};
 </script>
 
 <style scoped lang="scss"></style>

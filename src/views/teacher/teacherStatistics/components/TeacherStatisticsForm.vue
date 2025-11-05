@@ -36,7 +36,7 @@
       </el-form-item>
       <el-form-item label="核对状态" prop="checkStatus">
         <el-select v-model="paramsProps.row.checkStatus" clearable placeholder="请选择核对状态">
-          <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" />
+          <el-option v-for="item in accountStatus" :key="item.id" :label="item.codeName" :value="Number(item.id)" :debug="true" />
         </el-select>
       </el-form-item>
       <el-form-item label="核对时间" prop="checkTime">
@@ -60,6 +60,16 @@
       <el-form-item label="备注" prop="remark">
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" clearable />
       </el-form-item>
+      <el-form-item label="附件" prop="url">
+        <upload-files
+          v-model:modelValue="fileUrls"
+          :limit="5"
+          :file-size="3"
+          :dir="'teacher'"
+          :debug="true"
+          @all-success="handleAllSuccess"
+        />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false"> 取消 </el-button>
@@ -72,6 +82,8 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import UploadFiles from '@/components/Upload/UploadFiles.vue';
+import type { IUploadResult } from '@/api/types/system/upload';
 
 defineOptions({
   name: 'TeacherStatisticsForm'
@@ -94,9 +106,12 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
+const fileUrls = ref<IUploadResult[] | string[]>([]);
+
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
+  fileUrls.value = params.row.url; // 附件回显--从表格数据传过来
   visible.value = true;
 };
 
@@ -106,6 +121,7 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
+      paramsProps.value.row.url = fileUrls.value; // 附件数据添加--从上传组件获取
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
@@ -115,6 +131,10 @@ const handleSubmit = () => {
     }
   });
 };
+
+function handleAllSuccess(list: IUploadResult[]) {
+  console.log('全部上传成功，共', list.length, '条：', list);
+}
 
 defineExpose({
   acceptParams

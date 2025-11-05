@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onBeforeUnmount } from 'vue';
+import { ref, reactive, onBeforeUnmount, computed } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
 import { getImageCodeApi, verifyImageCodeApi } from '@/api/modules/system/captcha';
 import { aesEncrypt } from '@/utils';
@@ -269,7 +269,7 @@ const onDialogOpened = () => {
   }, 100);
 };
 
-defineExpose({ acceptParams, dialogVisible });
+defineExpose({ acceptParams, dialogVisible, isSuccess: computed(() => slideData.isSuccess) });
 </script>
 
 <style scoped lang="scss">

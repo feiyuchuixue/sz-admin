@@ -4,6 +4,8 @@ export type LoginParams = {
   password: string;
   clientId: string;
   grantType: string;
+  iv: string;
+  requestId: string;
 };
 
 export type LoginInfo = {
@@ -32,4 +34,9 @@ export type UserInfo = {
   lastLoginTime?: string;
   createTime?: string;
   updateTime?: string;
+};
+
+export type ChallengeInfo = {
+  requestId: string;
+  secretKey: string;
 };

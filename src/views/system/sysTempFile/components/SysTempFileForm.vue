@@ -9,17 +9,19 @@
       @submit.enter.prevent="handleSubmit"
     >
       <el-form-item label="模板文件" prop="url">
-        <UploadFiles
+        <upload-files
           v-model:modelValue="fileUrls"
-          multiple
           :file-size="3"
-          :dir="'tmp'"
+          :dir="'excel'"
           @change="fileChange"
           accept=".xlsx,.xls,.docx,.doc,.pdf"
         />
       </el-form-item>
       <el-form-item label="模版名" prop="tempName">
         <el-input v-model="paramsProps.row.tempName" placeholder="请填写模版名" clearable />
+      </el-form-item>
+      <el-form-item label="标识" prop="alias">
+        <el-input v-model="paramsProps.row.alias" placeholder="请填写标识" clearable></el-input>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
@@ -35,14 +37,16 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
-import UploadFiles from '@/components/Upload/file.vue';
+import UploadFiles from '@/components/Upload/UploadFiles.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
 
 defineOptions({
   name: 'SysTempFileForm'
 });
 
-const rules = reactive({});
+const rules = reactive({
+  alias: [{ required: true, message: '请填写标识' }]
+});
 
 const visible = ref(false);
 const paramsProps = ref<View.DefaultParams>({

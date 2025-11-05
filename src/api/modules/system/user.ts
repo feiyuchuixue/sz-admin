@@ -1,6 +1,14 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { UserQuery, UserInfo, UserForm, UserRoleData, UserRoleForm, UserPasswordForm } from '@/api/types/system/user';
+import type {
+  UserQuery,
+  UserInfo,
+  UserForm,
+  UserRoleData,
+  UserRoleForm,
+  UserPasswordForm,
+  UserTagOptions
+} from '@/api/types/system/user';
 import type { IPage } from '@/api/types';
 import type { SysDeptDeptSetting, SysDeptTree } from '@/api/types/system/dept';
 
@@ -129,10 +137,9 @@ export const getDataUserRole = (params: { userId: number }) => {
 };
 
 /**
- * 设置用户数据角色
+ * 设置用户类型
  * @param params
- * @returns {*}
  */
-export const setUserDataRole = (params: UserRoleForm) => {
-  return http.put(ADMIN_MODULE + `/sys-user/datarole`, params);
+export const setUserTag = (params: UserTagOptions) => {
+  return http.post(ADMIN_MODULE + `/sys-user/changeset/usertag`, params);
 };

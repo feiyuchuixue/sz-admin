@@ -40,7 +40,16 @@
             <el-icon class="el-icon--left">
               <SvgIcon name="org" />
             </el-icon>
-            &nbsp;&nbsp; 设置部门
+            设置部门
+          </el-button>
+          <el-button
+            v-auth="'sys.user.admin_set_btn'"
+            type="info"
+            :icon="Flag"
+            plain
+            :disabled="!scope.isSelected"
+            @click="settingUserTag(scope)"
+            >设置账户类型
           </el-button>
           <el-button type="info" :icon="Unlock" plain :disabled="!scope.isSelected" @click="unlock(scope.selectedListIds)">
             解锁
@@ -95,19 +104,14 @@
                         设置部门
                       </el-dropdown-item>
                     </div>
+                    <div v-auth="'sys.user.admin_set_btn'">
+                      <el-dropdown-item type="primary" :icon="Flag" @click="settingUserTag(row)"> 设置账户类型 </el-dropdown-item>
+                    </div>
                     <div v-auth="'sys.user.unlock_btn'">
                       <el-dropdown-item type="primary" :icon="Refresh" link @click="resetPwd(row)"> 重置密码 </el-dropdown-item>
                     </div>
                     <div v-auth="'sys.user.delete_btn'">
                       <el-dropdown-item v-if="row.id !== 1" :icon="Delete" @click="deleteInfo(row)"> 删除 </el-dropdown-item>
-                    </div>
-                    <div v-auth="'sys.user.data_role_set_btn'">
-                      <el-dropdown-item type="primary" v-if="row.id !== 1" @click="openUserDataPermissions('设置数据角色', row)">
-                        <el-icon class="el-icon--left">
-                          <SvgIcon name="scope" />
-                        </el-icon>
-                        设置数据角色
-                      </el-dropdown-item>
                     </div>
                   </el-dropdown-menu>
                 </template>
@@ -120,13 +124,13 @@
       <UserEdit ref="userEditRef" />
       <UserPermissions ref="userPermissionsRef" />
       <UserDeptForm ref="userDeptFormRef" @submit="refreshDeptTree" />
-      <UserDataPermissions ref="userDataPermissionsRef" />
+      <UserTagForm ref="userTagFormRef" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { CirclePlus, Delete, EditPen, User, Unlock, Refresh, DArrowRight } from '@element-plus/icons-vue';
+import { CirclePlus, Delete, EditPen, User, Unlock, Refresh, DArrowRight, Flag } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import DeptTree from '@/views/system/accountManage/components/DeptTree.vue';
 import { useHandleData } from '@/hooks/useHandleData';
@@ -139,8 +143,7 @@ import {
   setUserRole,
   unlockUser,
   resetPassword,
-  getUserDetailApi,
-  setUserDataRole
+  getUserDetailApi
 } from '@/api/modules/system/user';
 import UserAdd from '@/views/system/accountManage/components/UserAdd.vue';
 import UserEdit from '@/views/system/accountManage/components/UserEdit.vue';
@@ -152,21 +155,29 @@ import { reactive, ref } from 'vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import UserDeptForm from '@/views/system/accountManage/components/UserDeptForm.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import UserDataPermissions from '@/views/system/accountManage/components/UserDataPermissions.vue';
 import { IS_PREVIEW } from '@/config';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import { useDict } from '@/hooks/useDict';
+import UserTagForm from '@/views/system/accountManage/components/UserTagForm.vue';
 defineOptions({
   name: 'AccountManage'
 });
 
-useDict(['dynamic_dept_options', 'dynamic_role_options']);
+useDict(['dynamic_dept_options', 'dynamic_role_options', 'user_tag', 'account_status']); // 使用useDict Hook 主动加载字典
 
 // 表格配置项
 const columns: ColumnProps<RoleInfo>[] = [
   { type: 'selection', width: 55, selectable: row => row.id !== 1 },
-  { prop: 'username', label: '账户', width: 150, align: 'left' },
+  { prop: 'username', label: '账户', width: 120, align: 'left' },
   { prop: 'nickname', label: '昵称', width: 150, align: 'left' },
+  {
+    prop: 'userTagCd',
+    label: '账户类型',
+    tag: true,
+    enum: useDictOptions('user_tag'),
+    width: 100,
+    fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' }
+  },
   { prop: 'phone', label: '手机号', width: 120 },
   {
     prop: 'deptIds',
@@ -192,8 +203,8 @@ const columns: ColumnProps<RoleInfo>[] = [
     width: 80,
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' }
   },
-  { prop: 'createTime', label: '创建时间', width: 165 },
-  { prop: 'operation', label: '操作', width: 260, fixed: 'right' }
+  { prop: 'createTime', label: '创建时间', width: 160 },
+  { prop: 'operation', label: '操作', width: 180, fixed: 'right' }
 ];
 
 const searchColumns: SearchProps[] = [
@@ -299,6 +310,34 @@ const settingDept = (record: any) => {
   }
 };
 
+const userTagFormRef = ref<InstanceType<typeof UserTagForm>>();
+const settingUserTag = (record: any) => {
+  if (record.selectedListIds) {
+    const params = {
+      title: '批量设置账户类型',
+      row: {},
+      api: undefined,
+      getTableList: proTableRef.value?.getTableList,
+      selectedList: record.selectedList, //选中的行信息
+      selectIds: record.selectedListIds,
+      isBatch: true
+    };
+    userTagFormRef.value?.acceptParams(params);
+    proTableRef.value?.clearSelection();
+  } else {
+    const params = {
+      title: '设置账户类型',
+      row: {},
+      api: undefined,
+      getTableList: proTableRef.value?.getTableList,
+      selectedList: [record], //选中的行信息
+      selectIds: [record.id],
+      isBatch: false
+    };
+    userTagFormRef.value?.acceptParams(params);
+  }
+};
+
 const unlock = async (id: (string | number)[]) => {
   if (Array.isArray(id)) {
     await unlockUser({ ids: id });
@@ -336,19 +375,6 @@ const changeDeptTree = (val: number) => {
 
 const refreshDeptTree = () => {
   deptTreeRef.value?.refresh();
-};
-
-// 设置数据角色
-const userDataPermissionsRef = ref<InstanceType<typeof UserDataPermissions>>();
-const openUserDataPermissions = (title: string, row = {}) => {
-  const params = {
-    title,
-    row: row,
-    api: setUserDataRole,
-    getTableList: proTableRef.value?.getTableList
-  };
-  userDataPermissionsRef.value?.acceptParams(params);
-  proTableRef.value?.getTableList();
 };
 </script>
 

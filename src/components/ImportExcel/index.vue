@@ -1,10 +1,31 @@
 <template>
-  <el-dialog v-model="dialogVisible" :title="`导入${parameter.title}`" :destroy-on-close="true" width="580px" draggable>
+  <el-dialog v-model="dialogVisible" :title="`导入：${parameter.title}`" :destroy-on-close="true" width="580px" draggable>
     <el-form class="drawer-multiColumn-form" label-width="100px">
-      <el-form-item label="模板下载 :">
-        <el-button type="primary" :icon="Download" @click="downloadTemp"> 点击下载 </el-button>
-      </el-form-item>
-      <el-form-item label="文件上传 :">
+      <!-- 优化背景和标签的模板信息区域 -->
+      <div class="template-info-card">
+        <div class="template-content">
+          <div class="template-meta">
+            <div class="meta-row">
+              <span class="meta-label">标识：</span>
+              <el-tag type="info" size="small" effect="plain">{{ parameter.alias }}</el-tag>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">文件名：</span>
+              <el-tag type="info" size="small" effect="plain">{{ parameter.fileName }}</el-tag>
+            </div>
+            <div v-if="parameter.templateName && parameter.templateName !== parameter.fileName" class="meta-row">
+              <span class="meta-label">展示名：</span>
+              <el-tag type="warning" size="small" effect="plain">{{ parameter.templateName }}</el-tag>
+            </div>
+          </div>
+          <div class="template-actions">
+            <el-button type="primary" :icon="Download" @click="downloadTemp"> 下载模板 </el-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文件上传 -->
+      <el-form-item label="文件上传：">
         <el-upload
           action="#"
           class="upload"
@@ -32,8 +53,13 @@
           </template>
         </el-upload>
       </el-form-item>
-      <el-form-item label="数据覆盖 :">
-        <el-switch v-model="isCover" />
+
+      <!-- 数据覆盖选项 -->
+      <el-form-item label="数据覆盖：">
+        <div class="cover-option">
+          <el-switch v-model="isCover" />
+          <span class="cover-hint">启用后将覆盖相同主键的数据</span>
+        </div>
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -52,13 +78,16 @@ defineOptions({
 
 export interface ExcelParameterProps {
   title: string; // 标题
-  templateName?: string; // 模板
+  templateName?: string; // 模板展示/下载文件名
   templateFileType?: File.ExcelFileType; //  模板文件类型
   fileSize?: number; // 上传文件的大小
   fileType?: File.ExcelMimeType[]; // 上传文件的类型
   tempApi?: (params: any) => Promise<any>; // 下载模板的Api
   importApi?: (params: any, config?: AxiosRequestConfig<any> | undefined) => Promise<any>; // 批量导入的Api
   getTableList?: () => void; // 获取表格数据的Api
+  alias: string; // 导入查询别名（必填）
+  fileName: string; // 查询的文件名（必填）
+  param?: Record<string, any>; // 其他查询参数（优先级最高，透传）
 }
 
 // 是否覆盖数据
@@ -72,11 +101,16 @@ const parameter = ref<ExcelParameterProps>({
   title: '',
   fileSize: 5,
   fileType: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-  templateFileType: '.xlsx'
+  alias: '',
+  fileName: ''
 });
 
 // 接收父组件参数
 const acceptParams = (params: ExcelParameterProps) => {
+  // 校验必填
+  if (!params.alias || !params.fileName) {
+    throw new Error('ImportExcel 参数 alias 和 fileName 必填');
+  }
   parameter.value = { ...parameter.value, ...params };
   dialogVisible.value = true;
 };
@@ -84,11 +118,10 @@ const acceptParams = (params: ExcelParameterProps) => {
 // Excel 导入模板下载
 const downloadTemp = () => {
   if (!parameter.value.tempApi) return;
-  const templateFileType = parameter.value.templateFileType;
-  const templateName = parameter.value.templateName ? parameter.value.templateName : parameter.value.title;
-  useDownload(parameter.value.tempApi, `${templateName}模板`, {
-    templateName: templateName + templateFileType
-  });
+  const downloadParams = parameter.value.param
+    ? parameter.value.param
+    : { alias: parameter.value.alias, templateName: parameter.value.fileName };
+  useDownload(parameter.value.tempApi, parameter.value.templateName, downloadParams);
 };
 
 // 文件上传
