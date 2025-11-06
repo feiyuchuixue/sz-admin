@@ -94,7 +94,9 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <div v-auth="'sys.user.role_set_btn'">
-                      <el-dropdown-item :icon="User" @click="openUserPermissions('设置角色', row)"> 设置角色 </el-dropdown-item>
+                      <el-dropdown-item :icon="User" v-if="row.id !== 1" @click="openUserPermissions('设置角色', row)">
+                        设置角色
+                      </el-dropdown-item>
                     </div>
                     <div v-auth="'sys.user.dept_set_btn'">
                       <el-dropdown-item type="primary" @click="settingDept(row)">
@@ -105,7 +107,9 @@
                       </el-dropdown-item>
                     </div>
                     <div v-auth="'sys.user.admin_set_btn'">
-                      <el-dropdown-item type="primary" :icon="Flag" @click="settingUserTag(row)"> 设置账户类型 </el-dropdown-item>
+                      <el-dropdown-item type="primary" v-if="row.id !== 1" :icon="Flag" @click="settingUserTag(row)">
+                        设置账户类型
+                      </el-dropdown-item>
                     </div>
                     <div v-auth="'sys.user.unlock_btn'">
                       <el-dropdown-item type="primary" :icon="Refresh" link @click="resetPwd(row)"> 重置密码 </el-dropdown-item>
