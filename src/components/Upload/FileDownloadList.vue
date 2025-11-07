@@ -10,10 +10,9 @@
         </span>
 
         <div class="op-group">
-          <el-tooltip :content="downloadingMap[file.url] ? '下载中...' : '下载'" placement="top" :show-after="120">
-            <span class="op-icon op-download" :class="{ loading: downloadingMap[file.url] }" @click="downloadFile(file)">
-              <el-icon v-if="!downloadingMap[file.url]"><Download /></el-icon>
-              <el-icon v-else class="spin"><Loading /></el-icon>
+          <el-tooltip content="下载" placement="top" :show-after="120">
+            <span class="op-icon op-download" @click="handleDownload(file)">
+              <el-icon><Download /></el-icon>
             </span>
           </el-tooltip>
 
@@ -57,9 +56,11 @@
 </template>
 
 <script setup lang="ts">
-import { Document, Download, View, Loading } from '@element-plus/icons-vue';
+import { Document, Download, View } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick } from 'vue';
 import type { IUploadResult } from '@/api/types/system/upload';
+import { useUrlDownload } from '@/hooks/useUrlDownload';
+import { ElMessage } from 'element-plus';
 
 defineOptions({ name: 'FileDownloadList' });
 
@@ -71,9 +72,7 @@ const props = withDefaults(
     align?: 'left' | 'center' | 'right';
     maxRows?: number;
   }>(),
-  {
-    files: () => []
-  }
+  { files: () => [] }
 );
 
 const align = props.align || 'left';
@@ -105,113 +104,20 @@ function isImage(url: string) {
   return /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(url);
 }
 
-/* 折叠 */
+/* 折叠显示逻辑 */
 const expanded = ref(false);
 const needCollapse = computed(() => maxRows > 0 && fileList.value.length > maxRows);
 const visibleFiles = computed(() =>
   !needCollapse.value ? fileList.value : expanded.value ? fileList.value : fileList.value.slice(0, maxRows)
 );
 
-/* 下载增强 */
-const downloadingMap = ref<Record<string, boolean>>({});
-
-function shouldForceFetch(url: string, isImg: boolean) {
-  // 策略：图片 => 强制；跨域 => 强制
-  try {
-    const u = new URL(url, location.href);
-    const cross = u.origin !== location.origin;
-    return isImg || cross;
-  } catch {
-    return isImg;
-  }
-}
-
-function extractFileNameFromCD(cd?: string | null): string | undefined {
-  if (!cd) return;
-
-  // 先匹配 RFC5987 格式：filename*=UTF-8''xxx%20name.ext
-  const starMatch = /filename\*\s*=\s*([^;]+)/i.exec(cd);
-  if (starMatch) {
-    // 去掉外围引号
-    let value = starMatch[1].trim().replace(/^"(.*)"$/, '$1');
-    // 解析 charset'lang'value 结构
-    const rfc5987 = /^([^']*)'[^']*'(.*)$/.exec(value);
-    if (rfc5987) {
-      const encodedPart = rfc5987[2];
-      try {
-        return decodeURIComponent(encodedPart);
-      } catch (e) {
-        void e; // 标记已使用
-      }
-    } else {
-      // 没有按 charset'lang' 分段，尝试直接 decode
-      try {
-        return decodeURIComponent(value);
-      } catch (e) {
-        void e; // 标记已使用
-      }
-      return value;
-    }
-  }
-
-  // 普通 filename=
-  const normalMatch = /filename\s*=\s*([^;]+)/i.exec(cd);
-  if (normalMatch) {
-    return normalMatch[1].trim().replace(/^"(.*)"$/, '$1');
-  }
-}
-
-async function forceBlobDownload(url: string, filename?: string) {
-  const res = await fetch(url, {
-    credentials: 'include' // 若不需要携带 cookie 可移除
+function handleDownload(file: FileType) {
+  useUrlDownload(file).catch(err => {
+    ElMessage.error(err?.message || '下载失败');
   });
-  if (!res.ok) throw new Error(`下载失败: ${res.status}`);
-  let finalName = filename;
-  const cd = extractFileNameFromCD(res.headers.get('Content-Disposition'));
-  if (!finalName && cd) finalName = cd;
-  const blob = await res.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.style.display = 'none';
-  a.href = objectUrl;
-  a.download = finalName || getFileName(url) || 'download';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  // 释放
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
-async function downloadFile(file: FileType) {
-  if (downloadingMap.value[file.url]) return;
-  downloadingMap.value[file.url] = true;
-
-  const name = file.filename || getFileName(file.url);
-  const img = isImage(file.url);
-
-  try {
-    if (shouldForceFetch(file.url, img)) {
-      await forceBlobDownload(file.url, name);
-    } else {
-      // 同域 & 非图片：直接 a.download 更省内存
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = file.url;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-  } catch (e) {
-    console.error('下载失败，尝试回退直接打开：', e);
-    // 回退：打开新窗口（你也可以换成 ElMessage）
-    window.open(file.url, '_blank');
-  } finally {
-    downloadingMap.value[file.url] = false;
-  }
-}
-
-/* 预览 */
+/* 图片预览逻辑 */
 const viewerVisible = ref(false);
 const currentIndex = ref(0);
 const imageFiles = computed(() =>
@@ -246,7 +152,6 @@ watch(viewerVisible, v => {
 </script>
 
 <style scoped lang="scss">
-/* 设计变量（可快速换主题） */
 .file-download-list {
   --fdl-row-height: 24px;
   --fdl-color-text: var(--el-text-color-primary, #303133);
@@ -277,7 +182,6 @@ watch(viewerVisible, v => {
   align-items: flex-end;
 }
 
-/* 行 */
 .file-row {
   position: relative;
   display: grid;
@@ -299,8 +203,6 @@ watch(viewerVisible, v => {
 .file-row:hover {
   background: var(--fdl-hover-bg);
 }
-
-/* 行前圆点（可删除） */
 .file-row::before {
   content: '';
   width: 4px;
@@ -316,8 +218,6 @@ watch(viewerVisible, v => {
 .file-row:hover::before {
   opacity: 0.65;
 }
-
-/* 图标 */
 .file-icon {
   color: var(--fdl-icon-hover-primary);
   font-size: 18px;
@@ -326,23 +226,18 @@ watch(viewerVisible, v => {
 .file-row.is-image:hover .file-icon {
   color: var(--fdl-icon-hover-primary);
 }
-
-/* 文件名 */
 .file-name {
   min-width: 0;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   color: var(--fdl-color-text);
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding-right: 4px;
 }
-
-/* 图片标记 */
 .img-preview-tag {
   font-size: 11px;
   line-height: 14px;
@@ -355,8 +250,6 @@ watch(viewerVisible, v => {
   display: inline-flex;
   align-items: center;
 }
-
-/* 操作图标组 */
 .op-group {
   display: inline-flex;
   align-items: center;
@@ -364,7 +257,6 @@ watch(viewerVisible, v => {
   padding-right: 2px;
   font-size: 0;
 }
-
 .op-icon {
   display: inline-flex;
   align-items: center;
@@ -385,16 +277,12 @@ watch(viewerVisible, v => {
 .op-icon.op-preview:hover {
   color: var(--fdl-icon-hover-warning);
 }
-
-/* 空状态 */
 .no-file {
   color: var(--el-text-color-placeholder, #c0c4cc);
   font-size: 13px;
   text-align: center;
   padding: 6px 0;
 }
-
-/* 折叠切换 */
 .collapse-toggle {
   display: inline-flex;
   align-items: center;
@@ -427,14 +315,10 @@ watch(viewerVisible, v => {
 .arrow.up {
   border-bottom: 6px solid var(--el-color-primary, #409eff);
 }
-
-/* Viewer 背景微调 */
 :deep(.el-image-viewer__wrapper) {
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(2px);
 }
-
-/* 预览名称条 */
 .viewer-name-bar {
   position: fixed;
   top: 14px;
@@ -456,7 +340,6 @@ watch(viewerVisible, v => {
   font-weight: 500;
   letter-spacing: 0.5px;
 }
-
 .fdl-fade-enter-active,
 .fdl-fade-leave-active {
   transition: opacity 0.18s;
