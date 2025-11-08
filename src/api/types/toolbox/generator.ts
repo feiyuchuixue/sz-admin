@@ -86,6 +86,7 @@ export type GeneratorGeneratorInfo = {
   menuInitType: string;
   btnPermissionType: string;
   isAutofill: string;
+  btnDataScopeType: string;
 };
 
 export type GeneratorPreviewInfo = {

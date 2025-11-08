@@ -7,11 +7,19 @@
           <div class="template-meta">
             <div class="meta-row">
               <span class="meta-label">标识：</span>
-              <el-tag type="info" size="small" effect="plain">{{ parameter.alias }}</el-tag>
+              <el-tooltip :content="parameter.alias" effect="dark" placement="top">
+                <el-tag type="info" size="small" effect="plain">
+                  {{ parameter.alias }}
+                </el-tag>
+              </el-tooltip>
             </div>
             <div class="meta-row">
               <span class="meta-label">文件名：</span>
-              <el-tag type="info" size="small" effect="plain">{{ parameter.fileName }}</el-tag>
+              <el-tooltip :content="parameter.fileName" effect="dark" placement="top">
+                <el-tag type="info" size="small" effect="plain">
+                  {{ parameter.fileName }}
+                </el-tag>
+              </el-tooltip>
             </div>
             <div v-if="parameter.templateName && parameter.templateName !== parameter.fileName" class="meta-row">
               <span class="meta-label">展示名：</span>
@@ -112,6 +120,7 @@ const acceptParams = (params: ExcelParameterProps) => {
     throw new Error('ImportExcel 参数 alias 和 fileName 必填');
   }
   parameter.value = { ...parameter.value, ...params };
+  isCover.value = false; // 每次初始化时重置
   dialogVisible.value = true;
 };
 

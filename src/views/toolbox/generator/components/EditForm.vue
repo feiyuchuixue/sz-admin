@@ -326,7 +326,7 @@
       <div v-show="active === 2">
         <el-form
           ref="generatorFormRef"
-          label-width="140px"
+          label-width="180px"
           label-suffix=" :"
           :rules="generatorRules"
           :model="generatorInfo"
@@ -442,7 +442,7 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="24" v-if="generatorInfo.generateType == 'all'">
+            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
               <el-form-item label="生成按钮权限" prop="btnPermissionType" v-show="generatorInfo.menuInitType === '1'">
                 <template #label>
                   <el-space :size="4">
@@ -460,6 +460,27 @@
                 <el-radio-group v-model="generatorInfo.btnPermissionType">
                   <el-radio value="1"> 是 </el-radio>
                   <el-radio value="0"> 否 </el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
+              <el-form-item label="自动创建数据权限" prop="btnDataScopeType" v-show="generatorInfo.menuInitType === '1'">
+                <template #label>
+                  <el-space :size="4">
+                    <span>自动创建数据权限</span>
+                    <el-tooltip
+                      effect="dark"
+                      content="启用后将自动为菜单生成并开启数据权限控制。大多数 SQL 查询会受该权限影响，但特殊或复杂 SQL 场景下可能导致查询失效，请谨慎使用。"
+                      placement="top"
+                    >
+                      <i :class="'iconfont icon-yiwen'" />
+                    </el-tooltip>
+                  </el-space>
+                  <span>&nbsp;:</span>
+                </template>
+                <el-radio-group v-model="generatorInfo.btnDataScopeType">
+                  <el-radio value="1"> 开启 </el-radio>
+                  <el-radio value="0"> 关闭 </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
@@ -537,7 +558,8 @@ const generatorInfo = ref<GeneratorGeneratorInfo>({
   generateType: 'all',
   menuInitType: '1',
   btnPermissionType: '1',
-  isAutofill: '1'
+  isAutofill: '1',
+  btnDataScopeType: '1'
 });
 const isShowExcel = ref<boolean>(true);
 

@@ -132,7 +132,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     },
     width: 150
   },
-  { prop: 'createTime', label: '创建时间', width: 160 },
+  { prop: 'createTime', label: '创建时间' },
   {
     prop: 'updateId',
     label: '更新人',
@@ -145,7 +145,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     },
     width: 150
   },
-  { prop: 'updateTime', label: '更新时间', width: 80 },
+  { prop: 'updateTime', label: '更新时间' },
   { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
 ];
 // 搜索条件项
