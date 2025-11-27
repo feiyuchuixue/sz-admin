@@ -692,12 +692,26 @@ defineExpose({ acceptParams });
     height: 80vh;
     min-height: 600px;
     padding: 32px 32px 0 32px;
-    background: #fafbfc;
+    background: var(--el-bg-color, #fafbfc); /* 亮暗模式自适应 */
+    transition: background 0.2s;
+
+    // dialog边框色
+    border-radius: 12px;
+    border: 1px solid var(--el-border-color, #f0f0f0);
+    box-shadow: 0 8px 40px 0 var(--el-box-shadow-color, rgba(0, 0, 0, 0.17));
   }
   .role-base-form {
     flex-shrink: 0;
     margin-bottom: 18px;
     background: transparent;
+    .el-form-item__label {
+      color: var(--el-text-color-primary, #222);
+    }
+    .el-input__inner {
+      background: var(--el-fill-color-blank, #fff);
+      color: var(--el-text-color-regular, #222);
+      border-color: var(--el-border-color, #e4e7ed);
+    }
   }
   .permission-content-area {
     flex: 1 1 0;
@@ -707,37 +721,55 @@ defineExpose({ acceptParams });
     .menu-sidebar {
       width: 260px;
       min-width: 180px;
-      background: #fff;
+      background: var(--el-bg-color-overlay, #fff);
       border-radius: 8px;
       margin-right: 32px;
-      padding: 12px 0 12px 0;
-      border: 1px solid #f0f0f0;
+      padding: 12px 0;
+      border: 1px solid var(--el-border-color, #f0f0f0);
+      box-shadow: 1px 0 8px 0 var(--el-box-shadow-light, rgba(64, 158, 255, 0.04));
       display: flex;
       flex-direction: column;
       overflow: auto;
       max-height: 100%;
       min-height: 0;
-      box-shadow: 1px 0 8px 0 rgba(64, 158, 255, 0.04);
+
+      /* ------ 修改开始 ------ */
       .sidebar-header {
         display: flex;
+        flex-wrap: wrap; // 允许内容自动换行
         align-items: center;
-        justify-content: space-between;
-        padding: 0 18px 10px 18px;
+        justify-content: flex-start;
+        padding: 0 16px 10px 16px; // 左右都留空，原来是18px，略微收窄也可
         border-bottom: 1px solid #f4f4f4;
         margin-bottom: 10px;
+
         .sidebar-title {
           font-weight: bold;
           color: #222;
+          margin-right: 16px; // 标题与后方内容分隔
+          flex-shrink: 0; // 标题不压缩
         }
-        .sidebar-actions .el-link {
-          margin-left: 8px;
+        .sidebar-actions {
+          display: flex;
+          flex-wrap: wrap; // 多内容自动换行
+          align-items: center;
+          gap: 8px;
+          min-width: 0; // 允许内容收缩
+          .el-link {
+            margin-left: 0; // 去掉左间距
+            color: var(--el-color-primary);
+          }
+        }
+        .el-input {
+          margin-left: 12px;
         }
       }
+      /* ------ 修改结束 ------ */
+
       .menu-tree {
-        flex: 1 1 0;
-        padding-right: 4px;
         .el-tree-node__content {
-          padding: 3px 0 3px 0;
+          padding: 3px 0;
+          color: var(--el-text-color-regular, #444);
         }
         .tree-node {
           display: flex;
@@ -746,20 +778,25 @@ defineExpose({ acceptParams });
           border-radius: 5px;
           padding: 3px 8px;
           margin-bottom: 2px;
+          color: var(--el-text-color-regular, #222);
+          background: transparent;
+          transition:
+            background 0.2s,
+            border 0.2s;
           &.selectable:hover {
-            background: #f3f6fb;
+            background: var(--el-fill-color-light, #25272b);
           }
           &.selected {
-            background: #e6f7ff;
-            border-left: 4px solid #409eff;
+            background: var(--el-color-primary-light-9, #e6f7ff);
+            border-left: 4px solid var(--el-color-primary, #409eff);
             font-weight: 500;
+            color: var(--el-color-primary, #409eff);
           }
           .menu-config-dot {
-            display: inline-block;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #409eff;
+            background: var(--el-color-primary, #409eff);
             margin-right: 6px;
             vertical-align: middle;
           }
@@ -771,6 +808,8 @@ defineExpose({ acceptParams });
             line-height: 18px;
             vertical-align: middle;
             border-radius: 8px;
+            background: var(--el-bg-color-page, #e6fffa);
+            color: var(--el-color-success, #67c23a);
           }
         }
       }
@@ -778,36 +817,26 @@ defineExpose({ acceptParams });
     .menu-permission-card {
       flex: 1 1 0;
       min-width: 400px;
-      background: #fff;
+      background: var(--el-bg-color-overlay, #fff);
       border-radius: 8px;
-      border: 1px solid #f0f0f0;
+      border: 1px solid var(--el-border-color, #f0f0f0);
       padding: 24px 30px 10px 30px;
-      display: flex;
-      flex-direction: column;
-      overflow: auto;
-      max-height: 100%;
-      min-height: 0;
-      box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.03);
+      box-shadow: 0 1px 8px 0 var(--el-box-shadow-color, rgba(0, 0, 0, 0.05));
+      color: var(--el-text-color-primary, #333);
       .menu-title-row {
         font-size: 16px;
         font-weight: 600;
         margin-bottom: 18px;
-        color: #333;
       }
       .label-row {
         font-size: 14px;
         margin-bottom: 8px;
-        color: #444;
         display: flex;
         align-items: center;
-        .el-link {
-          margin-left: 8px;
-        }
       }
       .divider-line {
-        border-top: 1px dashed #e0e0e0;
+        border-top: 1px dashed var(--el-border-color-light, #3d4148);
         margin: 8px 0 10px 0;
-        width: 100%;
       }
       .menu-buttons-row {
         margin-bottom: 18px;
@@ -815,16 +844,15 @@ defineExpose({ acceptParams });
           display: flex;
           flex-wrap: wrap;
           gap: 18px 32px;
+          .el-checkbox {
+            --el-checkbox-checked-bg-color: var(--el-color-primary, #409eff);
+            --el-checkbox-checked-border-color: var(--el-color-primary, #409eff);
+            color: var(--el-color-primary, #409eff);
+          }
         }
-      }
-      .menu-data-row {
-        margin-bottom: 12px;
       }
       .menu-status-row {
         margin-top: 18px;
-        .el-tag {
-          margin-right: 8px;
-        }
       }
       .data-scope-tag {
         font-size: 12px;
@@ -836,24 +864,17 @@ defineExpose({ acceptParams });
       }
       .no-data-scope-tip {
         margin: 24px 0;
+        color: var(--el-text-color-disabled, #bbb);
       }
     }
   }
   .el-dialog__footer {
-    flex-shrink: 0;
+    background: var(--el-bg-color, #fafbfc);
+    border-top: 1px solid var(--el-border-color, #f0f0f0);
     padding: 18px 32px 24px 32px;
-    border-top: 1px solid #f0f0f0;
-    background: #fafbfc;
     .el-button + .el-button {
       margin-left: 10px;
     }
-  }
-  .tree-container {
-    height: 300px;
-    overflow-y: scroll;
-  }
-  .min-header {
-    min-height: 50px;
   }
   .permission-checkbox-group {
     display: flex;
@@ -866,6 +887,9 @@ defineExpose({ acceptParams });
     align-items: center;
     margin-bottom: 6px;
     min-width: 220px;
+    .el-checkbox__label {
+      color: var(--el-text-color-regular, #222) !important;
+    }
   }
   .permission-tag {
     margin-left: 6px;
@@ -874,27 +898,36 @@ defineExpose({ acceptParams });
     font-weight: bold;
     letter-spacing: 0.5px;
     padding: 0 5px;
-    background: #e6f7ff;
-    color: #096dd9;
-    border: 1px solid #91d5ff;
+    background: var(--el-bg-color-page, #e6f7ff);
+    color: var(--el-color-primary, #409eff);
+    border: 1px solid var(--el-color-primary-light-7, #91d5ff);
   }
 }
 
+// 覆盖 element-plus button: dark-模式主色等
+:deep(.el-button--primary) {
+  background: var(--el-color-primary, #409eff);
+  border-color: var(--el-color-primary, #409eff);
+}
+
+:deep(.el-link) {
+  color: var(--el-color-primary) !important;
+}
 :deep(.checkbox-primary-style) {
-  --el-checkbox-checked-bg-color: #409eff;
-  --el-checkbox-checked-border-color: #409eff;
-  color: #409eff;
+  --el-checkbox-checked-bg-color: var(--el-color-primary, #409eff);
+  --el-checkbox-checked-border-color: var(--el-color-primary, #409eff);
+  color: var(--el-color-primary, #409eff);
 }
 :deep(.checkbox-primary-style .el-checkbox__label),
 :deep(.checkbox-primary-style.is-checked .el-checkbox__label) {
-  color: #409eff !important;
+  color: var(--el-color-primary, #409eff) !important;
   transition:
     color 0.2s,
     text-decoration-color 0.2s;
 }
 :deep(.checkbox-primary-style .el-checkbox__label:hover) {
-  color: #1976d2 !important;
+  color: var(--el-color-primary-dark-2, #1976d2) !important;
   text-decoration: underline;
-  text-decoration-color: #1976d2;
+  text-decoration-color: var(--el-color-primary-dark-2, #1976d2);
 }
 </style>

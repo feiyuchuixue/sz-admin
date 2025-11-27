@@ -347,4 +347,47 @@ const filterDeptNode = (value: string, data: any) => {
     }
   }
 }
+
+/* ===== 暗黑模式覆盖区块（放最后，专用于穿透ElementPlus暗黑主题）===== */
+:deep(.el-card) {
+  background: var(--el-bg-color-overlay, #202127) !important;
+  border-color: var(--el-border-color, #23272e) !important;
+  color: var(--el-text-color-primary, #e0e0e0);
+}
+:deep(.tree-container),
+:deep(.user-tree-container),
+:deep(.dept-tree-container) {
+  background: var(--el-bg-color-overlay, #181a20) !important;
+  border-color: var(--el-border-color, #2c2c2c) !important;
+  color: var(--el-text-color-primary, #e0e0e0);
+}
+:deep(.el-tree) {
+  background: var(--el-bg-color-overlay, #181a20) !important;
+  color: var(--el-text-color-regular, #e0e0e0) !important;
+}
+:deep(.el-tree-node__content) {
+  background: var(--el-bg-color-overlay, #181a20) !important;
+  color: var(--el-text-color-regular, #e0e0e0) !important;
+}
+:deep(.el-input__inner),
+:deep(.el-select__input) {
+  background: var(--el-fill-color-blank, #191a20) !important;
+  color: var(--el-text-color-regular, #d3d7db) !important;
+  border-color: var(--el-border-color, #363636) !important;
+}
+:deep(.el-input__prefix) {
+  color: var(--el-color-primary);
+}
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  border-color: var(--el-color-primary, #49b1fa) !important;
+  background-color: var(--el-color-primary, #49b1fa) !important;
+}
+:deep(.el-checkbox__label) {
+  color: var(--el-text-color-regular, #e0e0e0) !important;
+}
+:deep(.el-alert) {
+  background: var(--el-bg-color-overlay, #222) !important;
+  color: var(--el-text-color-primary, #d3d7db) !important;
+  border-color: var(--el-border-color, #23272e) !important;
+}
 </style>
