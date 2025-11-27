@@ -385,9 +385,4 @@ const filterDeptNode = (value: string, data: any) => {
 :deep(.el-checkbox__label) {
   color: var(--el-text-color-regular, #e0e0e0) !important;
 }
-:deep(.el-alert) {
-  background: var(--el-bg-color-overlay, #222) !important;
-  color: var(--el-text-color-primary, #d3d7db) !important;
-  border-color: var(--el-border-color, #23272e) !important;
-}
 </style>
