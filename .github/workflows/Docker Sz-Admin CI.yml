@@ -13,34 +13,24 @@ jobs:
     env:
       # 项目服务名（容器名）
       APP_NAME: sz-admin
-
       # 应用运行环境
       RUNNING_ACTIVE: preview
-
       # 服务监听端口（注意需与 Dockerfile 中 EXPOSE 保持一致）
       SERVICE_PORT: 9800
-
       # 可选：nginx配置目录（挂载到容器的 /etc/nginx/conf.d）
       NGINX_CONF_DIR: /home/conf/sz-admin-nginx/conf.d
-
       # 阿里云 Docker 仓库域名
       ACR_DOMAIN: registry.cn-beijing.aliyuncs.com
-
       # 阿里云命名空间（仓库分组）
       ACR_ZONE: sz-action
-
       # 镜像版本号（预览环境固定为 latest）
       VERSION: latest
-
       # 可选：容器启动脚本存放目录
       SHELL_RUN_DIR: /home/run
-
       # 前端预览环境标识（某些 feature 会被禁用）
       VITE_PREVIEW: true
-
       # 可选：docker-compose 目录路径
       DOCKER_COMPOSE_PATH: /home/docker-compose/sz-admin
-
     steps:
       # 1. 拉取代码
       - name: Checkout source code
