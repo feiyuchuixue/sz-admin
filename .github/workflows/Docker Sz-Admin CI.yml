@@ -84,6 +84,9 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           password: ${{ secrets.REMOTE_PASSWORD }}
           script: |
+            ll
+            pwd
+            ls
             cd ${{ env.DOCKER_COMPOSE_PATH }}
             bash upgrade.sh
 
