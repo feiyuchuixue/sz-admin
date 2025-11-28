@@ -213,14 +213,14 @@ watch(
     :deep(.el-tabs__content) {
       height: calc(70vh - 54px);
       overflow-y: auto;
+      background: var(--el-bg-color, #fff);
     }
   }
-
   .right {
     flex: none;
     width: 260px;
-    background-color: #fafafa;
-    border-left: 1px solid #ebeef5;
+    background-color: var(--el-bg-color, #fafafa);
+    border-left: 1px solid var(--el-border-color, #ebeef5);
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -236,7 +236,7 @@ watch(
       .el-card__header {
         font-weight: 300;
         font-size: 14px;
-        color: #333;
+        color: var(--el-text-color-regular, #333);
         padding: 0 0 8px;
       }
 
@@ -246,6 +246,9 @@ watch(
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        background-color: var(--el-tag-bg-color, #f0f2f5);
+        color: var(--el-tag-text-color, #333);
+        border: none;
       }
     }
   }
@@ -256,5 +259,49 @@ watch(
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  background: var(--el-tag-bg-color, #f0f2f5);
+  color: var(--el-tag-text-color, #333);
+}
+
+/* 暗黑模式适配 */
+:deep(.el-dialog) {
+  background: var(--el-bg-color-page, #181818);
+  color: var(--el-text-color-primary, #e5eaf3);
+}
+:deep(.el-card) {
+  background: var(--el-bg-color-page, #181818) !important;
+}
+
+:deep(.el-tag) {
+  background: #222;
+  color: #e5eaf3;
+}
+
+[data-theme='dark'] .choose-box,
+.dark .choose-box {
+  .choose-main-box {
+    :deep(.el-tabs__content) {
+      background: #181818;
+    }
+  }
+  .right {
+    background: #222;
+    border-left: 1px solid #444;
+    .el-card {
+      .el-card__header {
+        color: #bfbfbf;
+      }
+      .el-tag {
+        background: #333;
+        color: #e5eaf3;
+      }
+    }
+  }
+}
+
+[data-theme='dark'] .choose-tag,
+.dark .choose-tag {
+  background: #333 !important;
+  color: #e5eaf3 !important;
 }
 </style>

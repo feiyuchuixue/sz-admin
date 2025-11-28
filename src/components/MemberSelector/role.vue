@@ -173,10 +173,94 @@ defineExpose({
   flex-direction: column;
   height: 55vh;
   min-height: 400px;
-  background: #fff;
+  background: #fff; // 仅亮色，暗色会被覆盖
 }
 .fixed-table {
   flex: 1 1 auto;
   overflow-y: auto;
+}
+
+/* 暗黑模式下样式，仅当[data-theme=dark]或.dark触发 */
+[data-theme='dark'] .table-pagination-wrapper,
+.dark .table-pagination-wrapper {
+  background: #222 !important;
+}
+
+[data-theme='dark'] .el-table,
+.dark .el-table {
+  background: #212121 !important;
+  color: #e5eaf3 !important;
+}
+
+[data-theme='dark'] .el-table__cell,
+.dark .el-table__cell {
+  background: #212121 !important;
+  color: #e5eaf3 !important;
+  border-color: #333 !important;
+}
+
+[data-theme='dark'] .el-table__header,
+[data-theme='dark'] .el-table__body,
+.dark .el-table__header,
+.dark .el-table__body {
+  background: #212121 !important;
+}
+
+[data-theme='dark'] .el-input__inner,
+.dark .el-input__inner {
+  background: #232323 !important;
+  color: #e5eaf3 !important;
+  border: 1px solid #555 !important;
+}
+
+[data-theme='dark'] .el-button,
+.dark .el-button {
+  background: #232323 !important;
+  color: #e5eaf3 !important;
+  border: 1px solid #555 !important;
+}
+
+[data-theme='dark'] .el-pagination,
+.dark .el-pagination {
+  background: #181818 !important;
+  color: #e5eaf3 !important;
+  border-top: 1px solid #222 !important;
+}
+[data-theme='dark'] .el-pagination .el-pager li,
+.dark .el-pagination .el-pager li {
+  background: #222 !important;
+  color: #e5eaf3 !important;
+}
+[data-theme='dark'] .el-pagination.is-background .el-pager li:not(.disabled).active,
+.dark .el-pagination.is-background .el-pager li:not(.disabled).active {
+  background: #409eff !important;
+  color: #fff !important;
+}
+[data-theme='dark'] .el-pagination__jump,
+.dark .el-pagination__jump {
+  color: #e5eaf3 !important;
+}
+[data-theme='dark'] .el-pagination__editor,
+.dark .el-pagination__editor {
+  background-color: #232323 !important;
+  color: #e5eaf3 !important;
+  border: 1px solid #333 !important;
+}
+[data-theme='dark'] .el-pagination__editor.el-input .el-input__inner,
+.dark .el-pagination__editor.el-input .el-input__inner {
+  background: #232323 !important;
+  color: #e5eaf3 !important;
+  border: 1px solid #555 !important;
+}
+[data-theme='dark'] .el-pagination .el-select .el-input__wrapper,
+.dark .el-pagination .el-select .el-input__wrapper {
+  background: #232323 !important;
+  border: 1px solid #333 !important;
+}
+[data-theme='dark'] .el-pagination .btn-next,
+[data-theme='dark'] .el-pagination .btn-prev,
+.dark .el-pagination .btn-next,
+.dark .el-pagination .btn-prev {
+  color: #e5eaf3 !important;
 }
 </style>
