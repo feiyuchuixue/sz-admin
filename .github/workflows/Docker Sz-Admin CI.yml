@@ -26,6 +26,8 @@ jobs:
       SHELL_RUN_DIR: /home/run
       # 预览环境标识（预览环境某些功能将禁用）
       VITE_PREVIEW: true
+      # docker compose 路径
+      DOCKER_COMPOSE_PATH: /home/docker-compose/sz-admin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,12 +51,14 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
+      # 可选：如果使用 自动发布，则执行下面的步骤
       - name: Check if default.conf exists on remote
         id: check-file
         run: |
           file_exists=$(sshpass -p ${{ secrets.REMOTE_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "if [ -f ${{ env.NGINX_CONF_DIR }}/default.conf ]; then echo true; else echo false; fi")
           echo "file_exists=$file_exists" >> $GITHUB_ENV
 
+        # 可选：如果使用 自动发布，则执行下面的步骤
       - name: Upload default.conf if needed
         if: ${{ env.file_exists == 'false' }}
         run: sshpass -p ${{ secrets.REMOTE_PASSWORD }} scp -o StrictHostKeyChecking=no ./nginx/default.conf ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ env.NGINX_CONF_DIR }}
@@ -68,9 +72,11 @@ jobs:
       - name: Tag Docker image
         run: docker tag ${{ env.APP_NAME }}:${{ env.VERSION }} ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
 
+      # 推送 Docker 镜像到 ACR，如果无需自动发布，脚本执行到这里就可以停止了。在目标服务器上手动拉取镜像并运行容器即可。
       - name: Push Docker image to ACR
         run: docker push ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
 
+      # 如果使用 docker compose 部署，并进行自动发布，则执行下面的步骤
       - name: Deploy to remote server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -78,29 +84,40 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           password: ${{ secrets.REMOTE_PASSWORD }}
           script: |
-            docker pull ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
+            cd ${{ env.DOCKER_COMPOSE_PATH }}
+            bash upgrade.sh
 
-            echo "==================== 生成启动命令脚本 ===================="
-            mkdir -p ${{ env.SHELL_RUN_DIR }}
-            START_SCRIPT="${{ env.SHELL_RUN_DIR }}/docker_run_${{ env.APP_NAME }}_${{ env.RUNNING_ACTIVE }}.sh"
-            cat > $START_SCRIPT <<EOL
-            #!/bin/bash
-              echo "==================== 停止旧应用容器 ===================="
-              docker stop ${{ env.APP_NAME }} || true
-              docker rm ${{ env.APP_NAME }} || true
-              docker image prune -f
-              docker builder prune -f
-              echo "==================== 启动应用容器 ===================="
-              docker run -itd \\
-              --name ${{ env.APP_NAME }} \\
-              --restart always \\
-              -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \\
-              -e TZ=Asia/Shanghai \\
-              -v ${{ env.NGINX_CONF_DIR }}:/etc/nginx/conf.d \\
-              ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
-            EOL
-            chmod +x $START_SCRIPT
-            echo "启动脚本已生成：$START_SCRIPT"
-            echo "可以运行以下命令手动启动容器："
-            echo "bash $START_SCRIPT"
-            bash $START_SCRIPT
+      # 如果使用 docker 部署，并进行自动发布，则执行下面的步骤
+#      - name: Deploy to remote server
+#        uses: appleboy/ssh-action@v1.2.0
+#        with:
+#          host: ${{ secrets.REMOTE_HOST }}
+#          username: ${{ secrets.REMOTE_USER }}
+#          password: ${{ secrets.REMOTE_PASSWORD }}
+#          script: |
+#            docker pull ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
+#
+#            echo "==================== 生成启动命令脚本 ===================="
+#            mkdir -p ${{ env.SHELL_RUN_DIR }}
+#            START_SCRIPT="${{ env.SHELL_RUN_DIR }}/docker_run_${{ env.APP_NAME }}_${{ env.RUNNING_ACTIVE }}.sh"
+#            cat > $START_SCRIPT <<EOL
+#            #!/bin/bash
+#              echo "==================== 停止旧应用容器 ===================="
+#              docker stop ${{ env.APP_NAME }} || true
+#              docker rm ${{ env.APP_NAME }} || true
+#              docker image prune -f
+#              docker builder prune -f
+#              echo "==================== 启动应用容器 ===================="
+#              docker run -itd \\
+#              --name ${{ env.APP_NAME }} \\
+#              --restart always \\
+#              -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \\
+#              -e TZ=Asia/Shanghai \\
+#              -v ${{ env.NGINX_CONF_DIR }}:/etc/nginx/conf.d \\
+#              ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
+#            EOL
+#            chmod +x $START_SCRIPT
+#            echo "启动脚本已生成：$START_SCRIPT"
+#            echo "可以运行以下命令手动启动容器："
+#            echo "bash $START_SCRIPT"
+#            bash $START_SCRIPT
