@@ -2,6 +2,7 @@ import type { VNode, ComponentPublicInstance, Ref } from 'vue';
 import type { BreakPoint, Responsive } from '@/components/Grid/interface';
 import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults';
 import ProTable from '@/components/ProTable/index.vue';
+import type { DefaultRow } from 'element-plus/es/components/table/src/table/defaults';
 
 export interface ProTableProps {
   columns: ColumnProps[]; // 列配置项  ==> 必传
@@ -16,8 +17,8 @@ export interface ProTableProps {
   initParam?: any; // 初始化请求参数 ==> 非必传（默认为{}）
   border?: boolean; // 是否带有纵向边框 ==> 非必传（默认为true）
   toolButton?: ('refresh' | 'setting' | 'search')[] | boolean; // 是否显示表格功能按钮 ==> 非必传（默认为true）
-  rowKey?: string; // 行数据的 Key，用来优化 Table 的渲染，当表格数据多选时，所指定的 id ==> 非必传（默认为 id）
-  searchCol?: number | Record<BreakPoint, number>; // 表格搜索项 每列占比配置 ==> 非必传 { xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }
+  rowKey: string; // 行数据的 Key，用来优化 Table 的渲染，当表格数据多选时，所指定的 id ==> 非必传（默认为 id）
+  searchCol?: number | Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', number>; // 表格搜索项 每列占比配置 ==> 非必传 { xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }
   loadingTime?: number; // 表格数据加载时间 ==> 非必传（默认为200）
 }
 
@@ -77,21 +78,22 @@ export type FieldNamesProps = {
   children?: string;
 };
 
-export type RenderScope<T> = {
+export type RenderScope<T = any> = {
   row: T;
   $index: number;
-  column: TableColumnCtx<T>;
+  column: TableColumnCtx<T & DefaultRow>;
   [key: string]: any;
 };
 
-export type HeaderRenderScope<T> = {
+export type HeaderRenderScope<T = any> = {
   $index: number;
-  column: TableColumnCtx<T>;
+  column: TableColumnCtx<T & DefaultRow>;
   [key: string]: any;
 };
 
-export interface ColumnProps<T = any>
-  extends Partial<Omit<TableColumnCtx<T>, 'type' | 'children' | 'renderCell' | 'renderHeader'>> {
+export interface ColumnProps<T = any> extends Partial<
+  Omit<TableColumnCtx<T & DefaultRow>, 'type' | 'children' | 'renderCell' | 'renderHeader'>
+> {
   type?: TypeProps; // 列类型
   tag?: boolean | Ref<boolean>; // 是否是标签展示
   tagLimit?: number; // 标签展示时，最多显示多少个标签，超过的会被隐藏, -1 为不限制
