@@ -41,6 +41,12 @@ importers:
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
+      jodit:
+        specifier: ^4.7.9
+        version: 4.7.9
+      lodash.merge:
+        specifier: ^4.6.2
+        version: 4.6.2
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
@@ -81,6 +87,9 @@ importers:
       '@tsconfig/node18':
         specifier: ^18.2.6
         version: 18.2.6
+      '@types/lodash.merge':
+        specifier: ^4.6.9
+        version: 4.6.9
       '@types/node':
         specifier: ^18.19.130
         version: 18.19.130
@@ -797,6 +806,9 @@ packages:
 
   '@types/lodash-es@4.17.12':
     resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
+
+  '@types/lodash.merge@4.6.9':
+    resolution: {integrity: sha512-23sHDPmzd59kUgWyKGiOMO2Qb9YtqRO/x4IhkgNUiPQ1+5MUVqi6bCZeq9nBJ17msjIMbEIO5u+XW4Kz6aGUhQ==}
 
   '@types/lodash@4.17.21':
     resolution: {integrity: sha512-FOvQ0YPD5NOfPgMzJihoT+Za5pdkDJWcbpuj1DjaKZIr/gxodQjY/uWEFlTNqW2ugXHUiL8lRQgw63dzKHZdeQ==}
@@ -2061,6 +2073,9 @@ packages:
   isobject@3.0.1:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
+
+  jodit@4.7.9:
+    resolution: {integrity: sha512-dPlewnu2+vVXELh9BEJTNQoSBL3Cf2E0fNh30yjSEgUtJHYSUYToDjMDEqr0T/L9iNpqPTODy2b4pzyGpPRUog==}
 
   js-base64@2.6.4:
     resolution: {integrity: sha512-pZe//GGmwJndub7ZghVHz7vjb2LgC1m8B07Au3eYqeqv9emhESByMXxaEgkUkEqJe87oBbSniGYoQNIBklc7IQ==}
@@ -3602,6 +3617,10 @@ snapshots:
     dependencies:
       '@types/lodash': 4.17.21
 
+  '@types/lodash.merge@4.6.9':
+    dependencies:
+      '@types/lodash': 4.17.21
+
   '@types/lodash@4.17.21': {}
 
   '@types/node-forge@1.3.14':
@@ -5126,6 +5145,8 @@ snapshots:
       isarray: 1.0.0
 
   isobject@3.0.1: {}
+
+  jodit@4.7.9: {}
 
   js-base64@2.6.4: {}
 
