@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="580px" draggable>
+  <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="880px" draggable>
     <el-form
       ref="ruleFormRef"
       label-width="140px"
@@ -70,6 +70,9 @@
           @all-success="handleAllSuccess"
         />
       </el-form-item>
+      <el-form-item label="内容" prop="contentHtml">
+        <jodit-editor v-model="paramsProps.row.contentHtml" :upload-dir="'teacher/aabb'" />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false"> 取消 </el-button>
@@ -84,6 +87,7 @@ import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import UploadFiles from '@/components/Upload/UploadFiles.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
+import JoditEditor from '@/components/JoditEditor/index.vue';
 
 defineOptions({
   name: 'TeacherStatisticsForm'

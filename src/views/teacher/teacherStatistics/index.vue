@@ -42,12 +42,14 @@
         >
           编辑
         </el-button>
+        <el-button type="primary" link @click="openContent('演示：富文本内容详情', row, false)"> 预览HTML </el-button>
         <el-button v-auth="'teacher.statistics.remove'" type="primary" link :icon="Delete" @click="deleteInfo(row)">
           删除
         </el-button>
       </template>
     </ProTable>
     <TeacherStatisticsForm ref="teacherStatisticsRef" />
+    <TeacherStatisticsContentForm ref="teacherStatisticsContentRef" />
     <ImportExcel ref="ImportExcelRef" />
   </div>
 </template>
@@ -78,7 +80,7 @@ import RemoteSearchSelect from '@/components/RemoteSearchSelect/index.vue';
 import { useDict } from '@/hooks/useDict';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
-
+import TeacherStatisticsContentForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsContentForm.vue';
 defineOptions({
   name: 'TeacherStatisticsView'
 });
@@ -255,6 +257,22 @@ const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   };
   teacherStatisticsRef.value?.acceptParams(params);
 };
+
+const teacherStatisticsContentRef = ref<InstanceType<typeof TeacherStatisticsContentForm>>();
+const openContent = async (title: string, row: any = {}, isAdd = true) => {
+  if (!isAdd) {
+    const record = await getTeacherStatisticsDetailApi({ id: row?.id });
+    row = record?.data;
+  }
+  const params = {
+    title,
+    row: { ...row },
+    api: isAdd ? createTeacherStatisticsApi : updateTeacherStatisticsApi,
+    getTableList: proTableRef.value?.getTableList
+  };
+  teacherStatisticsContentRef.value?.acceptParams(params);
+};
+
 // 删除信息
 const deleteInfo = async (params: TeacherStatisticsRow) => {
   await useHandleData(removeTeacherStatisticsApi, { ids: [params.id] }, `删除【${params.id}】教师统计`);
