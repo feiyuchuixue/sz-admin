@@ -1,0 +1,16 @@
+/* Jodit 富文本编辑器内容格式化样式，处理v-html回显时的内容溢出问题 */
+.rich-content,
+.jodit-wysiwyg,
+.jodit-wysiwyg pre,
+.jodit-wysiwyg code,
+.jodit-wysiwyg table {
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-all; /* 英文与长单词强制断行 */
+  overflow-wrap: break-word; /* 超长内容自动断行 */
+}
+.rich-content pre,
+.rich-content code {
+  white-space: pre-wrap; /* 保持格式又可以多行显示 */
+  overflow-x: auto; /* 超长内容出现滚动条 */
+}

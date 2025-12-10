@@ -12,3 +12,8 @@ body,
 :-webkit-any(article, aside, nav, section) h1 {
   font-size: 2em;
 }
+
+/* 解决图片超出容器问题 */
+img {
+  max-width: 100%;
+}

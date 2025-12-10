@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="580px" draggable>
+  <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" :width="dialogWidth" draggable>
     <el-form
       ref="ruleFormRef"
       label-width="140px"
@@ -70,6 +70,14 @@
           @all-success="handleAllSuccess"
         />
       </el-form-item>
+      <el-form-item label="内容" prop="contentHtml">
+        <jodit-editor
+          v-model="paramsProps.row.contentHtml"
+          :upload-dir="'teacher/aabb'"
+          :height="'400px'"
+          style="width: 100%; max-width: 100%; box-sizing: border-box"
+        />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false"> 取消 </el-button>
@@ -84,10 +92,13 @@ import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import UploadFiles from '@/components/Upload/UploadFiles.vue';
 import type { IUploadResult } from '@/api/types/system/upload';
+import JoditEditor from '@/components/JoditEditor/index.vue';
+import { useDialogWidth } from '@/hooks/useDialogWidth';
 
 defineOptions({
   name: 'TeacherStatisticsForm'
 });
+const dialogWidth = useDialogWidth();
 const accountStatus = useDictOptions('account_status');
 
 const rules = reactive({
