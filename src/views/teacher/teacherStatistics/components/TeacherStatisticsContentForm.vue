@@ -1,7 +1,7 @@
 <template>
   <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="880px" draggable>
     <el-form label-width="140px" label-suffix=" :" :model="paramsProps.row">
-      <div v-html="paramsProps.row.contentHtml"></div>
+      <div v-html="paramsProps.row.contentHtml" class="rich-content"></div>
     </el-form>
   </el-dialog>
 </template>
