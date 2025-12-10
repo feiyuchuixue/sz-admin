@@ -14,15 +14,3 @@
   white-space: pre-wrap; /* 保持格式又可以多行显示 */
   overflow-x: auto; /* 超长内容出现滚动条 */
 }
-.rich-content table {
-  table-layout: auto;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  display: block; /* 行内表格溢出可横向滚动 */
-}
-.rich-content img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
