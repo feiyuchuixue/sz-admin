@@ -14,7 +14,7 @@ export function useDialogWidth(width?: string): Ref<string> {
     } else if (winW < 1000) {
       dialogWidth.value = '75vw';
     } else {
-      dialogWidth.value = '55vw';
+      dialogWidth.value = '65vw';
     }
   }
 
