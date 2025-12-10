@@ -71,7 +71,7 @@
         />
       </el-form-item>
       <el-form-item label="内容" prop="contentHtml">
-        <jodit-editor v-model="paramsProps.row.contentHtml" :upload-dir="'teacher/aabb'" />
+        <jodit-editor v-model="paramsProps.row.contentHtml" :upload-dir="'teacher/aabb'" :height="'400px'" />
       </el-form-item>
     </el-form>
     <template #footer>

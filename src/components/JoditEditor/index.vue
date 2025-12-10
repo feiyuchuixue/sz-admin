@@ -29,13 +29,15 @@ interface Props {
   config?: DeepPartial<Config>;
   plugins?: Plugin[];
   uploadDir?: string; // （当有文件资源时的）上传目录
+  height?: string; // 编辑器高度
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   config: () => ({}),
   plugins: () => [],
-  uploadDir: 'editor'
+  uploadDir: 'editor',
+  height: '400px'
 });
 
 const emits = defineEmits<{
@@ -50,8 +52,8 @@ const editorInstance = shallowRef<Jodit>(); // 可暴露实例
 defineExpose({ editorInstance });
 
 const defaultConfig: () => DeepPartial<Config> = () => ({
-  height: '400px',
   width: '100%',
+  height: props.height,
   placeholder: '请输入内容...',
   language: 'zh_cn',
   buttons: [
@@ -284,7 +286,6 @@ const initEditor = () => {
   const instance = Jodit.make(editorRef.value, {
     ...mergedConfig.value
   });
-
   // 核心 change 事件
   instance.events.on('change', (value: string) => {
     emits('update:modelValue', value);
@@ -329,6 +330,14 @@ watch(
   () => {
     destroyEditor();
     nextTick(() => initEditor());
+  }
+);
+watch(
+  () => props.height,
+  height => {
+    if (editorInstance.value) {
+      editorInstance.value.e.fire('setHeight', height);
+    }
   }
 );
 </script>
