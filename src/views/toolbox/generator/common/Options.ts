@@ -100,6 +100,10 @@ export const htmlTypeOptions: Options[] = [
     value: 'fileUpload'
   },
   {
+    label: 'jodit-editor',
+    value: 'jodit-editor'
+  },
+  {
     label: 'radio-group [未完待续]',
     value: 'radio-group'
   },
@@ -118,10 +122,6 @@ export const htmlTypeOptions: Options[] = [
   {
     label: 'imageUpload [未完待续]',
     value: 'imageUpload'
-  },
-  {
-    label: 'editor [未完待续]',
-    value: 'editor'
   }
 ];
 
