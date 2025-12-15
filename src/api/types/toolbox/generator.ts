@@ -87,6 +87,7 @@ export type GeneratorGeneratorInfo = {
   btnPermissionType: string;
   isAutofill: string;
   btnDataScopeType: string;
+  windowShowType: string;
 };
 
 export type GeneratorPreviewInfo = {

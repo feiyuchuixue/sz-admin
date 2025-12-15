@@ -120,6 +120,23 @@
                 <el-checkbox name="type" v-model="generatorInfo.isAutofill" true-value="1" false-value="0" />
               </el-form-item>
             </el-col>
+            <el-col :span="6">
+              <el-form-item prop="type">
+                <template #label>
+                  <el-space :size="4">
+                    <span>窗口展示方式</span>
+                    <el-tooltip effect="dark" content="控制详情页组件的窗口展示方式：弹窗、抽屉。" placement="top">
+                      <i :class="'iconfont icon-yiwen'" />
+                    </el-tooltip>
+                  </el-space>
+                  <span>&nbsp;:</span>
+                </template>
+                <el-radio-group v-model="generatorInfo.windowShowType">
+                  <el-radio value="0"> 弹窗Dialog </el-radio>
+                  <el-radio value="1"> 抽屉Drawer </el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
           </el-row>
         </div>
         <h4 class="form-header h4">配置字段</h4>
@@ -559,7 +576,8 @@ const generatorInfo = ref<GeneratorGeneratorInfo>({
   menuInitType: '1',
   btnPermissionType: '1',
   isAutofill: '1',
-  btnDataScopeType: '1'
+  btnDataScopeType: '1',
+  windowShowType: '0'
 });
 const isShowExcel = ref<boolean>(true);
 
