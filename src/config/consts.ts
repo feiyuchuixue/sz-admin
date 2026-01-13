@@ -22,6 +22,12 @@ export const CHANNEL_KICK_OFF: string = 'KICK_OFF';
 
 export const UPGRADE_CHANNEL: string = 'UPGRADE_CHANNEL';
 
+export const SYNC_FRONTEND_CONF: string = 'SYNC_FRONTEND_CONF';
+
+export const SYNC_DICT: string = 'SYNC_DICT';
+
+export const SYNC_PERMISSIONS: string = 'SYNC_PERMISSIONS';
+
 /**
  * 是否选项
  * @type {[Options,Options]}

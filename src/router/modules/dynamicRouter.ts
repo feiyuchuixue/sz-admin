@@ -4,6 +4,7 @@ import { useOptionsStore } from '@/stores/modules/options';
 import { LOGIN_URL } from '@/config';
 import router from '@/router';
 import type { RouteRecordRaw } from 'vue-router';
+import { useConfigStore } from '@/stores/modules/config';
 
 // 引入 views 文件夹下所有 vue 文件
 const modules = import.meta.glob('@/views/**/*.vue');
@@ -15,6 +16,7 @@ export const initDynamicRouter = async () => {
   const userStore = useUserStore();
   const authStore = useAuthStore();
   const optionsStore = useOptionsStore();
+  const configStore = useConfigStore();
 
   try {
     if (authStore.isLoaded) return;
@@ -25,6 +27,8 @@ export const initDynamicRouter = async () => {
     optionsStore.setReloadOptions();
     await optionsStore.getAllDictList();
     await authStore.setLoaded();
+    configStore.setReload();
+    await configStore.getConfig();
 
     // 2.判断当前用户有没有菜单权限
     // if (!authStore.authMenuListGet.length) {

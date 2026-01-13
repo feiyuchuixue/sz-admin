@@ -34,6 +34,7 @@ import ConfigEditForm from '@/views/system/configManage/components/ConfigEditFor
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { ConfigQuery, ConfigInfo } from '@/api/types/system/config';
 import { ref } from 'vue';
+import { yesNoOptions } from '@/config/consts';
 
 defineOptions({
   name: 'ConfigManage'
@@ -45,6 +46,7 @@ const columns: ColumnProps<ConfigInfo>[] = [
   { prop: 'configName', label: '参数名称' },
   { prop: 'configKey', label: 'Key', tag: true, width: 200 },
   { prop: 'configValue', label: 'Value' },
+  { prop: 'frontendVisible', label: '是否需要前端加载', enum: yesNoOptions, width: 160 },
   { prop: 'remark', label: '备注' },
   { prop: 'createTime', label: '创建时间' },
   { prop: 'updateTime', label: '修改时间' },
@@ -69,7 +71,8 @@ const openAddEdit = (title: string, row = {}, isAdd = true) => {
     title,
     row: { ...row },
     api: isAdd ? addConfig : editConfig,
-    getTableList: proTableRef.value?.getTableList
+    getTableList: proTableRef.value?.getTableList,
+    isAdd: isAdd
   };
   dictTypeRef.value?.acceptParams(params);
 };

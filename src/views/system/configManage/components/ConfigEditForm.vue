@@ -2,7 +2,7 @@
   <el-dialog v-model="visible" :title="`${paramsProps.title}`" :destroy-on-close="true" width="580px" draggable append-to-body>
     <el-form
       ref="ruleFormRef"
-      label-width="100px"
+      label-width="120px"
       label-suffix=" :"
       :rules="rules"
       :model="paramsProps.row"
@@ -13,7 +13,7 @@
           :disabled="paramsProps.row.isLock === 'T'"
           v-model="paramsProps.row.configName"
           placeholder="请填写参数名称"
-          clearable
+          clearablex
         />
       </el-form-item>
       <el-form-item label="Key" prop="configKey">
@@ -27,8 +27,13 @@
       <el-form-item label="Value" prop="configValue">
         <el-input v-model="paramsProps.row.configValue" placeholder="请填写Value" clearable />
       </el-form-item>
+      <el-form-item label="是否前端加载" prop="frontendVisible">
+        <el-select v-model="paramsProps.row.frontendVisible" clearable placeholder="请选择业务字典类型">
+          <el-option v-for="item in yesNoOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
+        <el-input v-model="paramsProps.row.remark" placeholder="请填写备注" :rows="6" type="textarea" clearable />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -42,6 +47,7 @@
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { IS_PREVIEW } from '@/config';
+import { yesNoOptions } from '@/config/consts';
 
 defineOptions({
   name: 'DictTypeForm'
@@ -50,7 +56,8 @@ defineOptions({
 const rules = reactive({
   configName: [{ required: true, message: '请填写参数类型' }],
   configKey: [{ required: true, message: '请填写Key' }],
-  configValue: [{ required: true, message: '请填写Value' }]
+  configValue: [{ required: true, message: '请填写Value' }],
+  frontendVisible: [{ required: true, message: '请选择业务字典类型' }]
 });
 
 const visible = ref(false);
@@ -64,6 +71,11 @@ const paramsProps = ref<View.DefaultParams>({
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
+  const isAdd = params.isAdd;
+  if (isAdd) {
+    // 新增时，设置默认值
+    paramsProps.value.row.frontendVisible = 'F';
+  }
   visible.value = true;
 };
 

@@ -38,3 +38,11 @@ export const editConfig = (params: ConfigForm) => {
 export const deleteConfig = (params: { ids: number[] }) => {
   return http.delete(ADMIN_MODULE + `/sys-config`, params);
 };
+
+/**
+ * 获取前端参数信息
+ * @returns {*}
+ */
+export const getFrontendConfig = () => {
+  return http.get<Record<string, string>>(ADMIN_MODULE + `/sys-config/frontend-configs`, {});
+};

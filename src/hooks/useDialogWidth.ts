@@ -1,7 +1,7 @@
 import { ref, onMounted, onUnmounted, type Ref } from 'vue';
 
 export function useDialogWidth(width?: string): Ref<string> {
-  const MAX_WIDTH = 800;
+  // const MAX_WIDTH = 800;
   const dialogWidth = ref('800px');
   function updateDialogWidth() {
     if (width) {
