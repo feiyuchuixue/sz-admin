@@ -68,7 +68,7 @@
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_PAGE">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_BTN">
           <el-form-item label="路由名称" prop="name">
             <template #label>
               <el-space :size="4">
@@ -87,7 +87,7 @@
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="paramsProps.row.menuTypeCd == MENU_PAGE">
+        <el-col :span="12" v-if="paramsProps.row.menuTypeCd !== MENU_BTN">
           <el-form-item label="路由地址" prop="path">
             <template #label>
               <el-space :size="4">
