@@ -42,7 +42,7 @@ import { useAuthStore } from '@/stores/modules/auth';
 import InfoDialog from './InfoDialog.vue';
 import PasswordDialog from './PasswordDialog.vue';
 import { Edit, SwitchButton, User } from '@element-plus/icons-vue';
-import { useSocketStore } from '@/stores/modules/socket';
+import { useSocketStore } from '@/stores/modules/socket/socket';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import defaultAvatar from '@/assets/images/avatar.gif';
 

@@ -16,7 +16,7 @@ import { computed, defineAsyncComponent } from 'vue';
 import Loading from '@/components/Loading/index.vue';
 import ThemeDrawer from '@/layouts/components/ThemeDrawer/index.vue';
 import { useAppStore } from '@/stores/modules/app';
-import { useSocketStore } from '@/stores/modules/socket';
+import { useSocketStore } from '@/stores/modules/socket/socket';
 
 defineOptions({
   name: 'LayoutAsync'

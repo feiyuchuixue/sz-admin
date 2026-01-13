@@ -7,7 +7,7 @@ import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL } from '@/api/helper';
 import type { IResultData } from '@/api/types';
 import { useUserStore } from '@/stores/modules/user';
 import { useAuthStore } from '@/stores/modules/auth';
-import { useSocketStore } from '@/stores/modules/socket';
+import { useSocketStore } from '@/stores/modules/socket/socket';
 import { ElMessage } from 'element-plus';
 
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
