@@ -50,14 +50,76 @@ const fieldNames = computed(() => {
 
 // 接收 enumMap (el 为 select-v2 需单独处理 enumData)
 const enumMap = inject('enumMap', ref(new Map()));
-const columnEnum = computed(() => {
-  let enumData = enumMap.value.get(props.column.prop) || props.column.enum;
-  if (!enumData) return [];
-  if (props.column.el === 'select-v2' && props.column.fieldNames) {
-    enumData = enumData.map((item: { [key: string]: any }) => {
-      return { ...item, label: item[fieldNames.value.label], value: item[fieldNames.value.value] };
-    });
+const resolveEnumFromColumn = (column: SearchProps): any[] => {
+  const src = column.enum;
+  if (!src) return [];
+
+  // Ref<EnumProps[]>
+  if (typeof src === 'object' && 'value' in src) {
+    return src.value || [];
   }
+
+  // 数组
+  if (Array.isArray(src)) {
+    return src;
+  }
+
+  // 函数（异步枚举），这里通常在 ProTable 里统一处理并塞入 enumMap
+  if (typeof src === 'function') {
+    console.warn('[SearchFormItem] enum is function, please resolve it in ProTable and provide via enumMap');
+    return [];
+  }
+
+  return [];
+};
+
+const columnEnum = computed(() => {
+  // 1. 优先使用搜索项自己写的 enum
+  let enumData: any[] = resolveEnumFromColumn(props.column);
+
+  // 2. 如果当前 column 没有 enum，再从 enumMap 里取通用配置（由 ProTable/columns 提供）
+  if ((!enumData || !enumData.length) && props.column.prop) {
+    const fromMap = (enumMap.value as Map<string, any[]>).get(props.column.prop);
+    if (fromMap) {
+      if (Array.isArray(fromMap)) {
+        enumData = fromMap;
+      } else {
+        console.warn('[SearchFormItem] enumMap value is not array', {
+          prop: props.column.prop,
+          value: fromMap
+        });
+      }
+    }
+  }
+
+  // 兜底：不是数组或为空直接返回 []
+  if (!Array.isArray(enumData) || !enumData.length) return [];
+
+  // 如果当前字段名是默认的 label/value，
+  //  但数据长得像 { id, codeName }，尝试自动映射一次
+  const { label, value } = fieldNames.value;
+  if (label === 'label' && value === 'value') {
+    const hasCodeNameIdShape = enumData.some((item: any) => 'codeName' in item && 'id' in item);
+
+    if (hasCodeNameIdShape) {
+      enumData = enumData.map((item: any) => ({
+        ...item,
+        label: item.codeName,
+        value: item.id
+      }));
+    }
+  }
+
+  // 3. 针对 select-v2，按 fieldNames 转成 Element Plus 需要的 { label, value }
+  if (props.column.el === 'select-v2') {
+    const { label: fLabel, value: fValue } = fieldNames.value;
+    enumData = enumData.map((item: Record<string, any>) => ({
+      ...item,
+      label: item[fLabel],
+      value: item[fValue]
+    }));
+  }
+
   return enumData;
 });
 
