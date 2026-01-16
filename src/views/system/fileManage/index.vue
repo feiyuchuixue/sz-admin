@@ -10,7 +10,7 @@
       row-key="id"
     >
       <template #url="{ row }">
-        <a :href="row.url" target="_blank" :download="row.filename">{{ isImage(row.contextType) ? '预览' : '下载' }}</a>
+        <el-button link type="primary" @click="handleDownload(row.url)">下载</el-button>
       </template>
     </ProTable>
   </div>
@@ -23,6 +23,8 @@ import { getSysFileListApi } from '@/api/modules/system/file';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { SysFileRow, SysFileQuery } from '@/api/types/system/file';
 import { useDictOptions } from '@/hooks/useDictOptions';
+import { useUrlDownload } from '@/hooks/useUrlDownload';
+import { ElMessage } from 'element-plus';
 defineOptions({
   name: 'SysFileView'
 });
@@ -66,9 +68,13 @@ const formatParams = (params: SysFileQuery) => {
   delete newParams.createTime;
   return newParams;
 };
-// 是否是图片
-const isImage = (contextType: string) => {
-  const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp', 'image/svg+xml'];
-  return imageMimeTypes.includes(contextType);
-};
+
+function handleDownload(url: string) {
+  const file = {
+    url: url
+  };
+  useUrlDownload(file).catch(err => {
+    ElMessage.error(err?.message || '下载失败');
+  });
+}
 </script>
