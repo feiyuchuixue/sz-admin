@@ -244,11 +244,11 @@ const createUploader = (uploadDir: string): any => ({
   url: `${baseUrl}${ADMIN_MODULE}/sys-file/batchUpload`,
   headers: { Authorization: `Bearer ${userStore.token}` },
   method: 'POST',
-  data: { dirTag: uploadDir },
+  data: { dirTag: uploadDir, scene: 'richtext' },
   isSuccess(res: any) {
     return res;
   },
-  imagesExtensions: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp'],
+  imagesExtensions: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp', 'bmp'],
   defaultHandlerSuccess(data: any) {
     //此处参数的值默认是接口返回的data值
     console.log('defaultHandlerSuccess', data);
