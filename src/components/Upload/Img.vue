@@ -14,8 +14,8 @@
       :drag="drag"
       :accept="fileType.join(',')"
     >
-      <template v-if="imageUrl">
-        <img :src="imageUrl" class="upload-image" alt="图片预览" />
+      <template v-if="previewUrl">
+        <img :src="previewUrl" class="upload-image" alt="图片预览" />
         <div class="upload-handle" @click.stop>
           <div v-if="!self_disabled" class="handle-icon" @click="editImg">
             <el-icon><Edit /></el-icon>
@@ -42,17 +42,18 @@
     <div class="el-upload__tip">
       <slot name="tip" />
     </div>
-    <el-image-viewer v-if="imgViewVisible" :url-list="[imageUrl]" @close="imgViewVisible = false" />
+    <el-image-viewer v-if="imgViewVisible" :url-list="[previewUrl]" @close="imgViewVisible = false" />
   </div>
 </template>
 
 <script setup lang="ts" name="UploadImg">
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, watch, onMounted } from 'vue';
 import { generateUUID } from '@/utils';
 import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
 import type { UploadProps, UploadRequestOptions } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
+import { getOssPreviewUrl } from '@/utils/oss';
 
 interface UploadFileProps {
   imageUrl: string; // 图片地址 ==> 必传
@@ -96,20 +97,41 @@ const self_disabled = computed(() => {
   return props.disabled || formContext?.disabled;
 });
 
+// 仅用于展示/预览的地址（可能是 rawUrl，也可能是 privateUrl）
+const previewUrl = ref('');
+const refreshPreviewUrl = async () => {
+  if (!props.imageUrl) {
+    previewUrl.value = '';
+    return;
+  }
+  previewUrl.value = await getOssPreviewUrl(props.imageUrl);
+};
+
+// 初次挂载 & 外部 imageUrl 变化 时刷新预览
+onMounted(refreshPreviewUrl);
+watch(
+  () => props.imageUrl,
+  () => {
+    refreshPreviewUrl();
+  }
+);
+
 /**
  * @description 图片上传
  * @param options upload 所有配置项
  * */
 const emit = defineEmits<{
   'update:imageUrl': [value: string];
-  change: [value: IUploadResult];
+  change: [value: IUploadResult | null];
 }>();
 const handleHttpUpload = async (options: UploadRequestOptions) => {
   try {
     const { data } = await uploadFile({ file: options.file, dirTag: props.dir });
+    // 1. 把“原始地址”回传给父组件（父组件/数据库只存这个）
     emit('update:imageUrl', data.url);
     emit('change', data);
-    // 调用 el-form 内部的校验方法（可自动校验）
+    // 2. 使用原始地址计算预览地址（仅影响前端展示）
+    previewUrl.value = await getOssPreviewUrl(data.url);
     if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
   } catch (error) {
     options.onError(error as any);
@@ -122,6 +144,7 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
 const deleteImg = () => {
   emit('update:imageUrl', '');
   emit('change', null);
+  previewUrl.value = '';
 };
 
 /**
