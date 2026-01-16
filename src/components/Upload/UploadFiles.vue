@@ -92,6 +92,7 @@ import { uploadFile } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
+import { getOssPreviewUrl } from '@/utils/oss';
 
 defineOptions({ name: 'UploadFiles' });
 
@@ -504,26 +505,36 @@ async function forceBlobDownload(url: string, filename?: string) {
   setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 async function handleDownload(file: UploadFile) {
-  if (!file.url) return;
-  if (downloadingMap.value[file.url]) return;
-  downloadingMap.value[file.url] = true;
+  const rawUrl = file.url;
+  if (!rawUrl) return;
+  if (downloadingMap.value[rawUrl]) return;
+
+  downloadingMap.value[rawUrl] = true;
   try {
-    if (shouldForceFetch(file)) {
-      await forceBlobDownload(file.url, file.name);
+    // 1. 先根据原始 URL 获取实际可访问地址（public=原始, private=签名）
+    const downloadUrl = await getOssPreviewUrl(rawUrl);
+
+    const fakeFile: UploadFile = {
+      ...file,
+      url: downloadUrl // 后续逻辑都用转换后的地址
+    };
+
+    if (shouldForceFetch(fakeFile)) {
+      await forceBlobDownload(downloadUrl, fakeFile.name);
     } else {
       const a = document.createElement('a');
       a.style.display = 'none';
-      a.href = file.url;
-      a.download = file.name || file.url.split('/').pop() || 'download';
+      a.href = downloadUrl;
+      a.download = fakeFile.name || downloadUrl.split('/').pop() || 'download';
       document.body.appendChild(a);
       a.click();
       a.remove();
     }
   } catch (e) {
     logDebug('[download error]', e);
-    window.open(file.url, '_blank');
+    window.open(rawUrl, '_blank');
   } finally {
-    downloadingMap.value[file.url] = false;
+    downloadingMap.value[rawUrl] = false;
   }
 }
 
