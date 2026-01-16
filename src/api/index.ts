@@ -144,6 +144,14 @@ class RequestHttp {
       }
     });
   }
+
+  downloadWithHeader(url: string, params = {}, config?: AxiosRequestConfig<any>) {
+    // 返回 AxiosResponse<Blob>，这样可以拿到 headers + data
+    return this.instance.post<Blob>(url, params, {
+      ...config,
+      responseType: 'blob'
+    });
+  }
 }
 
 export default new RequestHttp(config);

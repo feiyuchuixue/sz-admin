@@ -16,6 +16,10 @@ export const useConfigStore = defineStore(
       isLoaded.value = true;
     }
 
+    function getConfigOption(key: string): string {
+      return configOptions.value[key];
+    }
+
     function setReload() {
       isLoaded.value = false;
     }
@@ -23,6 +27,7 @@ export const useConfigStore = defineStore(
     return {
       isLoaded,
       configOptions,
+      getConfigOption,
       getConfig,
       setReload: setReload
     };
