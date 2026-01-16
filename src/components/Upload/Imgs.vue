@@ -22,7 +22,7 @@
         </slot>
       </div>
       <template #file="{ file }">
-        <img :src="file.url" class="upload-image" alt="预览图片" />
+        <img :src="file.previewUrl || file.url" class="upload-image" alt="预览图片" />
         <div class="upload-handle" @click.stop>
           <div class="handle-icon" @click="handlePictureCardPreview(file)">
             <el-icon><ZoomIn /></el-icon>
@@ -43,12 +43,14 @@
 </template>
 
 <script setup lang="ts" name="UploadImgs">
-import { ref, computed, inject, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { Plus } from '@element-plus/icons-vue';
 import { uploadFile } from '@/api/modules/system/upload';
-import type { UploadProps, UploadFile, UploadUserFile, UploadRequestOptions } from 'element-plus';
+import type { UploadFile, UploadProps, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
 import type { IUploadResult } from '@/api/types/system/upload';
+import { getOssPreviewUrl } from '@/utils/oss';
+
 interface UploadFileProps {
   fileList: UploadUserFile[];
   fileInfo?: IUploadResult; // 文件信息 ==> 非必传
@@ -87,14 +89,35 @@ const self_disabled = computed(() => {
   return props.disabled || formContext?.disabled;
 });
 
-const _fileList = ref<UploadUserFile[]>(props.fileList);
+// 内部文件列表：在 UploadUserFile 的基础上扩展一个 previewUrl 字段，仅组件内部使用
+type InnerUploadUserFile = UploadUserFile & { previewUrl?: string };
 
-// 监听 props.fileList 列表默认值改变
+const _fileList = ref<InnerUploadUserFile[]>([]);
+
+// 把外部 fileList 映射为内部 _fileList，并为每个 url 生成 previewUrl
+const buildInnerFileList = async (list: UploadUserFile[]) => {
+  const result: InnerUploadUserFile[] = [];
+
+  for (const item of list) {
+    const rawUrl = item.url || '';
+    const previewUrl = rawUrl ? await getOssPreviewUrl(rawUrl) : '';
+
+    result.push({
+      ...item,
+      previewUrl
+    });
+  }
+
+  _fileList.value = result;
+};
+
+// 初始 & props.fileList 变化 时同步内部列表
 watch(
   () => props.fileList,
-  (n: UploadUserFile[]) => {
-    _fileList.value = n;
-  }
+  async (n: UploadUserFile[]) => {
+    await buildInnerFileList(n || []);
+  },
+  { immediate: true }
 );
 
 /**
@@ -141,11 +164,12 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
  * */
 const emit = defineEmits<{
   'update:fileList': [value: UploadUserFile[]];
-  change: [value: IUploadResult];
+  change: [value: IUploadResult | null];
 }>();
-const uploadSuccess = (response: IUploadResult | undefined, uploadFile: UploadFile) => {
+const uploadSuccess = async (response: IUploadResult | undefined, uploadFile: UploadFile) => {
   if (!response) return;
   uploadFile.url = response.url;
+  (uploadFile as InnerUploadUserFile).previewUrl = await getOssPreviewUrl(response.url);
   emit('update:fileList', _fileList.value);
   emit('change', response);
   // 调用 el-form 内部的校验方法（可自动校验）
@@ -196,7 +220,9 @@ const handleExceed = () => {
 const viewImageUrl = ref('');
 const imgViewVisible = ref(false);
 const handlePictureCardPreview: UploadProps['onPreview'] = file => {
-  viewImageUrl.value = file.url!;
+  // 预览优先使用 previewUrl
+  const innerFile = file as InnerUploadUserFile;
+  viewImageUrl.value = innerFile.previewUrl || innerFile.url || '';
   imgViewVisible.value = true;
 };
 </script>
