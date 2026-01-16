@@ -61,6 +61,7 @@ import { ref, computed, watch, nextTick } from 'vue';
 import type { IUploadResult } from '@/api/types/system/upload';
 import { useUrlDownload } from '@/hooks/useUrlDownload';
 import { ElMessage } from 'element-plus';
+import { getOssPreviewUrl } from '@/utils/oss';
 
 defineOptions({ name: 'FileDownloadList' });
 
@@ -107,7 +108,7 @@ function isImage(url: string) {
 /* 折叠显示逻辑 */
 const expanded = ref(false);
 const needCollapse = computed(() => maxRows > 0 && fileList.value.length > maxRows);
-const visibleFiles = computed(() =>
+const visibleFiles = computed<FileType[]>(() =>
   !needCollapse.value ? fileList.value : expanded.value ? fileList.value : fileList.value.slice(0, maxRows)
 );
 
@@ -117,25 +118,77 @@ function handleDownload(file: FileType) {
   });
 }
 
-/* 图片预览逻辑 */
+/* ---------------- 图片私有预览逻辑（仅图片才做转换） ---------------- */
+
+/**
+ * imageFiles:
+ *   - 只包含图片类型
+ *   - 保存数据库原始 url（rawUrl）和 name
+ */
+const imageFiles = computed(() =>
+  fileList.value
+    .filter(f => isImage(f.url))
+    .map(f => ({
+      rawUrl: f.url,
+      name: f.filename || getFileName(f.url)
+    }))
+);
+
+/**
+ * rawUrl -> 预览用私有 URL 的映射
+ * 只有图片才会被填充，且按需转换
+ */
+const imagePreviewUrlMap = ref<Record<string, string>>({});
+
+/**
+ * 供 el-image-viewer 使用的 url 列表：
+ * - 优先用已转换的私有 URL
+ * - 若还未转换，则临时用 rawUrl 兜底（保证能尽快看到预览，哪怕是公有或直链）
+ */
+const imageUrls = computed(() => imageFiles.value.map(img => imagePreviewUrlMap.value[img.rawUrl] || img.rawUrl));
+
 const viewerVisible = ref(false);
 const currentIndex = ref(0);
-const imageFiles = computed(() =>
-  fileList.value.filter(f => isImage(f.url)).map(f => ({ url: f.url, name: f.filename || getFileName(f.url) }))
-);
-const imageUrls = computed(() => imageFiles.value.map(i => i.url));
 const currentImageName = computed(() => imageFiles.value[currentIndex.value]?.name || '');
 
 const viewerZIndex = 5000;
 const barZIndex = ref(viewerZIndex + 1);
 
-function openViewer(file: FileType) {
-  const idx = imageFiles.value.findIndex(i => i.url === file.url);
+/**
+ * 按需为某个 rawUrl 生成私有预览地址
+ */
+async function ensureImagePreviewUrl(rawUrl: string): Promise<string> {
+  if (imagePreviewUrlMap.value[rawUrl]) {
+    return imagePreviewUrlMap.value[rawUrl];
+  }
+  const url = await getOssPreviewUrl(rawUrl);
+  const finalUrl = url || rawUrl;
+  imagePreviewUrlMap.value[rawUrl] = finalUrl;
+  return finalUrl;
+}
+
+/**
+ * 打开预览：
+ * - 找到当前文件在 imageFiles 中的索引
+ * - 先确保当前图片已经做过私有转换
+ * - 再打开 viewer
+ */
+async function openViewer(file: FileType) {
+  const idx = imageFiles.value.findIndex(img => img.rawUrl === file.url);
   currentIndex.value = idx < 0 ? 0 : idx;
+
+  // 只对当前要预览的图片做一次私有转换（懒加载）
+  await ensureImagePreviewUrl(file.url);
+
   viewerVisible.value = true;
 }
-function onViewerSwitch(newIndex: number) {
+
+async function onViewerSwitch(newIndex: number) {
   currentIndex.value = newIndex;
+  const target = imageFiles.value[newIndex];
+  if (target) {
+    await ensureImagePreviewUrl(target.rawUrl);
+  }
 }
 watch(viewerVisible, v => {
   if (v) {
