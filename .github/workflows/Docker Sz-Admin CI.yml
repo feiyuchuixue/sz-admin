@@ -6,101 +6,134 @@ on:
   pull_request:
     branches: [ "preview" ]
   workflow_dispatch:
+
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      # 服务名
+      # 项目服务名（容器名）
       APP_NAME: sz-admin
-      # 运行环境变量
+      # 应用运行环境
       RUNNING_ACTIVE: preview
-      # 端口。若修改端口，请保持与 Dockerfile中的 EXPOSE属性一致
+      # 服务监听端口（注意需与 Dockerfile 中 EXPOSE 保持一致）
       SERVICE_PORT: 9800
-      # nginx配置文件路径
+      # 可选：nginx配置目录（挂载到容器的 /etc/nginx/conf.d）
       NGINX_CONF_DIR: /home/conf/sz-admin-nginx/conf.d
-      # Docker 仓库域名
+      # 阿里云 Docker 仓库域名
       ACR_DOMAIN: registry.cn-beijing.aliyuncs.com
-      # 命名空间
+      # 阿里云命名空间（仓库分组）
       ACR_ZONE: sz-action
+      # 镜像版本号（预览环境固定为 latest）
       VERSION: latest
+      # 可选：容器启动脚本存放目录
       SHELL_RUN_DIR: /home/run
-      # 预览环境标识（预览环境某些功能将禁用）
+      # 前端预览环境标识（某些 feature 会被禁用）
       VITE_PREVIEW: true
+      # 可选：docker-compose 目录路径
+      DOCKER_COMPOSE_PATH: /home/docker-compose/sz-admin
     steps:
-      - name: Checkout repository
+      # 1. 拉取代码
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      # 2. 配置 Node.js 环境
+      - name: Set up Node.js 20.x
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install pnpm
+      # 3. 安装 pnpm 包管理工具
+      - name: Install pnpm globally
         run: npm install -g pnpm
 
+      # 4. 安装依赖
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
+      # 5. 构建前端项目
+      - name: Build frontend project
         env:
           VITE_PREVIEW: ${{ env.VITE_PREVIEW }}
         run: pnpm run build
 
+      # 6. 安装 sshpass（用于非 GitHub Action ssh 操作，可选）
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Check if default.conf exists on remote
-        id: check-file
-        run: |
-          file_exists=$(sshpass -p ${{ secrets.REMOTE_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "if [ -f ${{ env.NGINX_CONF_DIR }}/default.conf ]; then echo true; else echo false; fi")
-          echo "file_exists=$file_exists" >> $GITHUB_ENV
+      # --- 下面内容为docker可选，若你未启用自动 nginx 配置则可忽略 ---
+      # 检查远程 default.conf 是否存在
+      # - name: Check remote default.conf
+      #   id: check-file
+      #   run: |
+      #     file_exists=$(sshpass -p ${{ secrets.REMOTE_PASSWORD }} \
+      #         ssh -o StrictHostKeyChecking=no \
+      #         ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
+      #         "if [ -f ${{ env.NGINX_CONF_DIR }}/default.conf ]; then echo true; else echo false; fi")
+      #     echo "file_exists=$file_exists" >> $GITHUB_ENV
+      # 上传 default.conf 到远程
+      # - name: Upload default.conf if missing
+      #   if: ${{ env.file_exists == 'false' }}
+      #   run: sshpass -p ${{ secrets.REMOTE_PASSWORD }} \
+      #         scp -o StrictHostKeyChecking=no ./nginx/default.conf \
+      #         ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ env.NGINX_CONF_DIR }}
 
-      - name: Upload default.conf if needed
-        if: ${{ env.file_exists == 'false' }}
-        run: sshpass -p ${{ secrets.REMOTE_PASSWORD }} scp -o StrictHostKeyChecking=no ./nginx/default.conf ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ env.NGINX_CONF_DIR }}
-
+      # 7. 构建 Docker 镜像
       - name: Build Docker image
         run: docker build -t ${{ env.APP_NAME }}:${{ env.VERSION }} .
 
-      - name: Log in to ACR
+      # 8. 登录阿里云 ACR 仓库
+      - name: Login to Aliyun Container Registry
         run: echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=${{ secrets.ACR_USERNAME }} ${{ env.ACR_DOMAIN }} --password-stdin
 
-      - name: Tag Docker image
+      # 9. 镜像打标签（推送前命名规范）
+      - name: Tag Docker image for ACR
         run: docker tag ${{ env.APP_NAME }}:${{ env.VERSION }} ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
 
+      # 10. 推送镜像到 ACR
       - name: Push Docker image to ACR
         run: docker push ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
 
-      - name: Deploy to remote server
+      # 11. (选用) 使用 docker-compose 自动部署（推荐，与 sz-deploy-v3 脚本结合）
+      - name: Deploy using docker-compose on remote server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           password: ${{ secrets.REMOTE_PASSWORD }}
           script: |
-            docker pull ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
+            cd ${{ env.DOCKER_COMPOSE_PATH }}
+            bash upgrade.sh
 
-            echo "==================== 生成启动命令脚本 ===================="
-            mkdir -p ${{ env.SHELL_RUN_DIR }}
-            START_SCRIPT="${{ env.SHELL_RUN_DIR }}/docker_run_${{ env.APP_NAME }}_${{ env.RUNNING_ACTIVE }}.sh"
-            cat > $START_SCRIPT <<EOL
-            #!/bin/bash
-              echo "==================== 停止旧应用容器 ===================="
-              docker stop ${{ env.APP_NAME }} || true
-              docker rm ${{ env.APP_NAME }} || true
-              docker image prune -f
-              docker builder prune -f
-              echo "==================== 启动应用容器 ===================="
-              docker run -itd \\
-              --name ${{ env.APP_NAME }} \\
-              --restart always \\
-              -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \\
-              -e TZ=Asia/Shanghai \\
-              -v ${{ env.NGINX_CONF_DIR }}:/etc/nginx/conf.d \\
-              ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
-            EOL
-            chmod +x $START_SCRIPT
-            echo "启动脚本已生成：$START_SCRIPT"
-            echo "可以运行以下命令手动启动容器："
-            echo "bash $START_SCRIPT"
-            bash $START_SCRIPT
+      # 12. (可选) 直接在远程主机用 docker 启动容器
+      # - name: Deploy container on remote server (direct docker)
+      #   uses: appleboy/ssh-action@v1.2.0
+      #   with:
+      #     host: ${{ secrets.REMOTE_HOST }}
+      #     username: ${{ secrets.REMOTE_USER }}
+      #     password: ${{ secrets.REMOTE_PASSWORD }}
+      #     script: |
+      #       docker pull ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
+      #       echo "========= 生成容器启动脚本 ========="
+      #       mkdir -p ${{ env.SHELL_RUN_DIR }}
+      #       START_SCRIPT="${{ env.SHELL_RUN_DIR }}/docker_run_${{ env.APP_NAME }}_${{ env.RUNNING_ACTIVE }}.sh"
+      #       cat > $START_SCRIPT <<EOL
+      #       #!/bin/bash
+      #         echo "========= 停止旧容器 ========="
+      #         docker stop ${{ env.APP_NAME }} || true
+      #         docker rm ${{ env.APP_NAME }} || true
+      #         docker image prune -f
+      #         docker builder prune -f
+      #         echo "========= 启动新容器 ========="
+      #         docker run -itd \
+      #           --name ${{ env.APP_NAME }} \
+      #           --restart always \
+      #           -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \
+      #           -e TZ=Asia/Shanghai \
+      #           -v ${{ env.NGINX_CONF_DIR }}:/etc/nginx/conf.d \
+      #           ${{ env.ACR_DOMAIN }}/${{ env.ACR_ZONE }}/${{ env.APP_NAME }}:${{ env.VERSION }}
+      #       EOL
+      #       chmod +x $START_SCRIPT
+      #       echo "启动脚本已生成：$START_SCRIPT"
+      #       echo "可执行该脚本手动启动容器："
+      #       echo "bash $START_SCRIPT"
+      #       bash $START_SCRIPT
