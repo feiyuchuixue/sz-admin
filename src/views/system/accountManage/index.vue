@@ -80,11 +80,11 @@
                 {
                   type: 'or',
                   conditions: [
-                    'sys.user.unlock_btn',
                     'sys.user.role_set_btn',
-                    'sys.user.delete_btn',
                     'sys.user.dept_set_btn',
-                    'sys.user.data_scope_btn'
+                    'sys.user.admin_set_btn',
+                    'sys.user_resetPwd',
+                    'sys.user.delete_btn'
                   ]
                 }
               ]"
@@ -111,7 +111,7 @@
                         设置账户类型
                       </el-dropdown-item>
                     </div>
-                    <div v-auth="'sys.user.unlock_btn'">
+                    <div v-auth="'sys.user_resetPwd'">
                       <el-dropdown-item type="primary" :icon="Refresh" link @click="resetPwd(row)"> 重置密码 </el-dropdown-item>
                     </div>
                     <div v-auth="'sys.user.delete_btn'">
