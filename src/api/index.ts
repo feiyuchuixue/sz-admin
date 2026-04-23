@@ -10,10 +10,17 @@ import { useAuthStore } from '@/stores/modules/auth';
 import { useSocketStore } from '@/stores/modules/socket/socket';
 import { ElMessage } from 'element-plus';
 
-export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+export interface CustomAxiosRequestConfig<D = any> extends AxiosRequestConfig<D> {
   loading?: boolean;
   cancel?: boolean;
+  handleBusinessError?: boolean;
 }
+
+type CustomInternalAxiosRequestConfig<D = any> = InternalAxiosRequestConfig<D> & {
+  loading?: boolean;
+  cancel?: boolean;
+  handleBusinessError?: boolean;
+};
 
 const config = {
   // 默认地址请求地址，可在 .env.** 文件中修改
@@ -37,7 +44,7 @@ class RequestHttp {
      * token校验(JWT) : 接受服务器返回的 token,存储到 vuex/pinia/本地储存当中
      */
     this.instance.interceptors.request.use(
-      (config: CustomAxiosRequestConfig) => {
+      (config: CustomInternalAxiosRequestConfig) => {
         const userStore = useUserStore();
         // 当前请求不需要显示 loading，在 api 服务中通过指定的第三个参数: { loading: false } 来控制
         // config.loading !== false && showFullScreenLoading()
@@ -80,7 +87,10 @@ class RequestHttp {
         }
         // 全局错误信息拦截（防止下载文件的时候返回数据流，没有 code 直接报错）
         if (data.code && data.code !== CODE_SUCCESS) {
-          ElMessage.error({ message: data.message, dangerouslyUseHTMLString: true });
+          const customConfig = response.config as CustomAxiosRequestConfig;
+          if (customConfig.handleBusinessError !== false) {
+            ElMessage.error({ message: data.message, dangerouslyUseHTMLString: true });
+          }
           return Promise.reject(data);
         }
         // 成功请求（在页面上除非特殊情况，否则不用处理失败逻辑）
@@ -112,31 +122,31 @@ class RequestHttp {
   /**
    * @description 常用请求方法封装
    */
-  get<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+  get<T>(url: string, params: any = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
     return this.instance.get(url, { params, ...config });
   }
 
-  post<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+  post<T>(url: string, params: any = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
     return this.instance.post(url, params, config);
   }
 
-  put<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+  put<T>(url: string, params: any = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
     return this.instance.put(url, params, config);
   }
 
-  delete<T>(url: string, data: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+  delete<T>(url: string, data: any = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
     return this.instance.delete(url, { data, ...config });
   }
 
-  download(url: string, params = {}, config?: AxiosRequestConfig<any> | undefined): Promise<BlobPart> {
+  download(url: string, params = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<BlobPart> {
     return this.instance.post(url, params, { ...config, responseType: 'blob' });
   }
 
-  template(url: string, params = {}, config?: AxiosRequestConfig<any> | undefined): Promise<BlobPart> {
+  template(url: string, params = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<BlobPart> {
     return this.instance.get(url, { params, ...config, responseType: 'blob' });
   }
 
-  upload<T>(url: string, params: any = {}, config?: AxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
+  upload<T>(url: string, params: any = {}, config?: CustomAxiosRequestConfig<any> | undefined): Promise<IResultData<T>> {
     return this.instance.post(url, params, {
       ...config,
       headers: {
@@ -145,7 +155,7 @@ class RequestHttp {
     });
   }
 
-  downloadWithHeader(url: string, params = {}, config?: AxiosRequestConfig<any>) {
+  downloadWithHeader(url: string, params = {}, config?: CustomAxiosRequestConfig<any>) {
     // 返回 AxiosResponse<Blob>，这样可以拿到 headers + data
     return this.instance.post<Blob>(url, params, {
       ...config,

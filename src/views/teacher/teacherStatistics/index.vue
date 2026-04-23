@@ -81,11 +81,24 @@ import { useDict } from '@/hooks/useDict';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
 import TeacherStatisticsContentForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsContentForm.vue';
+import type { Options } from '@/config/typings';
 defineOptions({
   name: 'TeacherStatisticsView'
 });
 useDict(['account_status', 'dynamic_user_options']); // 使用useDict Hook 主动加载字典 【演示案例】
 const proTableRef = ref<ProTableInstance>();
+
+const yesNoOptions: Options[] = [
+  {
+    label: '是',
+    value: 'YES'
+  },
+  {
+    label: '否',
+    value: 'NO'
+  }
+];
+
 // 表格配置项
 const columns: ColumnProps<TeacherStatisticsRow>[] = [
   { type: 'selection', width: 80 },
@@ -121,6 +134,7 @@ const columns: ColumnProps<TeacherStatisticsRow>[] = [
     },
     width: 90
   },
+  { prop: 'hasInvalid', enum: yesNoOptions, label: '是否失效' },
   { prop: 'remark', label: '备注', width: 160 },
   {
     prop: 'createId',
@@ -228,6 +242,7 @@ const searchColumns: SearchProps[] = [
     }
   }
 ];
+
 // 获取table列表
 const getTableList = (params: TeacherStatisticsQuery) => {
   let newParams = formatParams(params);
@@ -292,8 +307,9 @@ const importData = () => {
     tempApi: downloadTemplate,
     importApi: importTeacherStatisticsExcelApi,
     getTableList: proTableRef.value?.getTableList,
-    alias: 'jstj',
-    fileName: '教师统计模板.xlsx'
+    alias: '教师统计导入模板.xlsx',
+    fileName: '教师统计导入模板.xlsx',
+    resultTip: '失败结果可到【Excel失败记录 - 教师统计导入】页面查看'
   };
   ImportExcelRef.value?.acceptParams(params);
 };
