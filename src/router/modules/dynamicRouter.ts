@@ -5,6 +5,7 @@ import { LOGIN_URL } from '@/config';
 import router from '@/router';
 import type { RouteRecordRaw } from 'vue-router';
 import { useConfigStore } from '@/stores/modules/config';
+import { getUserProfile } from '@/api/modules/system/user';
 
 // 引入 views 文件夹下所有 vue 文件
 const modules = import.meta.glob('@/views/**/*.vue');
@@ -20,7 +21,11 @@ export const initDynamicRouter = async () => {
 
   try {
     if (authStore.isLoaded) return;
-    // 1.获取菜单列表 && 按钮权限列表 && 字典列表
+    // 1.获取用户基本资料
+    const profileRes = await getUserProfile();
+    userStore.setProfile(profileRes.data);
+
+    // 2.获取菜单列表 && 按钮权限列表 && 字典列表
     await authStore.getAuthMenuList();
     await authStore.getAuthButtonList();
     await authStore.getAuthRoleList();

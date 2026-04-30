@@ -100,7 +100,6 @@ const performLogin = async (formData = loginForm) => {
     const { data } = await loginApi(params);
 
     userStore.setToken(data.accessToken);
-    userStore.setUserInfo(data.userInfo);
 
     await initDynamicRouter();
 

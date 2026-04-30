@@ -45,7 +45,6 @@ import { Edit, SwitchButton, User } from '@element-plus/icons-vue';
 import { useSocketStore } from '@/stores/modules/socket/socket';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import defaultAvatar from '@/assets/images/avatar.gif';
-import { getOssPreviewUrl } from '@/utils/oss';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -66,25 +65,22 @@ const preloadImage = (url: string): Promise<void> => {
 };
 
 /**
- * 根据用户信息中的 logo 设置头像：
+ * 根据用户 profile 中的 avatar 设置头像：
  * - 如果是默认头像：直接使用本地 defaultAvatar
- * - 如果有自定义 logo：先通过 getOssPreviewUrl 做一次私有地址转换，再预加载
+ * - 如果有自定义 avatar：先通过 getOssPreviewUrl 做一次私有地址转换，再预加载
  */
 const resolveAvatar = async () => {
-  const rawLogo = userStore.userInfo.logo;
+  const rawAvatar = userStore.profile?.avatar;
 
   // 无头像或就是默认头像：直接使用默认
-  if (!rawLogo || rawLogo === defaultAvatar) {
+  if (!rawAvatar || rawAvatar === defaultAvatar) {
     avatarSrc.value = defaultAvatar;
     return;
   }
 
   try {
-    // 对用户自定义头像做一次私有地址转换（兼容 MinIO / 其他私有 OSS）
-    const previewUrl = (await getOssPreviewUrl(rawLogo)) || rawLogo;
-
-    await preloadImage(previewUrl);
-    avatarSrc.value = previewUrl;
+    await preloadImage(rawAvatar);
+    avatarSrc.value = rawAvatar;
   } catch (error) {
     console.error(`Error loading avatar image`, error);
     avatarSrc.value = defaultAvatar;
@@ -124,9 +120,9 @@ const openDialog = (refName: 'infoRef' | 'passwordRef') => {
 // 初始化头像
 resolveAvatar();
 
-// 如果用户信息里的 logo 发生变化（比如修改个人资料后），自动刷新头像
+// 如果 profile 中的 avatar 发生变化（比如修改个人资料后），自动刷新头像
 watch(
-  () => userStore.userInfo.logo,
+  () => userStore.profile?.avatar,
   () => {
     resolveAvatar();
   }

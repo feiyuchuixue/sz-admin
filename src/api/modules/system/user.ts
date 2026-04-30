@@ -7,7 +7,8 @@ import type {
   UserRoleData,
   UserRoleForm,
   UserPasswordForm,
-  UserTagOptions
+  UserTagOptions,
+  UserProfileVO
 } from '@/api/types/system/user';
 import type { IPage } from '@/api/types';
 import type { SysDeptDeptSetting, SysDeptTree } from '@/api/types/system/dept';
@@ -142,4 +143,12 @@ export const getDataUserRole = (params: { userId: number }) => {
  */
 export const setUserTag = (params: UserTagOptions) => {
   return http.post(ADMIN_MODULE + `/sys-user/changeset/usertag`, params);
+};
+
+/**
+ * 获取当前登录用户基本资料
+ * @returns {*}
+ */
+export const getUserProfile = () => {
+  return http.get<UserProfileVO>(ADMIN_MODULE + `/sys-user/profile`);
 };

@@ -77,3 +77,15 @@ export type UserTagOptions = {
   userIds: number[];
   userTagCd: string;
 };
+
+// 用户基本资料（对应后端 UserProfileVO，/sys-user/profile）
+export type UserProfileVO = {
+  id: number;
+  username: string;
+  nickname: string;
+  sex: number;
+  birthday: string;
+  phone: string;
+  email: string;
+  avatar: string;
+};

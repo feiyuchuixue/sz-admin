@@ -3,54 +3,52 @@
     <el-descriptions :column="2" border>
       <el-descriptions-item>
         <template #label> 用户名 </template>
-        {{ info?.username }}
+        {{ profile?.username }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label> 昵称 </template>
-        {{ info?.nickname }}
+        {{ profile?.nickname }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label> 手机号 </template>
-        {{ info?.phone }}
+        {{ profile?.phone }}
       </el-descriptions-item>
       <el-descriptions-item>
-        <template #label> 身份证 </template>
-        {{ info?.idCard }}
+        <template #label> 邮箱 </template>
+        {{ profile?.email }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label> 性别 </template>
-        {{ showSex(info?.sex) }}
+        {{ showSex(profile?.sex) }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label> 年龄 </template>
-        {{ info?.age }}
+        {{ calcAge(profile?.birthday) }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label> 生日 </template>
+        {{ profile?.birthday }}
       </el-descriptions-item>
     </el-descriptions>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" @click="visible = false">确认</el-button>
+        <el-button @click="visible = false">关闭</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { getUserinfo } from '@/api/modules/system/user';
-import type { UserInfo } from '@/api/types/system/user';
+import { computed, ref } from 'vue';
+import { useUserStore } from '@/stores/modules/user';
 
+const userStore = useUserStore();
 const visible = ref(false);
+
+const profile = computed(() => userStore.profile);
+
 const openDialog = () => {
   visible.value = true;
-  loadInfo();
-};
-
-const info = ref<UserInfo>();
-const loadInfo = () => {
-  getUserinfo().then(res => {
-    info.value = res.data;
-  });
 };
 
 const showSex = (sex: number | undefined) => {
@@ -62,6 +60,21 @@ const showSex = (sex: number | undefined) => {
     default:
       return '未知';
   }
+};
+
+/**
+ * 根据生日（YYYY-MM-DD）计算年龄，未填写时返回 '-'
+ */
+const calcAge = (birthday: string | undefined): string => {
+  if (!birthday) return '-';
+  const today = new Date();
+  const birth = new Date(birthday);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age >= 0 ? String(age) : '-';
 };
 
 defineExpose({ openDialog });
