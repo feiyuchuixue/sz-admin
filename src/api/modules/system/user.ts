@@ -8,7 +8,10 @@ import type {
   UserRoleForm,
   UserPasswordForm,
   UserTagOptions,
-  UserProfileVO
+  UserProfileVO,
+  UserProfileUpdateForm,
+  UserContactUpdateForm,
+  UserContactUnbindForm
 } from '@/api/types/system/user';
 import type { IPage } from '@/api/types';
 import type { SysDeptDeptSetting, SysDeptTree } from '@/api/types/system/dept';
@@ -151,4 +154,28 @@ export const setUserTag = (params: UserTagOptions) => {
  */
 export const getUserProfile = () => {
   return http.get<UserProfileVO>(ADMIN_MODULE + `/sys-user/profile`);
+};
+
+/**
+ * 更新当前登录用户基本资料
+ * @param params
+ */
+export const updateUserProfile = (params: UserProfileUpdateForm) => {
+  return http.put(ADMIN_MODULE + `/sys-user/profile`, params);
+};
+
+/**
+ * 更新当前登录用户联系方式（手机号/邮箱）
+ * @param params
+ */
+export const updateUserContact = (params: UserContactUpdateForm) => {
+  return http.put(ADMIN_MODULE + `/sys-user/profile/contact`, params);
+};
+
+/**
+ * 解绑当前登录用户联系方式（手机号/邮箱）
+ * @param params
+ */
+export const unbindUserContact = (params: UserContactUnbindForm) => {
+  return http.delete(ADMIN_MODULE + `/sys-user/profile/contact`, params);
 };

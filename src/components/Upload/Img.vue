@@ -85,7 +85,7 @@ import { ref, computed, inject } from 'vue';
 import { generateUUID } from '@/utils';
 import { uploadResource } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
-import type { UploadProps, UploadRequestOptions } from 'element-plus';
+import type { UploadProps, UploadRequestOptions, UploadRawFile } from 'element-plus';
 import type { IResourceUploadResult } from '@/api/types/system/upload';
 import { VueCropper } from 'vue-cropper/next';
 import 'vue-cropper/next/dist/index.css';
@@ -251,7 +251,8 @@ const cropDialogVisible = ref(false);
 const cropImgSrc = ref('');
 const cropOutputType = ref('png');
 const cropUploading = ref(false);
-const cropperRef = ref<InstanceType<typeof VueCropper>>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cropperRef = ref<any>();
 // 裁剪后待上传的原始文件名（用于构造 File 对象）
 const cropFileName = ref('avatar.png');
 
@@ -286,7 +287,10 @@ const confirmCrop = () => {
   cropperRef.value.getCropBlob(async (blob: Blob) => {
     try {
       const mimeType = cropOutputType.value === 'png' ? 'image/png' : 'image/jpeg';
-      const file = new File([blob], cropFileName.value, { type: mimeType });
+      const rawFile = new File([blob], cropFileName.value, { type: mimeType });
+      // UploadRawFile 比原生 File 多一个 uid 字段，手动补充后做类型断言
+      (rawFile as unknown as { uid: number }).uid = Date.now();
+      const file = rawFile as unknown as UploadRawFile;
       const { data } = await uploadResource({
         file,
         sceneCode: props.sceneCode,

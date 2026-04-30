@@ -89,3 +89,24 @@ export type UserProfileVO = {
   email: string;
   avatar: string;
 };
+
+// 个人资料更新表单（对应后端 SysUserProfileUpdateDTO）
+export type UserProfileUpdateForm = {
+  nickname: string;
+  sex: number;
+  birthday: string;
+  avatar: string; // 头像 objectKey
+};
+
+// 联系方式更新表单（对应后端 SysUserContactUpdateDTO）
+export type UserContactUpdateForm = {
+  field: 'phone' | 'email';
+  value: string;
+  password: string;
+};
+
+// 联系方式解绑表单（对应后端 SysUserContactUnbindDTO）
+export type UserContactUnbindForm = {
+  field: 'phone' | 'email';
+  password: string;
+};

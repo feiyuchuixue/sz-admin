@@ -57,15 +57,9 @@
         </template>
 
         <template #nickname="{ row }">
-            <el-avatar
-              v-if="row.logo"
-              :src="row.logo"
-              alt="用户"
-              :size="32"
-              class="avatar-list-style"
-            />
-            <span style="vertical-align: middle">{{ row?.nickname }}</span>
-          </template>
+          <el-avatar v-if="row.logo" :src="row.logo" alt="用户" :size="32" class="avatar-list-style" />
+          <span style="vertical-align: middle">{{ row?.nickname }}</span>
+        </template>
         <template #operation="{ row }">
           <div class="btn-group">
             <el-button v-auth="'sys.user.update_btn'" type="primary" link :icon="EditPen" @click="openUserEdit('编辑用户', row)">
@@ -189,7 +183,7 @@ const columns: ColumnProps<RoleInfo>[] = [
     tag: true,
     enum: useDictOptions('dynamic_dept_options'),
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
-    tagLimit: -1,
+    tagLimit: -1
   },
   {
     prop: 'roleIds',
