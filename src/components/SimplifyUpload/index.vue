@@ -52,9 +52,9 @@
 <script setup lang="ts">
 import { UploadFilled, Delete, Document, Picture } from '@element-plus/icons-vue';
 import { ref } from 'vue';
-import { uploadFile } from '@/api/modules/system/upload';
+import { uploadResource } from '@/api/modules/system/upload';
 import type { UploadFile, UploadRequestOptions, UploadUserFile } from 'element-plus';
-import type { UploadResult } from '@/api/types/system/upload';
+import type { ResourceUploadResult } from '@/api/types/system/upload';
 import type { IResultData } from '@/api/types';
 
 defineOptions({
@@ -68,7 +68,9 @@ type Props = {
   drag?: boolean;
   limit?: number;
   accept?: string;
-  dir: string;
+  sceneCode?: string; // 上传场景编码
+  bizKey?: string; // 命名规则为 BIZ_KEY 时的业务标识 ==> 非必传
+  pathSegments?: string; // 路径分段，逗号分割，BIZ/BIZ_DATE 策略时生效，如 "userId,dept" ==> 非必传
   modelValue?: string | string[];
 };
 
@@ -79,7 +81,7 @@ const props = withDefaults(defineProps<Props>(), {
   drag: true,
   limit: 1,
   accept: '',
-  dir: 'default'
+  sceneCode: ''
 });
 
 const emits = defineEmits<{
@@ -106,15 +108,20 @@ if (defaultVal !== undefined && defaultVal !== '') {
 
 // 重新设置的上传
 const uploadFileRequest = (options: UploadRequestOptions) => {
-  return uploadFile({ file: options.file, dirTag: props.dir });
+  return uploadResource({
+    file: options.file,
+    sceneCode: props.sceneCode,
+    bizKey: props.bizKey,
+    pathSegments: props.pathSegments
+  });
 };
 
-const handleSuccess = (res: IResultData<UploadResult>, file: UploadFile) => {
+const handleSuccess = (res: IResultData<ResourceUploadResult>, file: UploadFile) => {
   const { uid } = file;
   const index = fileList.value.findIndex(item => item.uid === uid);
   if (index !== -1) {
-    fileList.value[index].url = res.data.url;
-    fileList.value[index].name = res.data.filename;
+    fileList.value[index].url = res.data.accessUrl;
+    fileList.value[index].name = res.data.originName;
     emitChange();
   }
 };

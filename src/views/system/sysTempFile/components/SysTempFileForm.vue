@@ -38,7 +38,7 @@
 import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import UploadFiles from '@/components/Upload/UploadFiles.vue';
-import type { IUploadResult } from '@/api/types/system/upload';
+import type { IResourceUploadResult } from '@/api/types/system/upload';
 
 defineOptions({
   name: 'SysTempFileForm'
@@ -82,8 +82,8 @@ const handleSubmit = () => {
   });
 };
 
-const fileChange = (file: IUploadResult) => {
-  if (paramsProps.value.isAdd || !paramsProps.value.row.tempName) paramsProps.value.row.tempName = file?.filename; // 如果是新增，便利性带入文件名
+const fileChange = (file: IResourceUploadResult) => {
+  if (paramsProps.value.isAdd || !paramsProps.value.row.tempName) paramsProps.value.row.tempName = file?.originName; // 如果是新增，便利性带入文件名
 };
 
 defineExpose({

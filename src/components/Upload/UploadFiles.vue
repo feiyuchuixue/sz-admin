@@ -88,11 +88,10 @@
 <script setup lang="ts">
 import { Close, Document, Download, UploadFilled, Loading } from '@element-plus/icons-vue';
 import { ref, watch, nextTick, onBeforeUnmount, defineExpose } from 'vue';
-import { uploadFile } from '@/api/modules/system/upload';
+import { uploadResource } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
-import type { IUploadResult } from '@/api/types/system/upload';
+import type { IResourceUploadResult } from '@/api/types/system/upload';
 import type { AxiosProgressEvent } from 'axios';
-import { getOssPreviewUrl } from '@/utils/oss';
 
 defineOptions({ name: 'UploadFiles' });
 
@@ -104,8 +103,10 @@ type Props = {
   limit?: number;
   fileSize?: number;
   accept?: string;
-  modelValue?: IUploadResult[] | string[];
-  dir?: string;
+  modelValue?: IResourceUploadResult[] | string[];
+  sceneCode?: string; // 上传场景编码
+  bizKey?: string; // 命名规则为 BIZ_KEY 时的业务标识 ==> 非必传
+  pathSegments?: string; // 路径分段，逗号分割，BIZ/BIZ_DATE 策略时生效，如 "userId,dept" ==> 非必传
   flushDelay?: number;
   debug?: boolean;
   emitUploading?: boolean;
@@ -124,7 +125,7 @@ const props = withDefaults(defineProps<Props>(), {
   fileSize: 5,
   accept: '',
   modelValue: () => [],
-  dir: 'tmp',
+  sceneCode: 'system.template',
   flushDelay: 80,
   debug: false,
   emitUploading: false,
@@ -135,16 +136,16 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  'update:modelValue': [IUploadResult[]];
-  change: [value: IUploadResult | null];
-  'all-success': [list: IUploadResult[]];
+  'update:modelValue': [IResourceUploadResult[]];
+  change: [value: IResourceUploadResult | null];
+  'all-success': [list: IResourceUploadResult[]];
 }>();
 
 /* ------------ State ------------ */
 const _fileList = ref<UploadUserFile[]>([]);
-const _resultMap = ref<Map<string, IUploadResult>>(new Map());
+const _resultMap = ref<Map<string, IResourceUploadResult>>(new Map());
 const downloadingMap = ref<Record<string, boolean>>({});
-let internalSnapshot: IUploadResult[] = [];
+let internalSnapshot: IResourceUploadResult[] = [];
 
 /* ------------ Flags ------------ */
 let isProcessingResults = false;
@@ -152,7 +153,7 @@ let isInternalEmit = false;
 let initialHydrated = false; // 是否已完成首次回显
 let uploadCycleActive = false; // 当前上传周期是否激活
 let hasNewUploadSuccess = false; // 本周期是否有至少一个成功上传
-const pendingSuccessResults = new Map<string, { file: UploadFile; response: IUploadResult }>();
+const pendingSuccessResults = new Map<string, { file: UploadFile; response: IResourceUploadResult }>();
 let flushTimer: number | null = null;
 
 /* ------------ All-success 记忆签名 ------------ */
@@ -169,33 +170,34 @@ function getExt(name: string) {
   const i = name.lastIndexOf('.');
   return i >= 0 ? name.slice(i).toLowerCase() : '';
 }
-function preserveNormalize(raw: any, dirTag: string): IUploadResult {
-  const url = raw?.url ?? '';
-  const filename = raw?.filename || raw?.name || (url ? url.split('/').pop() || '' : '');
+function preserveNormalize(raw: any): IResourceUploadResult {
+  const accessUrl = raw?.accessUrl ?? raw?.url ?? '';
+  const originName = raw?.originName || raw?.filename || raw?.name || (accessUrl ? accessUrl.split('/').pop() || '' : '');
   const eTag = raw?.eTag || raw?.etag || '';
   return {
     ...(props.preserveRaw ? raw : {}),
-    url,
-    filename,
+    accessUrl,
+    originName,
     eTag,
-    ...(eTag ? { etag: eTag } : {}),
-    dirTag: raw?.dirTag || dirTag,
-    objectName: raw?.objectName ?? '',
-    contextType: raw?.contextType ?? '',
+    objectKey: raw?.objectKey ?? '',
+    contentType: raw?.contentType ?? '',
     size: raw?.size ?? 0,
-    fileId: raw?.fileId ?? 0
-  } as IUploadResult;
+    resourceId: raw?.resourceId ?? 0
+  } as IResourceUploadResult;
 }
-function buildStableUid(source: { fileId?: number; url?: string; filename?: string }, index: number) {
-  if (source.fileId && source.fileId > 0) return 'fid-' + source.fileId;
-  const base = (source.url || source.filename || 'item').replace(/\s+/g, '_');
+function buildStableUid(
+  source: { resourceId?: number; accessUrl?: string; url?: string; originName?: string; filename?: string },
+  index: number
+) {
+  if (source.resourceId && source.resourceId > 0) return 'rid-' + source.resourceId;
+  const base = (source.accessUrl || source.url || source.originName || source.filename || 'item').replace(/\s+/g, '_');
   return 'u:' + base + '#i:' + index;
 }
 function shallowMetaEqual(a: any, b: any) {
   return (
-    a?.url === b?.url &&
-    (a?.filename || '') === (b?.filename || '') &&
-    (a?.fileId || 0) === (b?.fileId || 0) &&
+    (a?.accessUrl || a?.url || '') === (b?.accessUrl || b?.url || '') &&
+    (a?.originName || a?.filename || '') === (b?.originName || b?.filename || '') &&
+    (a?.resourceId || a?.fileId || 0) === (b?.resourceId || b?.fileId || 0) &&
     (a?.eTag || a?.etag || '') === (b?.eTag || b?.etag || '')
   );
 }
@@ -205,27 +207,22 @@ function isSameList(a: any, b: any) {
   for (let i = 0; i < a.length; i++) if (!shallowMetaEqual(a[i], b[i])) return false;
   return true;
 }
-function exportResultList(): IUploadResult[] {
-  const out: IUploadResult[] = [];
+function exportResultList(): IResourceUploadResult[] {
+  const out: IResourceUploadResult[] = [];
   _fileList.value.forEach(f => {
     const uid = String((f as any).uid);
     const r = _resultMap.value.get(uid);
     if (r) out.push(r);
     else if (props.emitUploading) {
-      out.push(
-        preserveNormalize(
-          { url: '', filename: f.name, dirTag: props.dir, size: (f as any).size ?? 0, uploading: true },
-          props.dir
-        )
-      );
+      out.push(preserveNormalize({ accessUrl: '', originName: f.name, size: (f as any).size ?? 0, uploading: true }));
     }
   });
   return out;
 }
 
 /* ------------ All-success ------------ */
-function computeAllSuccessSignature(list: IUploadResult[]): string {
-  return list.map(r => `${r!.url}#${r!.fileId}#${r!.filename}`).join('|') + `|len:${list.length}`;
+function computeAllSuccessSignature(list: IResourceUploadResult[]): string {
+  return list.map(r => `${r!.accessUrl}#${r!.resourceId}#${r!.originName}`).join('|') + `|len:${list.length}`;
 }
 function isAllSuccess(): boolean {
   if (_fileList.value.length === 0) return false;
@@ -295,10 +292,10 @@ function processPendingResults() {
         logDebug('文件已移除，忽略成功回调 uid=', uid);
         continue;
       }
-      const norm = preserveNormalize(response, props.dir)!;
+      const norm = preserveNormalize(response)!;
       const vf = _fileList.value[idx];
-      vf.name = norm.filename;
-      vf.url = norm.url;
+      vf.name = norm.originName;
+      vf.url = norm.accessUrl;
       vf.status = 'success';
 
       const old = _resultMap.value.get(uid);
@@ -318,7 +315,7 @@ function processPendingResults() {
 }
 
 /* ------------ 内部 emit ------------ */
-function internalEmit(list: IUploadResult[]) {
+function internalEmit(list: IResourceUploadResult[]) {
   isInternalEmit = true;
   emit('update:modelValue', list.slice());
   internalSnapshot = list.slice();
@@ -354,18 +351,18 @@ watch(
 
     if (isObj) {
       (newVal as any[]).forEach((raw, i) => {
-        const norm = preserveNormalize(raw, props.dir)!;
+        const norm = preserveNormalize(raw)!;
         const uid = buildStableUid(norm, i);
-        const file: UploadUserFile = { name: norm.filename, url: norm.url, status: 'success' };
+        const file: UploadUserFile = { name: norm.originName, url: norm.accessUrl, status: 'success' };
         (file as any).uid = uid;
         _fileList.value.push(file);
         _resultMap.value.set(uid, norm);
       });
     } else {
       (newVal as string[]).filter(Boolean).forEach((u, i) => {
-        const norm = preserveNormalize({ url: u, filename: u.split('/').pop() || '' }, props.dir)!;
+        const norm = preserveNormalize({ accessUrl: u, originName: u.split('/').pop() || '' })!;
         const uid = buildStableUid(norm, i);
-        const file: UploadUserFile = { name: norm.filename, url: norm.url, status: 'success' };
+        const file: UploadUserFile = { name: norm.originName, url: norm.accessUrl, status: 'success' };
         (file as any).uid = uid;
         _fileList.value.push(file);
         _resultMap.value.set(uid, norm);
@@ -384,8 +381,8 @@ watch(
 /* ------------ 上传请求 ------------ */
 const uploadFileRequest = async (options: UploadRequestOptions) => {
   try {
-    const { data } = await uploadFile(
-      { file: options.file, dirTag: props.dir },
+    const { data } = await uploadResource(
+      { file: options.file, sceneCode: props.sceneCode, bizKey: props.bizKey, pathSegments: props.pathSegments },
       {
         onUploadProgress(event: AxiosProgressEvent) {
           const progressEvent = new ProgressEvent('upload', {
@@ -405,7 +402,7 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
 };
 
 /* ------------ 成功回调 ------------ */
-const handleSuccess = (response: IUploadResult | undefined, file: UploadFile) => {
+const handleSuccess = (response: IResourceUploadResult | undefined, file: UploadFile) => {
   if (!response) {
     logDebug('成功回调无 response uid=', file.uid);
     return;
@@ -511,21 +508,14 @@ async function handleDownload(file: UploadFile) {
 
   downloadingMap.value[rawUrl] = true;
   try {
-    // 1. 先根据原始 URL 获取实际可访问地址（public=原始, private=签名）
-    const downloadUrl = await getOssPreviewUrl(rawUrl);
-
-    const fakeFile: UploadFile = {
-      ...file,
-      url: downloadUrl // 后续逻辑都用转换后的地址
-    };
-
-    if (shouldForceFetch(fakeFile)) {
-      await forceBlobDownload(downloadUrl, fakeFile.name);
+    // 后端已返回可直接访问的地址，无需前端转换
+    if (shouldForceFetch(file)) {
+      await forceBlobDownload(rawUrl, file.name);
     } else {
       const a = document.createElement('a');
       a.style.display = 'none';
-      a.href = downloadUrl;
-      a.download = fakeFile.name || downloadUrl.split('/').pop() || 'download';
+      a.href = rawUrl;
+      a.download = file.name || rawUrl.split('/').pop() || 'download';
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -548,8 +538,8 @@ class CustomUploadProgressEvent extends ProgressEvent {
 }
 
 /* ------------ 对外暴露 ------------ */
-function getAllUploadResults(): IUploadResult[] {
-  const ordered: IUploadResult[] = [];
+function getAllUploadResults(): IResourceUploadResult[] {
+  const ordered: IResourceUploadResult[] = [];
   _fileList.value.forEach(f => {
     const uid = String((f as any).uid);
     const r = _resultMap.value.get(uid);

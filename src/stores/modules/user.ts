@@ -1,40 +1,39 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import piniaPersistConfig from '@/stores/helper/persist';
-import type { UserInfo } from '@/api/types/system/login';
+import type { UserProfileVO } from '@/api/types/system/user';
 
 export const useUserStore = defineStore(
   'user',
   () => {
     const token = ref('');
-    const userInfo = ref<UserInfo>({
-      username: ''
-    });
+
+    // profile 不持久化，每次刷新页面由 initDynamicRouter 重新从接口获取
+    const profile = ref<UserProfileVO | null>(null);
+
     function setToken(tokenStr: string) {
       token.value = tokenStr;
     }
 
-    // Set setUserInfo
-    function setUserInfo(info: UserInfo) {
-      userInfo.value = info;
+    function setProfile(data: UserProfileVO) {
+      profile.value = data;
     }
 
     function clear() {
       token.value = '';
-      userInfo.value = {
-        username: ''
-      };
+      profile.value = null;
     }
 
     return {
       token,
-      userInfo,
+      profile,
       setToken,
-      setUserInfo,
+      setProfile,
       clear
     };
   },
   {
-    persist: piniaPersistConfig('user')
+    // 只持久化 token，profile 每次刷新由接口重新拉取
+    persist: piniaPersistConfig('user', ['token'])
   }
 );

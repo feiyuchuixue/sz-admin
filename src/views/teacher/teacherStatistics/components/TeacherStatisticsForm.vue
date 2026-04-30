@@ -91,7 +91,7 @@ import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import UploadFiles from '@/components/Upload/UploadFiles.vue';
-import type { IUploadResult } from '@/api/types/system/upload';
+import type { IResourceUploadResult } from '@/api/types/system/upload';
 import JoditEditor from '@/components/JoditEditor/index.vue';
 import { useDialogWidth } from '@/hooks/useDialogWidth';
 
@@ -117,7 +117,7 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
-const fileUrls = ref<IUploadResult[] | string[]>([]);
+const fileUrls = ref<IResourceUploadResult[] | string[]>([]);
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
@@ -143,7 +143,7 @@ const handleSubmit = () => {
   });
 };
 
-function handleAllSuccess(list: IUploadResult[]) {
+function handleAllSuccess(list: IResourceUploadResult[]) {
   console.log('全部上传成功，共', list.length, '条：', list);
 }
 
