@@ -28,7 +28,7 @@ interface Props {
   modelValue: string;
   config?: DeepPartial<Config>;
   plugins?: Plugin[];
-  uploadDir?: string; // （当有文件资源时的）上传目录
+  sceneCode?: string; // 资源场景编码，对应后端 yml scene.code，如 teacher.richtext
   height?: string; // 编辑器高度
 }
 
@@ -36,7 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   config: () => ({}),
   plugins: () => [],
-  uploadDir: 'editor',
+  sceneCode: 'system.richtext',
   height: '400px'
 });
 
@@ -232,7 +232,7 @@ const defaultConfig: () => DeepPartial<Config> = () => ({
   colorPickerDefaultTab: 'background',
   imageDefaultWidth: 300,
   toolbarAdaptive: false,
-  uploader: createUploader(props.uploadDir)
+  uploader: createUploader(props.sceneCode)
 });
 
 const mergedConfig = computed(() => {
@@ -240,11 +240,11 @@ const mergedConfig = computed(() => {
   return merge({}, defaultConfig(), props.config);
 });
 
-const createUploader = (uploadDir: string): any => ({
-  url: `${baseUrl}${ADMIN_MODULE}/sys-file/batchUpload`,
+const createUploader = (sceneCode: string): any => ({
+  url: `${baseUrl}${ADMIN_MODULE}/resource/batchUpload`,
   headers: { Authorization: `Bearer ${userStore.token}` },
   method: 'POST',
-  data: { dirTag: uploadDir, scene: 'richtext' },
+  data: { sceneCode },
   isSuccess(res: any) {
     return res;
   },
@@ -253,8 +253,8 @@ const createUploader = (uploadDir: string): any => ({
     //此处参数的值默认是接口返回的data值
     console.log('defaultHandlerSuccess', data);
     data.forEach((item: any) => {
-      const filename = item.filename;
-      const url = item.url;
+      const filename = item.originName;
+      const url = item.accessUrl;
       const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/i.test(filename);
       if (isImage) {
         this.s.insertImage(url);

@@ -74,7 +74,7 @@
       <el-form-item label="内容" prop="contentHtml">
         <jodit-editor
           v-model="paramsProps.row.contentHtml"
-          :upload-dir="'teacher/aabb'"
+          scene-code="teacher.richtext"
           :height="'400px'"
           style="width: 100%; max-width: 100%; box-sizing: border-box"
         />
