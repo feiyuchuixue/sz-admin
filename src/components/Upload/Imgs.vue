@@ -22,7 +22,7 @@
         </slot>
       </div>
       <template #file="{ file }">
-        <img :src="file.previewUrl || file.url" class="upload-image" alt="预览图片" />
+        <img :src="file.url" class="upload-image" alt="预览图片" />
         <div class="upload-handle" @click.stop>
           <div class="handle-icon" @click="handlePictureCardPreview(file)">
             <el-icon><ZoomIn /></el-icon>
@@ -45,15 +45,14 @@
 <script setup lang="ts" name="UploadImgs">
 import { computed, inject, ref, watch } from 'vue';
 import { Plus } from '@element-plus/icons-vue';
-import { uploadFile } from '@/api/modules/system/upload';
+import { uploadResource } from '@/api/modules/system/upload';
 import type { UploadFile, UploadProps, UploadRequestOptions, UploadUserFile } from 'element-plus';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
-import type { IUploadResult } from '@/api/types/system/upload';
-import { getOssPreviewUrl } from '@/utils/oss';
+import type { IResourceUploadResult } from '@/api/types/system/upload';
 
 interface UploadFileProps {
   fileList: UploadUserFile[];
-  fileInfo?: IUploadResult; // 文件信息 ==> 非必传
+  fileInfo?: IResourceUploadResult; // 文件信息 ==> 非必传
   api?: (params: any) => Promise<any>; // 上传图片的 api 方法，一般项目上传都是同一个 api 方法，在组件里直接引入即可 ==> 非必传
   drag?: boolean; // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled?: boolean; // 是否禁用上传组件 ==> 非必传（默认为 false）
@@ -63,7 +62,9 @@ interface UploadFileProps {
   height?: string; // 组件高度 ==> 非必传（默认为 150px）
   width?: string; // 组件宽度 ==> 非必传（默认为 150px）
   borderRadius?: string; // 组件边框圆角 ==> 非必传（默认为 8px）
-  dir?: string; // 上传图片的目录 ==> 非必传（默认为 img）
+  sceneCode?: string; // 上传场景编码 ==> 非必传（默认为 admin.user.logo）
+  bizKey?: string; // 命名规则为 BIZ_KEY 时的业务标识 ==> 非必传
+  pathSegments?: string; // 路径分段，逗号分割，BIZ/BIZ_DATE 策略时生效，如 "userId,dept" ==> 非必传
 }
 
 const props = withDefaults(defineProps<UploadFileProps>(), {
@@ -77,7 +78,7 @@ const props = withDefaults(defineProps<UploadFileProps>(), {
   height: '150px',
   width: '150px',
   borderRadius: '8px',
-  dir: 'img'
+  sceneCode: 'admin.user.logo'
 });
 
 // 获取 el-form 组件上下文
@@ -89,33 +90,14 @@ const self_disabled = computed(() => {
   return props.disabled || formContext?.disabled;
 });
 
-// 内部文件列表：在 UploadUserFile 的基础上扩展一个 previewUrl 字段，仅组件内部使用
-type InnerUploadUserFile = UploadUserFile & { previewUrl?: string };
-
-const _fileList = ref<InnerUploadUserFile[]>([]);
-
-// 把外部 fileList 映射为内部 _fileList，并为每个 url 生成 previewUrl
-const buildInnerFileList = async (list: UploadUserFile[]) => {
-  const result: InnerUploadUserFile[] = [];
-
-  for (const item of list) {
-    const rawUrl = item.url || '';
-    const previewUrl = rawUrl ? await getOssPreviewUrl(rawUrl) : '';
-
-    result.push({
-      ...item,
-      previewUrl
-    });
-  }
-
-  _fileList.value = result;
-};
+// 内部文件列表
+const _fileList = ref<UploadUserFile[]>([]);
 
 // 初始 & props.fileList 变化 时同步内部列表
 watch(
   () => props.fileList,
-  async (n: UploadUserFile[]) => {
-    await buildInnerFileList(n || []);
+  (n: UploadUserFile[]) => {
+    _fileList.value = n ? [...n] : [];
   },
   { immediate: true }
 );
@@ -150,7 +132,12 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
  * */
 const handleHttpUpload = async (options: UploadRequestOptions) => {
   try {
-    const { data } = await uploadFile({ file: options.file, dirTag: props.dir });
+    const { data } = await uploadResource({
+      file: options.file,
+      sceneCode: props.sceneCode,
+      bizKey: props.bizKey,
+      pathSegments: props.pathSegments
+    });
     options.onSuccess(data);
   } catch (error) {
     options.onError(error as any);
@@ -164,12 +151,11 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
  * */
 const emit = defineEmits<{
   'update:fileList': [value: UploadUserFile[]];
-  change: [value: IUploadResult | null];
+  change: [value: IResourceUploadResult | null];
 }>();
-const uploadSuccess = async (response: IUploadResult | undefined, uploadFile: UploadFile) => {
+const uploadSuccess = async (response: IResourceUploadResult | undefined, uploadFile: UploadFile) => {
   if (!response) return;
-  uploadFile.url = response.url;
-  (uploadFile as InnerUploadUserFile).previewUrl = await getOssPreviewUrl(response.url);
+  uploadFile.url = response.accessUrl;
   emit('update:fileList', _fileList.value);
   emit('change', response);
   // 调用 el-form 内部的校验方法（可自动校验）
@@ -220,9 +206,7 @@ const handleExceed = () => {
 const viewImageUrl = ref('');
 const imgViewVisible = ref(false);
 const handlePictureCardPreview: UploadProps['onPreview'] = file => {
-  // 预览优先使用 previewUrl
-  const innerFile = file as InnerUploadUserFile;
-  viewImageUrl.value = innerFile.previewUrl || innerFile.url || '';
+  viewImageUrl.value = file.url || '';
   imgViewVisible.value = true;
 };
 </script>

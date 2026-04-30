@@ -56,16 +56,16 @@
           </el-button>
         </template>
 
-        <template #username="{ row }">
-          <el-button type="primary" link>
-            {{ row?.username }}
-          </el-button>
-        </template>
-
-        <template #logo="{ row }">
-          <el-image v-if="row.logo" :src="row.logo" />
-          <div v-else>--</div>
-        </template>
+        <template #nickname="{ row }">
+            <el-avatar
+              v-if="row.logo"
+              :src="row.logo"
+              alt="用户"
+              :size="32"
+              class="avatar-list-style"
+            />
+            <span style="vertical-align: middle">{{ row?.nickname }}</span>
+          </template>
         <template #operation="{ row }">
           <div class="btn-group">
             <el-button v-auth="'sys.user.update_btn'" type="primary" link :icon="EditPen" @click="openUserEdit('编辑用户', row)">
@@ -182,14 +182,14 @@ const columns: ColumnProps<RoleInfo>[] = [
     width: 100,
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' }
   },
-  { prop: 'phone', label: '手机号', width: 120 },
+  { prop: 'phone', label: '手机号', width: 115 },
   {
     prop: 'deptIds',
     label: '部门',
     tag: true,
     enum: useDictOptions('dynamic_dept_options'),
     fieldNames: { label: 'codeName', value: 'id', tagType: 'callbackShowStyle' },
-    tagLimit: -1
+    tagLimit: -1,
   },
   {
     prop: 'roleIds',
@@ -394,5 +394,19 @@ const refreshDeptTree = () => {
 
 .el-button + .el-button + .el-dropdown {
   margin-left: 12px;
+}
+
+.avatar-list-style {
+  margin-right: 8px;
+  border: 2px solid #e1e1e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  vertical-align: middle;
+  background: #f8f8f8;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.avatar-list-style:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.16);
 }
 </style>

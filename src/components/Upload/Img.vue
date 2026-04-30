@@ -43,21 +43,57 @@
       <slot name="tip" />
     </div>
     <el-image-viewer v-if="imgViewVisible" :url-list="[previewUrl]" @close="imgViewVisible = false" />
+
+    <!-- 裁剪弹窗（仅 crop=true 时使用） -->
+    <el-dialog
+      v-if="crop"
+      v-model="cropDialogVisible"
+      title="裁剪头像"
+      width="480px"
+      append-to-body
+      :close-on-click-modal="false"
+      @close="cancelCrop"
+    >
+      <div class="crop-container">
+        <vue-cropper
+          ref="cropperRef"
+          :img="cropImgSrc"
+          :output-size="1"
+          :output-type="cropOutputType"
+          :info="false"
+          :can-scale="true"
+          :auto-crop="true"
+          :auto-crop-width="200"
+          :auto-crop-height="200"
+          :fixed="true"
+          :fixed-number="[1, 1]"
+          :center-box="true"
+          :full="false"
+          mode="contain"
+        />
+      </div>
+      <template #footer>
+        <el-button @click="cancelCrop">取消</el-button>
+        <el-button type="primary" :loading="cropUploading" @click="confirmCrop">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts" name="UploadImg">
-import { ref, computed, inject, watch, onMounted } from 'vue';
+import { ref, computed, inject } from 'vue';
 import { generateUUID } from '@/utils';
-import { uploadFile } from '@/api/modules/system/upload';
+import { uploadResource } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
 import type { UploadProps, UploadRequestOptions } from 'element-plus';
-import type { IUploadResult } from '@/api/types/system/upload';
-import { getOssPreviewUrl } from '@/utils/oss';
+import type { IResourceUploadResult } from '@/api/types/system/upload';
+import { VueCropper } from 'vue-cropper/next';
+import 'vue-cropper/next/dist/index.css';
 
 interface UploadFileProps {
-  imageUrl: string; // 图片地址 ==> 必传
-  fileInfo?: IUploadResult; // 文件信息 ==> 非必传
+  imageUrl: string; // 图片 objectKey（入库字段）==> 必传
+  previewUrl?: string; // 图片展示地址（后端返回的可访问 URL，用于预览）==> 非必传
+  fileInfo?: IResourceUploadResult; // 文件信息 ==> 非必传
   api?: (params: any) => Promise<any>; // 上传图片的 api 方法，一般项目上传都是同一个 api 方法，在组件里直接引入即可 ==> 非必传
   drag?: boolean; // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled?: boolean; // 是否禁用上传组件 ==> 非必传（默认为 false）
@@ -66,12 +102,16 @@ interface UploadFileProps {
   height?: string; // 组件高度 ==> 非必传（默认为 150px）
   width?: string; // 组件宽度 ==> 非必传（默认为 150px）
   borderRadius?: string; // 组件边框圆角 ==> 非必传（默认为 8px）
-  dir?: string; // 上传图片的目录 ==> 非必传（默认为 img）
+  sceneCode?: string; // 上传场景编码 ==> 非必传（默认为 admin.user.logo）
+  bizKey?: string; // 命名规则为 BIZ_KEY 时的业务标识 ==> 非必传
+  pathSegments?: string; // 路径分段，逗号分割，BIZ/BIZ_DATE 策略时生效，如 "userId,dept" ==> 非必传
+  crop?: boolean; // 是否启用裁剪功能（头像场景使用） ==> 非必传（默认为 false）
 }
 
 // 接受父组件参数
 const props = withDefaults(defineProps<UploadFileProps>(), {
   imageUrl: '',
+  previewUrl: '',
   fileInfo: null,
   drag: true,
   disabled: false,
@@ -80,7 +120,8 @@ const props = withDefaults(defineProps<UploadFileProps>(), {
   height: '150px',
   width: '150px',
   borderRadius: '8px',
-  dir: 'img'
+  sceneCode: 'admin.user.logo',
+  crop: false
 });
 
 // 生成组件唯一id
@@ -97,24 +138,11 @@ const self_disabled = computed(() => {
   return props.disabled || formContext?.disabled;
 });
 
-// 仅用于展示/预览的地址（可能是 rawUrl，也可能是 privateUrl）
-const previewUrl = ref('');
-const refreshPreviewUrl = async () => {
-  if (!props.imageUrl) {
-    previewUrl.value = '';
-    return;
-  }
-  previewUrl.value = await getOssPreviewUrl(props.imageUrl);
-};
+// 上传后的本地预览地址（accessUrl），仅在本次上传会话中有效，优先于外部传入值
+const localPreviewUrl = ref('');
 
-// 初次挂载 & 外部 imageUrl 变化 时刷新预览
-onMounted(refreshPreviewUrl);
-watch(
-  () => props.imageUrl,
-  () => {
-    refreshPreviewUrl();
-  }
-);
+// 预览地址优先级：本地上传后的 accessUrl > 外部传入的 previewUrl > imageUrl（向下兼容）
+const previewUrl = computed(() => localPreviewUrl.value || props.previewUrl || props.imageUrl || '');
 
 /**
  * @description 图片上传
@@ -122,16 +150,24 @@ watch(
  * */
 const emit = defineEmits<{
   'update:imageUrl': [value: string];
-  change: [value: IUploadResult | null];
+  'update:previewUrl': [value: string];
+  change: [value: IResourceUploadResult | null];
 }>();
 const handleHttpUpload = async (options: UploadRequestOptions) => {
   try {
-    const { data } = await uploadFile({ file: options.file, dirTag: props.dir });
-    // 1. 把“原始地址”回传给父组件（父组件/数据库只存这个）
-    emit('update:imageUrl', data.url);
+    const { data } = await uploadResource({
+      file: options.file,
+      sceneCode: props.sceneCode,
+      bizKey: props.bizKey,
+      pathSegments: props.pathSegments
+    });
+    // 存 objectKey（入库字段）
+    emit('update:imageUrl', data.objectKey);
+    // 本地立即预览：无论外部是否绑定 preview-url，都能正确回显
+    localPreviewUrl.value = data.accessUrl;
+    // 若外部绑定了 preview-url，同步更新
+    emit('update:previewUrl', data.accessUrl);
     emit('change', data);
-    // 2. 使用原始地址计算预览地址（仅影响前端展示）
-    previewUrl.value = await getOssPreviewUrl(data.url);
     if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
   } catch (error) {
     options.onError(error as any);
@@ -142,9 +178,10 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
  * @description 删除图片
  * */
 const deleteImg = () => {
+  localPreviewUrl.value = '';
   emit('update:imageUrl', '');
+  emit('update:previewUrl', '');
   emit('change', null);
-  previewUrl.value = '';
 };
 
 /**
@@ -176,7 +213,14 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
         type: 'warning'
       });
     }, 0);
-  return imgType && imgSize;
+  if (!imgType || !imgSize) return false;
+
+  // 启用裁剪：读取文件为 DataURL，打开裁剪弹窗，阻止默认上传
+  if (props.crop) {
+    openCropDialog(rawFile);
+    return false;
+  }
+  return true;
 };
 
 /**
@@ -198,6 +242,70 @@ const uploadError = () => {
     title: '温馨提示',
     message: '图片上传失败，请您重新上传！',
     type: 'error'
+  });
+};
+
+// ==================== 裁剪相关 ====================
+
+const cropDialogVisible = ref(false);
+const cropImgSrc = ref('');
+const cropOutputType = ref('png');
+const cropUploading = ref(false);
+const cropperRef = ref<InstanceType<typeof VueCropper>>();
+// 裁剪后待上传的原始文件名（用于构造 File 对象）
+const cropFileName = ref('avatar.png');
+
+/**
+ * @description 打开裁剪弹窗
+ * */
+const openCropDialog = (file: File) => {
+  cropOutputType.value = file.type === 'image/png' ? 'png' : 'jpeg';
+  cropFileName.value = file.name;
+  const reader = new FileReader();
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    cropImgSrc.value = e.target?.result as string;
+    cropDialogVisible.value = true;
+  };
+  reader.readAsDataURL(file);
+};
+
+/**
+ * @description 取消裁剪
+ * */
+const cancelCrop = () => {
+  cropDialogVisible.value = false;
+  cropImgSrc.value = '';
+};
+
+/**
+ * @description 确认裁剪并上传
+ * */
+const confirmCrop = () => {
+  if (!cropperRef.value) return;
+  cropUploading.value = true;
+  cropperRef.value.getCropBlob(async (blob: Blob) => {
+    try {
+      const mimeType = cropOutputType.value === 'png' ? 'image/png' : 'image/jpeg';
+      const file = new File([blob], cropFileName.value, { type: mimeType });
+      const { data } = await uploadResource({
+        file,
+        sceneCode: props.sceneCode,
+        bizKey: props.bizKey,
+        pathSegments: props.pathSegments
+      });
+      emit('update:imageUrl', data.objectKey);
+      localPreviewUrl.value = data.accessUrl;
+      emit('update:previewUrl', data.accessUrl);
+      emit('change', data);
+      if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
+      cropDialogVisible.value = false;
+      cropImgSrc.value = '';
+      ElNotification({ title: '温馨提示', message: '头像上传成功！', type: 'success' });
+    } catch {
+      ElNotification({ title: '温馨提示', message: '头像上传失败，请重新上传！', type: 'error' });
+    } finally {
+      cropUploading.value = false;
+    }
   });
 };
 </script>
@@ -271,7 +379,7 @@ const uploadError = () => {
       .upload-image {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
       }
       .upload-empty {
         position: relative;
@@ -324,6 +432,22 @@ const uploadError = () => {
   .el-upload__tip {
     line-height: 18px;
     text-align: center;
+  }
+}
+
+/* 裁剪弹窗样式 */
+.crop-container {
+  width: 100%;
+  height: 320px;
+
+  /* 裁剪框视觉改为圆形 */
+  :deep(.cropper-view-box) {
+    border-radius: 50%;
+    outline: 0;
+  }
+  :deep(.cropper-face) {
+    border-radius: 50%;
+    background-color: inherit !important;
   }
 }
 </style>

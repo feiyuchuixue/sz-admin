@@ -42,8 +42,8 @@ importers:
         specifier: ^11.11.1
         version: 11.11.1
       jodit:
-        specifier: ^4.7.9
-        version: 4.7.9
+        specifier: ^4.12.2
+        version: 4.12.2
       lodash.merge:
         specifier: ^4.6.2
         version: 4.6.2
@@ -74,6 +74,9 @@ importers:
       vue:
         specifier: ^3.5.25
         version: 3.5.25(typescript@5.2.2)
+      vue-cropper:
+        specifier: ^0.6.5
+        version: 0.6.5
       vue-eslint-parser:
         specifier: ^10.2.0
         version: 10.2.0(eslint@9.39.1)
@@ -2090,8 +2093,8 @@ packages:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
 
-  jodit@4.7.9:
-    resolution: {integrity: sha512-dPlewnu2+vVXELh9BEJTNQoSBL3Cf2E0fNh30yjSEgUtJHYSUYToDjMDEqr0T/L9iNpqPTODy2b4pzyGpPRUog==}
+  jodit@4.12.2:
+    resolution: {integrity: sha512-SoZAH2YvL8JxPmL4muQJPbbF27rFKVzFQOiCRabjtSQcLVghm+XpIm5t9dXq+fCA4d1Z2O+8x/sORPVdLI4zbg==}
 
   js-base64@2.6.4:
     resolution: {integrity: sha512-pZe//GGmwJndub7ZghVHz7vjb2LgC1m8B07Au3eYqeqv9emhESByMXxaEgkUkEqJe87oBbSniGYoQNIBklc7IQ==}
@@ -2979,6 +2982,9 @@ packages:
 
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
+
+  vue-cropper@0.6.5:
+    resolution: {integrity: sha512-lSvY6IpeA/Tv/iPZ/FOkMHVRBPSlm7t57nuHEZFBMRNOH8ElvfqVlnHGDOAMlvPhh9gHiddiQoASS+fY0MFX0g==}
 
   vue-demi@0.14.10:
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
@@ -5193,7 +5199,7 @@ snapshots:
 
   isobject@3.0.1: {}
 
-  jodit@4.7.9: {}
+  jodit@4.12.2: {}
 
   js-base64@2.6.4: {}
 
@@ -6163,6 +6169,8 @@ snapshots:
       sass: 1.87.0
 
   vscode-uri@3.1.0: {}
+
+  vue-cropper@0.6.5: {}
 
   vue-demi@0.14.10(vue@3.5.25(typescript@5.2.2)):
     dependencies:

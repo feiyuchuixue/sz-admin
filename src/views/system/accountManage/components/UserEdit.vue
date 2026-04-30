@@ -68,10 +68,12 @@
           <UploadImg
             v-model:image-url="paramsProps.row.logo"
             @change="fileChange"
-            dir="user"
+            scene-code="admin.user.logo"
             width="135px"
             height="135px"
             border-radius="50%"
+            path-segments="user,logo"
+            :crop="true"
           >
             <template #empty>
               <el-icon><Avatar /></el-icon>
@@ -93,7 +95,7 @@
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import UploadImg from '@/components/Upload/Img.vue';
-import type { IUploadResult } from '@/api/types/system/upload';
+import type { IResourceUploadResult } from '@/api/types/system/upload';
 import { IS_PREVIEW } from '@/config';
 import { useDictOptions } from '@/hooks/useDictOptions';
 defineOptions({
@@ -137,7 +139,7 @@ const handleSubmit = () => {
 };
 
 // 获取文件变更事件
-const fileChange = (data: IUploadResult) => {
+const fileChange = (data: IResourceUploadResult) => {
   console.log(data);
 };
 
