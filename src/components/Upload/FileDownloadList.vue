@@ -1,12 +1,12 @@
 <template>
   <div class="file-download-list" :class="'align-' + align">
     <template v-if="visibleFiles.length">
-      <div class="file-row" v-for="file in visibleFiles" :key="file.url" :class="{ 'is-image': isImage(file.url) }">
+      <div class="file-row" v-for="file in visibleFiles" :key="file.url || file.name" :class="{ 'is-image': isImage(file) }">
         <el-icon class="file-icon"><Document /></el-icon>
 
-        <span class="file-name" :title="file.filename || getFileName(file.url)">
-          {{ file.filename || getFileName(file.url) }}
-          <span v-if="isImage(file.url)" class="img-preview-tag">图片</span>
+        <span class="file-name" :title="file.name || getFileName(file.url)">
+          {{ file.name || getFileName(file.url) }}
+          <span v-if="isImage(file)" class="img-preview-tag">图片</span>
         </span>
 
         <div class="op-group">
@@ -16,7 +16,7 @@
             </span>
           </el-tooltip>
 
-          <span v-if="isImage(file.url)" class="op-icon op-preview" title="预览" @click="openViewer(file)">
+          <span v-if="isImage(file)" class="op-icon op-preview" title="预览" @click="openViewer(file)">
             <el-icon><View /></el-icon>
           </span>
         </div>
@@ -58,18 +58,22 @@
 <script setup lang="ts">
 import { Document, Download, View } from '@element-plus/icons-vue';
 import { ref, computed, watch, nextTick } from 'vue';
-import type { IUploadResult } from '@/api/types/system/upload';
+import type { ResourceUploadResult } from '@/api/types/system/upload';
 import { useUrlDownload } from '@/hooks/useUrlDownload';
 import { ElMessage } from 'element-plus';
-import { getOssPreviewUrl } from '@/utils/oss';
 
 defineOptions({ name: 'FileDownloadList' });
 
-type FileType = IUploadResult & { url: string; filename?: string };
+/** 内部归一化结构，屏蔽新旧字段差异 */
+type NormalizedFile = {
+  url: string;
+  name: string;
+  contentType?: string;
+};
 
 const props = withDefaults(
   defineProps<{
-    files?: FileType[] | string[];
+    files?: ResourceUploadResult[] | string[];
     align?: 'left' | 'center' | 'right';
     maxRows?: number;
   }>(),
@@ -79,73 +83,62 @@ const props = withDefaults(
 const align = props.align || 'left';
 const maxRows = props.maxRows ?? 0;
 
-const fileList = computed<FileType[]>(() => {
+const fileList = computed<NormalizedFile[]>(() => {
   if (!props.files || !props.files.length) return [];
   if (typeof props.files[0] === 'string') {
     return (props.files as string[]).map(url => ({
       url,
-      filename: url.split('/').pop() ?? '',
-      eTag: '',
-      objectName: '',
-      dirTag: '',
-      contextType: '',
-      size: 0,
-      fileId: 0,
-      id: undefined,
-      type: undefined
+      name: url.split('/').pop() ?? url,
+      contentType: undefined
     }));
   }
-  return props.files as FileType[];
+  return (props.files as ResourceUploadResult[]).map(f => ({
+    url: f.accessUrl,
+    name: f.originName || f.accessUrl?.split('/').pop() || f.accessUrl,
+    contentType: f.contentType
+  }));
 });
 
 function getFileName(url: string) {
-  return url.split('/').pop() || url;
+  return url?.split('/').pop() || url;
 }
-function isImage(url: string) {
-  return /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(url);
+function isImage(file: NormalizedFile) {
+  if (file.contentType?.startsWith('image/')) return true;
+  return /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(file.url || '');
 }
 
 /* 折叠显示逻辑 */
 const expanded = ref(false);
 const needCollapse = computed(() => maxRows > 0 && fileList.value.length > maxRows);
-const visibleFiles = computed<FileType[]>(() =>
+const visibleFiles = computed<NormalizedFile[]>(() =>
   !needCollapse.value ? fileList.value : expanded.value ? fileList.value : fileList.value.slice(0, maxRows)
 );
 
-function handleDownload(file: FileType) {
-  useUrlDownload(file).catch(err => {
+function handleDownload(file: NormalizedFile) {
+  useUrlDownload({ url: file.url, filename: file.name }).catch(err => {
     ElMessage.error(err?.message || '下载失败');
   });
 }
 
-/* ---------------- 图片私有预览逻辑（仅图片才做转换） ---------------- */
+/* ---------------- 图片预览逻辑 ---------------- */
 
 /**
- * imageFiles:
- *   - 只包含图片类型
- *   - 保存数据库原始 url（rawUrl）和 name
+ * imageFiles：只包含图片类型，保存 rawUrl 和 name
  */
 const imageFiles = computed(() =>
   fileList.value
-    .filter(f => isImage(f.url))
+    .filter(f => isImage(f))
     .map(f => ({
       rawUrl: f.url,
-      name: f.filename || getFileName(f.url)
+      name: f.name
     }))
 );
 
 /**
- * rawUrl -> 预览用私有 URL 的映射
- * 只有图片才会被填充，且按需转换
- */
-const imagePreviewUrlMap = ref<Record<string, string>>({});
-
-/**
  * 供 el-image-viewer 使用的 url 列表：
- * - 优先用已转换的私有 URL
- * - 若还未转换，则临时用 rawUrl 兜底（保证能尽快看到预览，哪怕是公有或直链）
+ * 后端已通过 resolveUrl 回填新鲜的 accessUrl，前端直接使用
  */
-const imageUrls = computed(() => imageFiles.value.map(img => imagePreviewUrlMap.value[img.rawUrl] || img.rawUrl));
+const imageUrls = computed(() => imageFiles.value.map(img => img.rawUrl));
 
 const viewerVisible = ref(false);
 const currentIndex = ref(0);
@@ -155,40 +148,16 @@ const viewerZIndex = 5000;
 const barZIndex = ref(viewerZIndex + 1);
 
 /**
- * 按需为某个 rawUrl 生成私有预览地址
+ * 打开预览：找到当前文件在 imageFiles 中的索引，直接打开 viewer
  */
-async function ensureImagePreviewUrl(rawUrl: string): Promise<string> {
-  if (imagePreviewUrlMap.value[rawUrl]) {
-    return imagePreviewUrlMap.value[rawUrl];
-  }
-  const url = await getOssPreviewUrl(rawUrl);
-  const finalUrl = url || rawUrl;
-  imagePreviewUrlMap.value[rawUrl] = finalUrl;
-  return finalUrl;
-}
-
-/**
- * 打开预览：
- * - 找到当前文件在 imageFiles 中的索引
- * - 先确保当前图片已经做过私有转换
- * - 再打开 viewer
- */
-async function openViewer(file: FileType) {
+function openViewer(file: NormalizedFile) {
   const idx = imageFiles.value.findIndex(img => img.rawUrl === file.url);
   currentIndex.value = idx < 0 ? 0 : idx;
-
-  // 只对当前要预览的图片做一次私有转换（懒加载）
-  await ensureImagePreviewUrl(file.url);
-
   viewerVisible.value = true;
 }
 
-async function onViewerSwitch(newIndex: number) {
+function onViewerSwitch(newIndex: number) {
   currentIndex.value = newIndex;
-  const target = imageFiles.value[newIndex];
-  if (target) {
-    await ensureImagePreviewUrl(target.rawUrl);
-  }
 }
 watch(viewerVisible, v => {
   if (v) {

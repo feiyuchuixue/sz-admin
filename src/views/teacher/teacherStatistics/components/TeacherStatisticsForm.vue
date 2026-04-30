@@ -65,7 +65,8 @@
           v-model:modelValue="fileUrls"
           :limit="5"
           :file-size="3"
-          :dir="'teacher'"
+          scene-code="teacher.attachment"
+          path-segments="template,teacher"
           :debug="true"
           @all-success="handleAllSuccess"
         />
@@ -91,7 +92,7 @@ import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import UploadFiles from '@/components/Upload/UploadFiles.vue';
-import type { IResourceUploadResult } from '@/api/types/system/upload';
+import type { IResourceUploadResult, ResourceRef } from '@/api/types/system/upload';
 import JoditEditor from '@/components/JoditEditor/index.vue';
 import { useDialogWidth } from '@/hooks/useDialogWidth';
 
@@ -132,7 +133,14 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
-      paramsProps.value.row.url = fileUrls.value; // 附件数据添加--从上传组件获取
+      paramsProps.value.row.url = (fileUrls.value as IResourceUploadResult[])
+        .filter(Boolean)
+        .map(({ objectKey, originName, contentType }): ResourceRef => ({
+          objectKey,
+          originName,
+          contentType,
+          sceneCode: 'teacher.attachment'
+        }));
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();

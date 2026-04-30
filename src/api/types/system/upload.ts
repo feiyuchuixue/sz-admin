@@ -41,4 +41,15 @@ export type ResourceUploadResult = {
   resourceId: number;
 };
 
+/**
+ * 附件/文件资源 引用（多文件 JSON 列入库结构）
+ */
+export type ResourceRef = {
+  objectKey: string;
+  originName: string;
+  contentType: string;
+  sceneCode?: string;
+  accessUrl?: string;
+};
+
 export type IResourceUploadResult = ResourceUploadResult | null;

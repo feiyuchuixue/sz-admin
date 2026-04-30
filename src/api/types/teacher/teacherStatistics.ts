@@ -1,4 +1,5 @@
 import type { IPageQuery } from '@/api/types';
+import type { ResourceRef } from '@/api/types/system/upload';
 
 // 查询条件
 export type TeacherStatisticsQuery = IPageQuery & {
@@ -53,4 +54,5 @@ export type TeacherStatisticsRow = {
   createTime?: string;
   updateId?: number;
   updateTime?: string;
+  url?: ResourceRef[];
 };
