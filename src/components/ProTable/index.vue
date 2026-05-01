@@ -223,7 +223,7 @@ const setEnumMap = async (col: ColumnProps) => {
 provide('enumMap', enumMap);
 
 // 扁平化 columns
-const flatColumnsFunc = (columns: ColumnProps[], flatArr: ColumnProps[] = []) => {
+const flatColumnsFunc = (columns: ColumnProps[], flatArr: ColumnProps[] = []): ColumnProps[] => {
   columns.forEach(async col => {
     if (col._children?.length) flatArr.push(...flatColumnsFunc(col._children));
     flatArr.push(col);
@@ -237,7 +237,7 @@ const flatColumnsFunc = (columns: ColumnProps[], flatArr: ColumnProps[] = []) =>
   });
   return flatArr.filter(item => !item._children?.length);
 };
-flatColumnsFunc(tableColumns);
+flatColumnsFunc(tableColumns as ColumnProps[]);
 
 // 过滤需要搜索的配置项
 const searchColumnsData = props.searchColumns;

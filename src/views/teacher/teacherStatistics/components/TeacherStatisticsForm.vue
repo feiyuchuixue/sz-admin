@@ -67,7 +67,6 @@
           :file-size="3"
           scene-code="teacher.attachment"
           path-segments="template,teacher"
-          :debug="true"
           @all-success="handleAllSuccess"
         />
       </el-form-item>

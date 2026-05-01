@@ -34,8 +34,8 @@ export const javaTypeOptions: Options[] = [
     value: 'LocalTime'
   },
   {
-    label: 'List<UploadResult>',
-    value: 'List<UploadResult>'
+    label: 'List<ResourceRef>',
+    value: 'List<ResourceRef>'
   }
 ];
 
