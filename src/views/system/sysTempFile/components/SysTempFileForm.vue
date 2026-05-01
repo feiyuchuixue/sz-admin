@@ -13,8 +13,9 @@
           v-model:modelValue="fileUrls"
           :file-size="3"
           :dir="'excel'"
+          scene-code="template.excel"
           @change="fileChange"
-          accept=".xlsx,.xls,.docx,.doc,.pdf"
+          accept=".xlsx,.xls"
         />
       </el-form-item>
       <el-form-item label="模版名" prop="tempName">

@@ -74,7 +74,7 @@
             width="135px"
             height="135px"
             border-radius="50%"
-            path-segments="user,logo"
+            path-segments="user"
             :crop="true"
           >
             <template #empty>

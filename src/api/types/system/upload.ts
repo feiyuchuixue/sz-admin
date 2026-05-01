@@ -38,6 +38,7 @@ export type ResourceUploadResult = {
   accessUrl: string;
   contentType: string;
   size: number;
+  sceneCode?: string;
   resourceId: number;
 };
 
@@ -50,6 +51,7 @@ export type ResourceRef = {
   contentType: string;
   sceneCode?: string;
   accessUrl?: string;
+  resourceId?: number;
 };
 
 export type IResourceUploadResult = ResourceUploadResult | null;
