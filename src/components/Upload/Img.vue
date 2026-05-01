@@ -251,7 +251,7 @@ const cropDialogVisible = ref(false);
 const cropImgSrc = ref('');
 const cropOutputType = ref('png');
 const cropUploading = ref(false);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const cropperRef = ref<any>();
 // 裁剪后待上传的原始文件名（用于构造 File 对象）
 const cropFileName = ref('avatar.png');

@@ -10,7 +10,9 @@
     >
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
-        <el-button type="primary" :icon="CirclePlus" @click="openAddEdit('新增字典类型')"> 新增字典类型 </el-button>
+        <el-button type="primary" v-auth="'sys.dict.add_type_btn'" :icon="CirclePlus" @click="openAddEdit('新增字典类型')">
+          新增字典类型
+        </el-button>
         <el-button type="danger" :icon="Delete" plain :disabled="!scope.isSelected" @click="batchDelete(scope.selectedListIds)">
           批量删除字典类型
         </el-button>
@@ -35,11 +37,27 @@
       </template>
 
       <template #operation="{ row }">
-        <el-button v-if="row.isLock !== 'T'" type="primary" link :icon="EditPen" @click="openAddEdit('编辑字典类型', row, false)">
+        <el-button
+          v-if="row.isLock !== 'T'"
+          type="primary"
+          v-auth="'sys.dict.update_type_btn'"
+          link
+          :icon="EditPen"
+          @click="openAddEdit('编辑字典类型', row, false)"
+        >
           编辑
         </el-button>
-        <el-button v-if="row.isLock !== 'T'" type="primary" link :icon="Delete" @click="deleteInfo(row)"> 删除 </el-button>
-        <el-button v-auth="'sys.dict.sql_btn'" type="primary" link :icon="SoldOut" @click="showSqlInfo(row)"> SQL </el-button>
+        <el-button
+          v-if="row.isLock !== 'T'"
+          type="primary"
+          v-auth="'sys.dict.delete_type_btn'"
+          link
+          :icon="Delete"
+          @click="deleteInfo(row)"
+        >
+          删除
+        </el-button>
+        <el-button type="primary" link :icon="SoldOut" v-auth="'sys.dict.sql_btn'" @click="showSqlInfo(row)"> SQL </el-button>
       </template>
     </ProTable>
     <DictTypeForm ref="dictTypeRef" />

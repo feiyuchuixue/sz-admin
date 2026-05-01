@@ -22,6 +22,7 @@
           <el-button
             type="primary"
             :icon="CirclePlus"
+            v-auth="'sys.dict.add_btn'"
             @click="openAddEdit('新增字典', { sysDictTypeId: info?.id, sort: 1, callbackShowStyle: 'primary' }, true)"
           >
             新增字典
@@ -49,11 +50,21 @@
             link
             :disabled="row.isLock === 'T'"
             :icon="EditPen"
+            v-auth="'sys.dict.update_btn'"
             @click="openAddEdit('编辑字典', row, false)"
           >
             编辑
           </el-button>
-          <el-button type="primary" link :disabled="row.isLock === 'T'" :icon="Delete" @click="deleteInfo(row)"> 删除 </el-button>
+          <el-button
+            type="primary"
+            link
+            :disabled="row.isLock === 'T'"
+            v-auth="'sys.dict.delete_btn'"
+            :icon="Delete"
+            @click="deleteInfo(row)"
+          >
+            删除
+          </el-button>
         </template>
       </ProTable>
       <DictDataForm ref="dictDataFormRef" />

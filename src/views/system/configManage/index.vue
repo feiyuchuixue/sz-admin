@@ -10,14 +10,31 @@
     >
       <!-- 表格 header 按钮 -->
       <template #tableHeader="scope">
-        <el-button type="primary" :icon="CirclePlus" @click="openAddEdit('新增参数')"> 新增参数 </el-button>
-        <el-button type="danger" :icon="Delete" plain :disabled="!scope.isSelected" @click="batchDelete(scope.selectedListIds)">
+        <el-button type="primary" v-auth="'sys.config.add_btn'" :icon="CirclePlus" @click="openAddEdit('新增参数')">
+          新增参数
+        </el-button>
+        <el-button
+          type="danger"
+          v-auth="'sys.config.delete_btn'"
+          :icon="Delete"
+          plain
+          :disabled="!scope.isSelected"
+          @click="batchDelete(scope.selectedListIds)"
+        >
           批量删除参数
         </el-button>
       </template>
 
       <template #operation="{ row }">
-        <el-button type="primary" link :icon="EditPen" @click="openAddEdit('编辑参数', row, false)"> 编辑 </el-button>
+        <el-button
+          type="primary"
+          v-auth="'sys.config.update_btn'"
+          link
+          :icon="EditPen"
+          @click="openAddEdit('编辑参数', row, false)"
+        >
+          编辑
+        </el-button>
         <el-button v-if="row.isLock === 'F'" type="primary" link :icon="Delete" @click="deleteInfo(row)"> 删除 </el-button>
       </template>
     </ProTable>

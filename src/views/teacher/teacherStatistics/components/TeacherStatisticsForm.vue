@@ -92,7 +92,7 @@ import { ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import UploadFiles from '@/components/Upload/UploadFiles.vue';
-import type { IResourceUploadResult, ResourceRef } from '@/api/types/system/upload';
+import type { IResourceUploadResult, ResourceRef, ResourceUploadResult } from '@/api/types/system/upload';
 import JoditEditor from '@/components/JoditEditor/index.vue';
 import { useDialogWidth } from '@/hooks/useDialogWidth';
 
@@ -134,13 +134,15 @@ const handleSubmit = () => {
     if (!valid) return;
     try {
       paramsProps.value.row.url = (fileUrls.value as IResourceUploadResult[])
-        .filter(Boolean)
-        .map(({ objectKey, originName, contentType }): ResourceRef => ({
-          objectKey,
-          originName,
-          contentType,
-          sceneCode: 'teacher.attachment'
-        }));
+        .filter((r): r is ResourceUploadResult => r !== null)
+        .map(
+          ({ objectKey, originName, contentType }): ResourceRef => ({
+            objectKey,
+            originName,
+            contentType,
+            sceneCode: 'teacher.attachment'
+          })
+        );
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
