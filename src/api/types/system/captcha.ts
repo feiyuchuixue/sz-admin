@@ -7,10 +7,13 @@ export type CaptchaInfo = {
   smallWidth: number;
   smallHeight: number;
   requestId: string;
-  posY: number;
+  posY: number; // 小图 Y 轴显示位置，明文下发
   secretKey: string;
 };
+
 export type CaptchaVerifyImageParams = {
   requestId: string;
   moveEncrypted: string;
+  iv: string;
+  startTime: number;
 };

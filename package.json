@@ -18,7 +18,7 @@
     "@highlightjs/vue-plugin": "^2.1.0",
     "@rushstack/eslint-patch": "^1.16.1",
     "@vueuse/core": "^10.11.1",
-    "axios": "1.13.5",
+    "axios": "1.15.0",
     "element-plus": "^2.13.7",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-vue": "^10.9.0",

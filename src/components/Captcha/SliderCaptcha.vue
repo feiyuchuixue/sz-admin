@@ -10,35 +10,30 @@
     :close-on-press-escape="false"
   >
     <div class="sliderBox">
-      <div class="sliderBox_content">
-        <!-- 大图显示 -->
-        <img v-show="slideData.big" :src="'data:image/png;base64,' + slideData.big" class="bigImg" alt="验证码主图" />
+      <div class="sliderBox_content" :style="{ width: slideData.bigWidth + 'px', height: slideData.bigHeight + 'px' }">
+        <!-- 大图：后端已烧录缺口 -->
+        <img v-show="slideData.big" :src="'data:image/png;base64,' + slideData.big" class="bgImg" />
+        <!-- 小图：跟随滑块水平移动，Y 轴由后端 posY 定位 -->
+        <img v-show="slideData.small" :src="'data:image/png;base64,' + slideData.small" class="puzzleImg" ref="puzzleImgRef" />
         <span class="sliderBox_refresh" @click="refreshSlider">
-          <el-icon class="el-input__icon"><refresh /></el-icon>
+          <el-icon><refresh /></el-icon>
         </span>
-        <!-- 小图显示 -->
-        <img
-          v-show="slideData.small"
-          :src="'data:image/png;base64,' + slideData.small"
-          class="smallImg"
-          ref="imgK"
-          alt="验证码拼图"
-        />
         <!-- 验证结果提示 -->
         <div v-if="overlayVisible" class="overlay" :class="{ success: slideData.isSuccess, failure: !slideData.isSuccess }">
           <span>{{ overlayMessage }}</span>
         </div>
       </div>
       <div class="btnBox" ref="wrap">
-        <div class="sliderBox_text">
-          <span v-if="!isDragging && !slideData.isSuccess">向右滑动，完成验证</span>
-          <span v-if="isDragging">正在滑动，请松开完成验证</span>
+        <div class="sliderBox_text" :class="{ 'text-light': trackWidth > 64, 'text-dragging': isDragging }">
+          <span v-if="!isDragging && !isVerifying && !slideData.isSuccess">拖动滑块完成验证</span>
+          <span v-if="isDragging">释放后完成验证</span>
+          <span v-if="isVerifying && !slideData.isSuccess">正在验证...</span>
           <span v-if="slideData.isSuccess">验证通过</span>
         </div>
-        <!-- 滑块轨迹显示 -->
         <div class="sliderBox_track" :style="{ width: trackWidth + 'px' }" />
-        <!-- 滑块按钮 -->
-        <div class="sliderBox_btn" ref="slider" @mousedown="onMouseDown" @touchstart="onTouchStart" tabindex="0">&gt;</div>
+        <div class="sliderBox_btn" ref="slider" @mousedown="onMouseDown" @touchstart="onTouchStart" tabindex="0">
+          <el-icon><d-arrow-right /></el-icon>
+        </div>
       </div>
     </div>
   </el-dialog>
@@ -46,34 +41,45 @@
 
 <script setup lang="ts">
 import { ref, reactive, onBeforeUnmount, computed } from 'vue';
-import { Refresh } from '@element-plus/icons-vue';
+import { Refresh, DArrowRight } from '@element-plus/icons-vue';
 import { getImageCodeApi, verifyImageCodeApi } from '@/api/modules/system/captcha';
 import { aesEncrypt } from '@/utils';
 
 defineOptions({ name: 'SliderCaptcha' });
 
+const TRACK_PADDING = 4;
+// 拼图初始左侧偏移（避免贴边，单位 px）
+const PUZZLE_INIT_LEFT = 8;
+
 const dialogVisible = ref(false);
+
 const slideData = reactive({
   big: '',
   small: '',
   requestId: '',
   posY: 0,
   isSuccess: false,
-  bigWidth: 320,
+  bigWidth: 360,
+  bigHeight: 180,
+  smallWidth: 50,
+  smallHeight: 50,
   secretKey: ''
 });
-const slider = ref<HTMLDivElement | null>(null);
+
 const wrap = ref<HTMLDivElement | null>(null);
-const imgK = ref<HTMLImageElement | null>(null);
+const slider = ref<HTMLDivElement | null>(null);
+const puzzleImgRef = ref<HTMLImageElement | null>(null);
 const trackWidth = ref(0);
 const overlayMessage = ref('');
 const overlayVisible = ref(false);
 const isVerifying = ref(false);
+const isDragging = ref(false);
 const emit = defineEmits(['success', 'close']);
 
-let isDragging = false;
 let startX = 0;
 let startLeft = 0;
+let startTime = 0;
+let currentSliderLeft = TRACK_PADDING;
 
 const acceptParams = () => {
   fetchSlideData();
@@ -88,18 +94,22 @@ const fetchSlideData = async () => {
       posY: data.posY,
       requestId: data.requestId,
       bigWidth: data.bigWidth,
+      bigHeight: data.bigHeight,
+      smallWidth: data.smallWidth,
+      smallHeight: data.smallHeight,
       isSuccess: false,
       secretKey: data.secretKey
     });
     overlayVisible.value = false;
     overlayMessage.value = '';
     trackWidth.value = 0;
+    currentSliderLeft = TRACK_PADDING;
     dialogVisible.value = true;
-    setTimeout(resetSliderPosition, 50);
+    setTimeout(initPositions, 80);
   } catch (error) {
-    console.error('验证失败:', error);
+    console.error('获取验证码失败:', error);
     overlayVisible.value = true;
-    overlayMessage.value = '获取验证码失败，请刷新重试';
+    overlayMessage.value = '验证码加载失败，请重试';
   }
 };
 
@@ -107,34 +117,51 @@ const refreshSlider = async () => {
   slideData.isSuccess = false;
   overlayVisible.value = false;
   overlayMessage.value = '';
-  await fetchSlideData();
-};
-
-const closeSlider = () => {
-  dialogVisible.value = false;
-  resetSlider();
-  emit('close');
-};
-
-const resetSlider = () => {
-  slideData.big = '';
-  slideData.small = '';
-  slideData.requestId = '';
-  slideData.posY = 0;
-  slideData.isSuccess = false;
-  slideData.secretKey = '';
-  slideData.bigWidth = 320;
-  resetSliderPosition();
-};
-
-const resetSliderPosition = () => {
-  if (slider.value && imgK.value) {
-    slider.value.style.left = '0px';
-    imgK.value.style.left = '0px';
-    ensureImageYPosition();
-    trackWidth.value = 0;
+  isDragging.value = false;
+  trackWidth.value = 0;
+  currentSliderLeft = TRACK_PADDING;
+  try {
+    const { data } = await getImageCodeApi();
+    Object.assign(slideData, {
+      big: data.bigImageBase64,
+      small: data.smallImageBase64,
+      posY: data.posY,
+      requestId: data.requestId,
+      bigWidth: data.bigWidth,
+      bigHeight: data.bigHeight,
+      smallWidth: data.smallWidth,
+      smallHeight: data.smallHeight,
+      isSuccess: false,
+      secretKey: data.secretKey
+    });
+    setTimeout(initPositions, 80);
+  } catch (error) {
+    console.error('刷新验证码失败:', error);
+    overlayVisible.value = true;
+    overlayMessage.value = '验证码加载失败，请重试';
   }
 };
+
+/**
+ * 初始化小图和滑块位置
+ */
+function initPositions() {
+  if (slider.value) slider.value.style.left = `${TRACK_PADDING}px`;
+  currentSliderLeft = TRACK_PADDING;
+  trackWidth.value = 0;
+  setPuzzlePosition(PUZZLE_INIT_LEFT);
+}
+
+/**
+ * 设置小图水平位置（left）和垂直位置（top = posY）
+ */
+function setPuzzlePosition(x: number) {
+  if (!puzzleImgRef.value) return;
+  puzzleImgRef.value.style.left = `${x}px`;
+  puzzleImgRef.value.style.top = `${slideData.posY}px`;
+}
+
+// ─── 拖动逻辑 ────────────────────────────────────────────────────────────────
 
 const onMouseDown = (e: MouseEvent) => {
   if (!slider.value || !wrap.value || isVerifying.value || slideData.isSuccess) return;
@@ -154,77 +181,71 @@ const onTouchStart = (e: TouchEvent) => {
   }
 };
 
-let startTime = 0; // 用于记录滑动开始时间
 const startDrag = (clientX: number) => {
-  isDragging = true;
+  isDragging.value = true;
   startX = clientX;
-  startLeft = parseInt(slider.value!.style.left || '0');
-  startTime = Date.now(); // 在滑动开始时记录时间
+  startLeft = currentSliderLeft;
+  startTime = Date.now();
 };
 
 const onMouseMove = (e: MouseEvent) => {
-  if (!isDragging) return;
+  if (!isDragging.value) return;
   e.preventDefault();
   moveSlider(e.clientX);
 };
+
 const onTouchMove = (e: TouchEvent) => {
-  if (!isDragging) return;
+  if (!isDragging.value) return;
   e.preventDefault();
   if (e.touches.length === 1) moveSlider(e.touches[0].clientX);
 };
+
 const moveSlider = (clientX: number) => {
-  if (!slider.value || !imgK.value || !wrap.value) return;
+  if (!slider.value || !wrap.value) return;
   const moveX = clientX - startX;
-  const newLeft = Math.max(0, Math.min(startLeft + moveX, wrap.value.offsetWidth - slider.value.offsetWidth));
+  const maxLeft = wrap.value.offsetWidth - slider.value.offsetWidth - TRACK_PADDING;
+  const newLeft = Math.max(TRACK_PADDING, Math.min(startLeft + moveX, maxLeft));
+  const travel = newLeft - TRACK_PADDING;
   slider.value.style.left = `${newLeft}px`;
-  imgK.value.style.left = `${newLeft}px`;
-  ensureImageYPosition();
-  trackWidth.value = newLeft;
+  currentSliderLeft = newLeft;
+  setPuzzlePosition(PUZZLE_INIT_LEFT + travel);
+  trackWidth.value = travel + slider.value.offsetWidth;
 };
 
-const onMouseUp = async () => {
-  if (!isDragging) return;
+const onMouseUp = () => {
+  if (!isDragging.value) return;
+  isDragging.value = false;
   endDrag();
   document.removeEventListener('mousemove', onMouseMove);
   document.removeEventListener('mouseup', onMouseUp);
 };
-const onTouchEnd = async () => {
-  if (!isDragging) return;
+
+const onTouchEnd = () => {
+  if (!isDragging.value) return;
+  isDragging.value = false;
   endDrag();
   document.removeEventListener('touchmove', onTouchMove);
   document.removeEventListener('touchend', onTouchEnd);
 };
 
-const ensureImageYPosition = () => {
-  if (imgK.value && slideData.posY !== undefined && slideData.posY !== null) {
-    const yPos = parseInt(String(slideData.posY));
-    imgK.value.style.top = `${yPos}px`;
-    return yPos;
-  }
-  return 0;
-};
-
 const endDrag = async () => {
-  if (!slider.value || !imgK.value) return;
-  isDragging = false;
-  const currentLeft = parseInt(slider.value.style.left || '0');
-  ensureImageYPosition();
-  if (currentLeft > 0) {
-    try {
-      isVerifying.value = true;
-      const { iv, encryptedData } = await aesEncrypt(currentLeft + '', slideData.secretKey);
-      await verifyImageCode({
-        requestId: slideData.requestId,
-        startTime,
-        moveEncrypted: encryptedData,
-        iv: iv
-      });
-    } catch (error) {
-      console.error('endDrag err:', error);
-      handleVerificationFailure();
-    } finally {
-      isVerifying.value = false;
-    }
+  if (currentSliderLeft <= TRACK_PADDING) return;
+  // submitX = 初始偏移 + travel，对齐后端 posX
+  const submitX = PUZZLE_INIT_LEFT + (currentSliderLeft - TRACK_PADDING);
+  try {
+    isVerifying.value = true;
+    const encX = await aesEncrypt(submitX + '', slideData.secretKey);
+    await verifyImageCode({
+      requestId: slideData.requestId,
+      startTime,
+      moveEncrypted: encX.encryptedData,
+      iv: encX.iv
+    });
+  } catch (error) {
+    console.error('endDrag err:', error);
+    handleVerificationFailure();
+  } finally {
+    isVerifying.value = false;
   }
 };
 
@@ -232,10 +253,10 @@ const verifyImageCode = async (params: { requestId: string; startTime: number; m
   try {
     const { code } = await verifyImageCodeApi(params);
     const duration = ((Date.now() - params.startTime) / 1000).toFixed(2);
-    overlayVisible.value = true;
     if (code === '0000') {
       slideData.isSuccess = true;
-      overlayMessage.value = `验证成功, 耗时${duration}s`;
+      overlayVisible.value = true;
+      overlayMessage.value = `验证通过，耗时 ${duration}s`;
       setTimeout(() => {
         emit('success');
         closeSlider();
@@ -250,10 +271,28 @@ const verifyImageCode = async (params: { requestId: string; startTime: number; m
 
 const handleVerificationFailure = () => {
   slideData.isSuccess = false;
-  overlayMessage.value = '验证失败';
   overlayVisible.value = true;
-  resetSliderPosition();
-  setTimeout(refreshSlider, 1000);
+  overlayMessage.value = '验证未通过，请重试';
+  setTimeout(() => {
+    resetSliderPosition();
+    setTimeout(refreshSlider, 300);
+  }, 600);
+};
+
+const resetSliderPosition = () => {
+  if (slider.value) slider.value.style.left = `${TRACK_PADDING}px`;
+  currentSliderLeft = TRACK_PADDING;
+  trackWidth.value = 0;
+  setPuzzlePosition(PUZZLE_INIT_LEFT);
+};
+
+const closeSlider = () => {
+  dialogVisible.value = false;
+  emit('close');
+};
+
+const onDialogOpened = () => {
+  setTimeout(initPositions, 100);
 };
 
 onBeforeUnmount(() => {
@@ -262,12 +301,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('touchmove', onTouchMove);
   document.removeEventListener('touchend', onTouchEnd);
 });
-
-const onDialogOpened = () => {
-  setTimeout(() => {
-    ensureImageYPosition();
-  }, 100);
-};
 
 defineExpose({ acceptParams, dialogVisible, isSuccess: computed(() => slideData.isSuccess) });
 </script>
