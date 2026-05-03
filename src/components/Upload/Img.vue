@@ -87,8 +87,8 @@ import { uploadResource } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
 import type { UploadProps, UploadRequestOptions, UploadRawFile } from 'element-plus';
 import type { IResourceUploadResult } from '@/api/types/system/upload';
-import { VueCropper } from 'vue-cropper/next';
-import 'vue-cropper/next/dist/index.css';
+import { VueCropper } from 'vue-cropper';
+import 'vue-cropper/dist/index.css';
 
 interface UploadFileProps {
   imageUrl: string; // 图片 objectKey（入库字段）==> 必传

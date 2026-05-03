@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  vue-cropper@1.1.4:
+    hash: a77eff9b72afb1062d68c0afccff1f9a9d7323585c0294ce3c29d0f486d56922
+    path: patches/vue-cropper@1.1.4.patch
+
 importers:
 
   .:
@@ -75,8 +80,8 @@ importers:
         specifier: ^3.5.33
         version: 3.5.33(typescript@5.2.2)
       vue-cropper:
-        specifier: ^0.6.5
-        version: 0.6.5
+        specifier: ^1.1.4
+        version: 1.1.4(patch_hash=a77eff9b72afb1062d68c0afccff1f9a9d7323585c0294ce3c29d0f486d56922)
       vue-eslint-parser:
         specifier: ^10.4.0
         version: 10.4.0(eslint@9.39.4)
@@ -2931,8 +2936,8 @@ packages:
   vue-component-type-helpers@3.2.7:
     resolution: {integrity: sha512-+gPp5YGmhfsj1IN+xUo7y0fb4clfnOiiUA39y07yW1VzCRjzVgwLbtmdWlghh7mXrPsEaYc7rrIir/HT6C8vYQ==}
 
-  vue-cropper@0.6.5:
-    resolution: {integrity: sha512-lSvY6IpeA/Tv/iPZ/FOkMHVRBPSlm7t57nuHEZFBMRNOH8ElvfqVlnHGDOAMlvPhh9gHiddiQoASS+fY0MFX0g==}
+  vue-cropper@1.1.4:
+    resolution: {integrity: sha512-5m98vBsCEI9rbS4JxELxXidtAui3qNyTHLHg67Qbn7g8cg+E6LcnC+hh3SM/p94x6mFh6KRxT1ttnta+wCYqWA==}
 
   vue-demi@0.14.10:
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
@@ -6030,7 +6035,7 @@ snapshots:
 
   vue-component-type-helpers@3.2.7: {}
 
-  vue-cropper@0.6.5: {}
+  vue-cropper@1.1.4(patch_hash=a77eff9b72afb1062d68c0afccff1f9a9d7323585c0294ce3c29d0f486d56922): {}
 
   vue-demi@0.14.10(vue@3.5.33(typescript@5.2.2)):
     dependencies:
