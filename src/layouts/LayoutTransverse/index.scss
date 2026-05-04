@@ -15,12 +15,13 @@
       margin-right: 30px;
       .logo-img {
         width: 28px;
+        height: 28px;
         object-fit: contain;
-        margin-right: 6px;
+        margin-right: 8px;
       }
       .logo-text {
-        font-size: 21.5px;
-        font-weight: bold;
+        font-size: 18px;
+        font-weight: 600;
         color: var(--el-header-logo-text-color);
         white-space: nowrap;
       }

@@ -4,7 +4,7 @@
     <el-header>
       <div class="header-lf mask-image">
         <div class="logo flx-center">
-          <img class="logo-img" src="@/assets/images/logo.svg" alt="logo" />
+          <img class="logo-img" src="@/assets/images/brand/sz-logo.png" alt="Sz Admin logo" />
           <span class="logo-text">{{ title }}</span>
         </div>
         <ToolBarLeft />

@@ -7,8 +7,9 @@
       </div>
       <div class="login-form">
         <div class="login-logo">
-          <img class="login-icon" src="@/assets/images/logo.svg" alt="" />
-          <h2 class="logo-text">Sz-Admin</h2>
+          <img class="login-icon" src="@/assets/images/brand/sz-logo.png" alt="Sz Admin logo" />
+          <h2 class="logo-text">Sz Admin</h2>
+          <p class="logo-desc">基于 Spring Boot 3.x 、Jdk21、Vue 3 的轻量级脚手架</p>
         </div>
         <LoginForm />
       </div>

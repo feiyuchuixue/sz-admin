@@ -42,22 +42,32 @@
 
       .login-logo {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-bottom: 45px;
+        margin-bottom: 38px;
 
         .login-icon {
-          width: 60px;
-          height: 52px;
+          width: 56px;
+          height: 56px;
+          margin-bottom: 12px;
         }
 
         .logo-text {
-          padding: 0 0 0 25px;
+          padding: 0;
           margin: 0;
-          font-size: 42px;
-          font-weight: bold;
+          font-size: 32px;
+          font-weight: 700;
+          line-height: 1.15;
           color: #34495e;
           white-space: nowrap;
+        }
+
+        .logo-desc {
+          margin: 8px 0 0;
+          font-size: 14px;
+          color: var(--el-text-color-secondary);
+          letter-spacing: 1px;
         }
       }
 

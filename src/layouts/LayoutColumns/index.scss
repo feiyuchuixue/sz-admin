@@ -13,7 +13,8 @@
       box-sizing: border-box;
       height: 55px;
       .logo-img {
-        width: 32px;
+        width: 28px;
+        height: 28px;
         object-fit: contain;
       }
     }
@@ -75,8 +76,8 @@
       box-sizing: border-box;
       height: 55px;
       .logo-text {
-        font-size: 24px;
-        font-weight: bold;
+        font-size: 18px;
+        font-weight: 600;
         color: var(--el-aside-logo-text-color);
         white-space: nowrap;
       }
