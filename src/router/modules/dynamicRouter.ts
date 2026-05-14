@@ -61,8 +61,10 @@ export const initDynamicRouter = async () => {
       }
     });
   } catch (error) {
-    // 当按钮 || 菜单请求出错时，重定向到登陆页
-    userStore.setToken('');
+    // 当按钮 || 菜单请求出错时，清除全部登录态并重定向到登陆页
+    // 使用 clear() 而非 setToken('')，确保 profile / authInfo 等状态同步清除
+    userStore.clear();
+    authStore.clear();
     router.replace(LOGIN_URL);
     return Promise.reject(error);
   }
