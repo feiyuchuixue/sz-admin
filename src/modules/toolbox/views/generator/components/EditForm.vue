@@ -546,9 +546,14 @@
 <script lang="ts" setup>
 import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
-import type { GeneratorBaseInfo, GeneratorColumnInfo, GeneratorGeneratorInfo } from '@/api/types/toolbox/generator';
-import { getGeneratorInfo } from '@/api/modules/toolbox/generator';
-import { dictShowWayOptions, htmlTypeOptions, javaTypeOptions, queryTypeOptions } from '@/views/toolbox/generator/common/Options';
+import type { GeneratorBaseInfo, GeneratorColumnInfo, GeneratorGeneratorInfo } from '@/modules/toolbox/types/generator';
+import { getGeneratorInfo } from '@/modules/toolbox/api/generator';
+import {
+  dictShowWayOptions,
+  htmlTypeOptions,
+  javaTypeOptions,
+  queryTypeOptions
+} from '@/modules/toolbox/views/generator/common/Options';
 import { getDictTypeOptions } from '@/api/modules/system/dict';
 import type { DictCategory, DictType, DictOption } from '@/api/types/system/dict';
 import type { MenuTree } from '@/api/types/system/menu';

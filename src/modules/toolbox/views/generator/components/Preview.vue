@@ -18,8 +18,8 @@
 </template>
 
 <script setup lang="ts">
-import { previewCode } from '@/api/modules/toolbox/generator';
-import type { GeneratorPreviewInfo } from '@/api/types/toolbox/generator';
+import { previewCode } from '@/modules/toolbox/api/generator';
+import type { GeneratorPreviewInfo } from '@/modules/toolbox/types/generator';
 import type { IResultData } from '@/api/types';
 import HighCode from '@/components/HighCode/index.vue';
 import { ref } from 'vue';

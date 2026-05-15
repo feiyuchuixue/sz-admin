@@ -21,8 +21,8 @@
 <script setup lang="ts">
 import ProTable from '@/components/ProTable/index.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import type { GeneratorInfo } from '@/api/types/toolbox/generator';
-import { getGeneratorSchemaList, importGenerator } from '@/api/modules/toolbox/generator';
+import type { GeneratorInfo } from '@/modules/toolbox/types/generator';
+import { getGeneratorSchemaList, importGenerator } from '@/modules/toolbox/api/generator';
 import type { IPageQuery } from '@/api/types';
 import { ref } from 'vue';
 
