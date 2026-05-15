@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 
 import { useUserStore } from '@/stores/modules/user';
-import { CHANNEL_DEFAULT } from '@/config/consts';
+import { CHANNEL_DEFAULT, CHANNEL_PING, CLOSE_CODE_AUTH_EXPIRED } from '@/config/consts';
 import { parseSocketMessage, type SocketMessage } from './messageParser';
 import { createChannelHandlers } from './channelHandlers';
 
@@ -20,13 +20,23 @@ const socketUrl = useSocket
 
 const MAX_RECONNECT_COUNT = 10;
 const BASE_RECONNECT_DELAY = 10_000; // 10s
-const MAX_RECONNECT_DELAY = 30_000; // 30s
+const MAX_RECONNECT_DELAY = 30_000;  // 30s
 const FIXED_RECONNECT_DELAY = 60_000; // 60s
+
+/** 心跳发送间隔：30s */
+const HEARTBEAT_INTERVAL = 30_000;
+/** PONG 等待超时：10s 内未收到 PONG 则判定连接死亡 */
+const PONG_TIMEOUT = 10_000;
 
 export const useSocketStore = defineStore('socket', () => {
   const socket = ref<WebSocket | null>(null);
   const canReconnect = ref(true);
   const reconnectCount = ref(0);
+
+  /** 心跳定时器（setInterval）*/
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  /** PONG 超时计时器（setTimeout）*/
+  let pongTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   const userStore = useUserStore();
 
@@ -42,8 +52,70 @@ export const useSocketStore = defineStore('socket', () => {
     return FIXED_RECONNECT_DELAY;
   };
 
+  // ── 心跳 ──────────────────────────────────────────────────────────────
+
+  /**
+   * 启动 pong 超时计时器。
+   * 发出 PING 后 10s 内若未收到 PONG，判定连接死亡，主动 close + 重连。
+   */
+  const startPongTimeout = () => {
+    clearPongTimeout();
+    pongTimeoutTimer = setTimeout(() => {
+      console.warn('[socket] PONG 超时，判定连接死亡，触发重连');
+      // 强制关闭（不禁用重连），让 _onClose 走正常重连分支
+      if (socket.value) {
+        try {
+          socket.value.close();
+        } catch (_) {
+          // ignore
+        }
+        socket.value = null;
+      }
+      if (canReconnect.value) {
+        handleReconnect();
+      }
+    }, PONG_TIMEOUT);
+  };
+
+  /** 清除 pong 超时计时器（收到 PONG 时调用）*/
+  const clearPongTimeout = () => {
+    if (pongTimeoutTimer !== null) {
+      clearTimeout(pongTimeoutTimer);
+      pongTimeoutTimer = null;
+    }
+  };
+
+  /** 发送一次心跳 PING */
+  const sendPing = () => {
+    if (!socket.value || socket.value.readyState !== WebSocket.OPEN) return;
+    try {
+      socket.value.send(JSON.stringify({ channel: CHANNEL_PING }));
+      startPongTimeout();
+    } catch (err) {
+      console.warn('[socket] 发送 PING 失败：', err);
+    }
+  };
+
+  /** 启动心跳定时器（连接建立后调用）*/
+  const startHeartbeat = () => {
+    stopHeartbeat();
+    heartbeatTimer = setInterval(sendPing, HEARTBEAT_INTERVAL);
+  };
+
+  /** 停止心跳定时器（连接关闭时调用）*/
+  const stopHeartbeat = () => {
+    if (heartbeatTimer !== null) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
+    clearPongTimeout();
+  };
+
+  // ── WebSocket 事件 ─────────────────────────────────────────────────────
+
   const _onOpen = () => {
     resetReconnect();
+    startHeartbeat();
   };
 
   const handleReconnect = () => {
@@ -56,8 +128,18 @@ export const useSocketStore = defineStore('socket', () => {
     }, delay);
   };
 
-  const _onClose = () => {
+  const _onClose = (event: CloseEvent) => {
+    stopHeartbeat();
     socket.value = null;
+    // 服务端鉴权失效（自定义码 4401）：禁用重连 + 走统一登出闭环
+    // 仅此码触发登出，其它任何关闭原因（1000/1006/1011 等）均维持原有静默重连，
+    // 保证 WebSocket 仍是"可选能力"，不会因网络抖动/服务未配置而强制下线
+    if (event.code === CLOSE_CODE_AUTH_EXPIRED) {
+      canReconnect.value = false;
+      reconnectCount.value = 0;
+      handleAuthExpired();
+      return;
+    }
     if (canReconnect.value) {
       handleReconnect();
     }
@@ -68,6 +150,7 @@ export const useSocketStore = defineStore('socket', () => {
 
     canReconnect.value = false;
     reconnectCount.value = 0;
+    stopHeartbeat();
 
     if (!socket.value) return;
 
@@ -80,8 +163,8 @@ export const useSocketStore = defineStore('socket', () => {
     }
   };
 
-  // 创建 channel 分发器，只需要把 close 传进去
-  const { dispatchChannel } = createChannelHandlers({ close });
+  // 创建 channel 分发器，传入 close 和 clearPongTimeout
+  const { dispatchChannel, handleAuthExpired } = createChannelHandlers({ close, clearPongTimeout });
 
   const _onMessage = (event: MessageEvent) => {
     const msg = parseSocketMessage(event.data);
@@ -96,13 +179,10 @@ export const useSocketStore = defineStore('socket', () => {
     } catch (err) {
       console.error('WebSocket 消息处理出错：', err, '消息内容：', msg);
     }
-
-    console.log('接收到的消息：', msg);
   };
 
   const _onError = (event: Event) => {
     console.error('WebSocket 发生错误：', event);
-    // 如果需要全局通知，这里可以 mittBus.emit('socket.error', event);
   };
 
   const open = () => {
@@ -152,6 +232,19 @@ export const useSocketStore = defineStore('socket', () => {
       console.error('WebSocket 发送消息失败：', err, msg);
     }
   };
+
+  // ── 页面可见性探活 ──────────────────────────────────────────────────────
+  // 用户切回标签页时，若连接不是 OPEN 状态则立即尝试重连
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return;
+      if (!useSocket || !socketUrl) return;
+      if (!canReconnect.value) return;
+      if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
+        open();
+      }
+    });
+  }
 
   return {
     open,

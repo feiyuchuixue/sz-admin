@@ -29,6 +29,23 @@ export const SYNC_DICT: string = 'SYNC_DICT';
 export const SYNC_PERMISSIONS: string = 'SYNC_PERMISSIONS';
 
 /**
+ * 心跳请求频道（前端 → 服务端），每 30s 发送一次
+ */
+export const CHANNEL_PING: string = 'PING';
+
+/**
+ * 心跳响应频道（服务端 → 前端），收到后清除 pong 超时计时器
+ */
+export const CHANNEL_PONG: string = 'PONG';
+
+/**
+ * WebSocket 自定义关闭码：服务端鉴权失效（token 失效 / 被禁用）。
+ * 与后端 SocketManagerCache.CLOSE_CODE_AUTH_EXPIRED 对齐。
+ * 仅此码触发"停止重连 + 登出跳登录页"，其它码维持原有静默重连/忽略策略。
+ */
+export const CLOSE_CODE_AUTH_EXPIRED = 4401;
+
+/**
  * 是否选项
  * @type {[Options,Options]}
  */

@@ -55,7 +55,7 @@
       </el-form-item>
       <el-form-item label="设备类型" prop="deviceTypeCd">
         <el-select v-model="paramsProps.row.deviceTypeCd" clearable placeholder="请选择设备类型">
-          <el-option v-for="item in deviceTypeOption" :key="item.id" :label="item.codeName" :value="item.id" />
+          <el-option v-for="item in deviceTypeOption" :key="item.id" :label="item.codeName" :value="item.alias" />
         </el-select>
       </el-form-item>
       <el-form-item label="token活跃超时时间" prop="activeTimeout">
