@@ -61,25 +61,38 @@
       </template>
     </ProTable>
     <MenuForm ref="menuFormRef" />
-    <el-dialog v-model="showSqlDialog" :title="sqlDialTitle" width="80%">
-      <HighCode :code="sqlData" language="sql" title="菜单SQL" class="sql-box" />
-    </el-dialog>
+    <ScriptPreviewDialog
+      v-model="showScriptDialog"
+      :title="scriptDialogTitle"
+      :script-export="scriptExport"
+      :loading="scriptLoading"
+      @change-dialect="handleScriptDialectChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Delete, EditPen, CirclePlus, SoldOut, Sort } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
-import { addMenu, deleteMenu, editMenu, exportMenuSql, getMenuInfo, getMenuList, chaneDataRole } from '@/api/modules/system/menu';
+import {
+  addMenu,
+  deleteMenu,
+  editMenu,
+  exportMenuScript,
+  getMenuInfo,
+  getMenuList,
+  chaneDataRole
+} from '@/api/modules/system/menu';
 import MenuForm from '@/views/system/menuManage/components/MenuForm.vue';
 import { useHandleData } from '@/hooks/useHandleData';
 import { MENU_BTN, MENU_DIR, MENU_PAGE } from '@/config/consts';
 import type { MenuQuery } from '@/api/types/system/menu';
+import type { ScriptExportResult } from '@/api/types/script';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
-import HighCode from '@/components/HighCode/index.vue';
 import { computed, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import SvgIcon from '@/components/SvgIcon/index.vue';
+import ScriptPreviewDialog from '@/components/ScriptPreviewDialog/index.vue';
 import { IS_PREVIEW } from '@/config';
 import { useDictOptions } from '@/hooks/useDictOptions';
 
@@ -87,9 +100,10 @@ defineOptions({
   name: 'MenuManage'
 });
 
-const showSqlDialog = ref(false);
-const sqlData = ref<string>('');
-const rowSqlName = ref<any>({});
+const showScriptDialog = ref(false);
+const scriptLoading = ref(false);
+const scriptExport = ref<ScriptExportResult | null>(null);
+const scriptRow = ref<any>({});
 const proTableRef = ref<ProTableInstance>();
 
 // 获取table列表
@@ -177,14 +191,29 @@ const deleteInfo = async (params: Menu.MenuOptions) => {
 };
 
 const showSqlInfo = async (row: any = {}) => {
-  rowSqlName.value = row;
-  const { data } = await exportMenuSql({ ids: [row.id] });
-  showSqlDialog.value = true;
-  sqlData.value = data;
+  scriptRow.value = row;
+  await loadScript(row.id);
+  showScriptDialog.value = true;
 };
 
-const sqlDialTitle = computed(() => {
-  return 'SQL [' + rowSqlName.value?.meta?.title + ' ]' || 'SQL []';
+const loadScript = async (id: string, sqlDialect?: string) => {
+  scriptLoading.value = true;
+  try {
+    const { data } = await exportMenuScript({ ids: [id], sqlDialect });
+    scriptExport.value = data;
+  } finally {
+    scriptLoading.value = false;
+  }
+};
+
+const handleScriptDialectChange = (sqlDialect: string) => {
+  if (scriptRow.value?.id) {
+    loadScript(scriptRow.value.id, sqlDialect);
+  }
+};
+
+const scriptDialogTitle = computed(() => {
+  return `SQL [${scriptRow.value?.meta?.title || ''}]`;
 });
 
 const changeExpand = () => {
@@ -237,11 +266,3 @@ const changeDataScope = (params: Menu.MenuOptions) => {
   });
 };
 </script>
-<style scoped lang="scss">
-.sql-box {
-  margin: 0 auto;
-  width: 90%;
-  max-height: 60vh;
-  overflow: auto;
-}
-</style>

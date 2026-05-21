@@ -2,6 +2,7 @@ import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
 import type { DictTypeQuery, DictType, DictQuery, Dict, DictCustom, DictSourceQuery, DictSource } from '@/api/types/system/dict';
 import type { IPage } from '@/api/types';
+import type { ScriptExportResult } from '@/api/types/script';
 
 /**
  * 字典类别列表
@@ -109,6 +110,10 @@ export const deleteDictSource = (params: { ids: number[] }) => {
  */
 export const exportDictSql = (params: { ids: number[] }) => {
   return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params);
+};
+
+export const exportDictScript = (params: { ids: number[]; sqlDialect?: string }) => {
+  return http.post<ScriptExportResult>(ADMIN_MODULE + '/sys-dict/script/export', params);
 };
 
 /**
