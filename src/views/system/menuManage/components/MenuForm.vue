@@ -255,7 +255,7 @@ watch(
 );
 
 const validatePermission = (rule: any, value: any, callback: any) => {
-  getBtnExits({ permissions: value, id: paramsProps.value.row?.id }).then(res => {
+  getBtnExits({ permissions: value, id: paramsProps.value.row?.id || 0 }).then(res => {
     if (res.data.permissionCount > 0) {
       callback(new Error('权限已存在!'));
     } else {
