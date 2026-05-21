@@ -1,6 +1,6 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
-import type { DictTypeQuery, DictType, DictQuery, Dict, DictCustom } from '@/api/types/system/dict';
+import type { DictTypeQuery, DictType, DictQuery, Dict, DictCustom, DictSourceQuery, DictSource } from '@/api/types/system/dict';
 import type { IPage } from '@/api/types';
 
 /**
@@ -85,6 +85,22 @@ export const getAllDict = () => {
 
 export const getDictTypeOptions = () => {
   return http.get<DictType[]>(ADMIN_MODULE + `/sys-dict-type/selectOptionsType`);
+};
+
+export const getDictSourceList = (params: DictSourceQuery) => {
+  return http.get<IPage<DictSource>>(ADMIN_MODULE + `/sys-dict-source`, params);
+};
+
+export const addDictSource = (params: DictSource) => {
+  return http.post(ADMIN_MODULE + `/sys-dict-source`, params);
+};
+
+export const editDictSource = (params: DictSource) => {
+  return http.put(ADMIN_MODULE + `/sys-dict-source`, params);
+};
+
+export const deleteDictSource = (params: { ids: number[] }) => {
+  return http.delete(ADMIN_MODULE + `/sys-dict-source`, params);
 };
 
 /**

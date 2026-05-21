@@ -23,6 +23,9 @@ export type DictType = {
   id?: number;
   typeName: string;
   typeCode: string;
+  sourceCode?: string;
+  sourceName?: string;
+  sourceRange?: string;
   isLock?: string;
   isShow?: string;
   delFlag?: string;
@@ -30,6 +33,28 @@ export type DictType = {
   createTime?: string;
   updateTime?: string;
   isDynamic: boolean;
+};
+
+export type DictSourceOption = {
+  sourceCode: string;
+  sourceName: string;
+  startId: number;
+  endId: number;
+};
+
+export type DictSourceQuery = IPageQuery & {
+  sourceCode?: string;
+  sourceName?: string;
+};
+
+export type DictSource = {
+  id?: number;
+  sourceCode: string;
+  sourceName: string;
+  startId: number;
+  endId: number;
+  status?: string;
+  remark?: string;
 };
 
 // 字典分类option

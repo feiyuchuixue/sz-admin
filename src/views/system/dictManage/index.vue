@@ -1,65 +1,79 @@
 <template>
   <div class="table-box">
-    <ProTable
-      ref="proTableRef"
-      title="字典类型列表"
-      :indent="20"
-      :columns="columns"
-      :search-columns="searchColumns"
-      :request-api="getTableList"
-    >
-      <!-- 表格 header 按钮 -->
-      <template #tableHeader="scope">
-        <el-button type="primary" v-auth="'sys.dict.add_type_btn'" :icon="CirclePlus" @click="openAddEdit('新增字典类型')">
-          新增字典类型
-        </el-button>
-        <el-button type="danger" :icon="Delete" plain :disabled="!scope.isSelected" @click="batchDelete(scope.selectedListIds)">
-          批量删除字典类型
-        </el-button>
-      </template>
-
-      <template #typeCode="{ row }">
-        <el-button type="primary" link @click="openDictDta(row)">
-          {{ row?.typeCode }}
-        </el-button>
-      </template>
-
-      <template #type="{ row }">
-        <el-tag :type="row.type === 'system' ? 'primary' : 'info'">
-          {{ dictBusinessTypeLabel(row?.type) }}
-        </el-tag>
-      </template>
-
-      <template #isShow="{ row }">
-        <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'">
-          {{ yesNoOptionsLabel(row?.isShow) }}
-        </el-tag>
-      </template>
-
-      <template #operation="{ row }">
-        <el-button
-          v-if="row.isLock !== 'T'"
-          type="primary"
-          v-auth="'sys.dict.update_type_btn'"
-          link
-          :icon="EditPen"
-          @click="openAddEdit('编辑字典类型', row, false)"
+    <el-tabs v-model="activeName">
+      <el-tab-pane label="字典类型" name="type">
+        <ProTable
+          ref="proTableRef"
+          title="字典类型列表"
+          :indent="20"
+          :columns="columns"
+          :search-columns="searchColumns"
+          :request-api="getTableList"
         >
-          编辑
-        </el-button>
-        <el-button
-          v-if="row.isLock !== 'T'"
-          type="primary"
-          v-auth="'sys.dict.delete_type_btn'"
-          link
-          :icon="Delete"
-          @click="deleteInfo(row)"
-        >
-          删除
-        </el-button>
-        <el-button type="primary" link :icon="SoldOut" v-auth="'sys.dict.sql_btn'" @click="showSqlInfo(row)"> SQL </el-button>
-      </template>
-    </ProTable>
+          <!-- 表格 header 按钮 -->
+          <template #tableHeader="scope">
+            <el-button type="primary" v-auth="'sys.dict.add_type_btn'" :icon="CirclePlus" @click="openAddEdit('新增字典类型')">
+              新增字典类型
+            </el-button>
+            <el-button
+              type="danger"
+              :icon="Delete"
+              plain
+              :disabled="!scope.isSelected"
+              @click="batchDelete(scope.selectedListIds)"
+            >
+              批量删除字典类型
+            </el-button>
+          </template>
+
+          <template #typeCode="{ row }">
+            <el-button type="primary" link @click="openDictDta(row)">
+              {{ row?.typeCode }}
+            </el-button>
+          </template>
+
+          <template #sourceName="{ row }">
+            <el-tag :type="row.sourceCode === 'framework' ? 'primary' : 'success'">
+              {{ row?.sourceName }}
+            </el-tag>
+          </template>
+
+          <template #isShow="{ row }">
+            <el-tag :type="row.isShow === 'T' ? 'success' : 'danger'">
+              {{ yesNoOptionsLabel(row?.isShow) }}
+            </el-tag>
+          </template>
+
+          <template #operation="{ row }">
+            <el-button
+              v-if="row.isLock !== 'T'"
+              type="primary"
+              v-auth="'sys.dict.update_type_btn'"
+              link
+              :icon="EditPen"
+              @click="openAddEdit('编辑字典类型', row, false)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              v-if="row.isLock !== 'T'"
+              type="primary"
+              v-auth="'sys.dict.delete_type_btn'"
+              link
+              :icon="Delete"
+              @click="deleteInfo(row)"
+            >
+              删除
+            </el-button>
+            <el-button type="primary" link :icon="SoldOut" v-auth="'sys.dict.sql_btn'" @click="showSqlInfo(row)"> SQL </el-button>
+          </template>
+        </ProTable>
+      </el-tab-pane>
+
+      <el-tab-pane v-if="hasSourceQueryAuth" label="字典来源" name="source">
+        <DictSourceTab />
+      </el-tab-pane>
+    </el-tabs>
     <DictTypeForm ref="dictTypeRef" />
     <DictData ref="dictDataRef" />
     <el-dialog v-model="showSqlDialog" :title="sqlDialTitle" width="80%">
@@ -72,18 +86,25 @@
 import { CirclePlus, Delete, EditPen, SoldOut } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import { addDictType, deleteDictType, editDictType, exportDictSql, getDictType } from '@/api/modules/system/dict';
-import { dictBusinessType, dictBusinessTypeLabel, yesNoOptions, yesNoOptionsLabel } from '@/config/consts';
+import { yesNoOptions, yesNoOptionsLabel } from '@/config/consts';
 import DictTypeForm from '@/views/system/dictManage/components/DictTypeForm.vue';
+import DictSourceTab from '@/views/system/dictManage/components/DictSourceTab.vue';
 import { useHandleData } from '@/hooks/useHandleData';
 import DictData from '@/views/system/dictManage/components/DictData.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { DictType, DictTypeQuery } from '@/api/types/system/dict';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import HighCode from '@/components/HighCode/index.vue';
+import { useAuthStore } from '@/stores/modules/auth';
 
 defineOptions({
   name: 'DictManage'
 });
+
+const activeName = ref('type');
+
+const authStore = useAuthStore();
+const hasSourceQueryAuth = computed(() => authStore.authButtonListGet.includes('sys.dict.source.query_table'));
 
 // 表格配置项
 const columns: ColumnProps<DictType>[] = [
@@ -91,7 +112,8 @@ const columns: ColumnProps<DictType>[] = [
   { prop: 'id', label: '编号', width: 100 },
   { prop: 'typeName', label: '名称' },
   { prop: 'typeCode', label: '类型', width: 200 },
-  { prop: 'type', label: '业务类型', enum: dictBusinessType, width: 120 },
+  { prop: 'sourceName', label: '字典来源', width: 140 },
+  { prop: 'sourceRange', label: '来源区间', width: 170 },
   { prop: 'isShow', label: '显示', enum: yesNoOptions, width: 80 },
   { prop: 'remark', label: '备注' },
   { prop: 'createTime', label: '创建时间' },
@@ -118,7 +140,7 @@ const getTableList = (params: DictTypeQuery) => getDictType(params);
 const dictTypeRef = ref<InstanceType<typeof DictTypeForm>>();
 const openAddEdit = (title: string, row = {}, isAdd = true) => {
   if (isAdd) {
-    row = { type: 'business' };
+    row = { sourceCode: 'custom' };
   }
   const params: View.DefaultParams = {
     title,

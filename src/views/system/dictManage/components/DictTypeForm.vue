@@ -8,9 +8,9 @@
       :model="paramsProps.row"
       @submit.enter.prevent="handleSubmit"
     >
-      <el-form-item label="业务类型" prop="type">
-        <el-select v-model="paramsProps.row.type" :disabled="!isAdd" clearable placeholder="请选择业务字典类型">
-          <el-option v-for="item in dictBusinessType" :key="item.value" :label="item.label" :value="item.value" />
+      <el-form-item label="字典来源" prop="sourceCode">
+        <el-select v-model="paramsProps.row.sourceCode" :disabled="!isAdd" clearable placeholder="请选择字典来源">
+          <el-option v-for="item in sourceOptions" :key="item.id" :label="item.codeName" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="字典名称" prop="typeName">
@@ -33,14 +33,14 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import { dictBusinessType } from '@/config/consts';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'DictTypeForm'
 });
 
 const rules = reactive({
-  type: [{ required: true, message: '请选择业务字典类型' }],
+  sourceCode: [{ required: true, message: '请选择字典来源' }],
   typeCode: [{ required: true, message: '请填写字典类型' }],
   typeName: [{ required: true, message: '请填写字典名称' }]
 });
@@ -52,9 +52,10 @@ const paramsProps = ref<View.DefaultParams>({
   api: undefined,
   getTableList: undefined
 });
+const sourceOptions = useDictOptions('dynamic_dict_source_options');
 
 // 接收父组件传过来的参数
-const acceptParams = (params: View.DefaultParams) => {
+const acceptParams = async (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
   if (params?.isAdd) isAdd.value = params?.isAdd;
