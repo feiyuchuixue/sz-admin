@@ -1,5 +1,4 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { IPage } from '@/api/types';
 import type {
   SysTempFileQuery,
@@ -10,55 +9,55 @@ import type {
 } from '@/api/types/system/sysTempFile';
 
 /**
- * 查询列表
+ * 鏌ヨ鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getSysTempFileListApi = (params: SysTempFileQuery) => {
-  return http.get<IPage<SysTempFileRow>>(ADMIN_MODULE + `/sys-temp-file`, params);
+  return adminHttp.get<IPage<SysTempFileRow>>(`/sys-temp-file`, params);
 };
 
 /**
- * 添加
+ * 娣诲姞
  * @param params
  * @returns {*}
  */
 export const createSysTempFileApi = (params: SysTempFileForm) => {
-  return http.post(ADMIN_MODULE + `/sys-temp-file`, params);
+  return adminHttp.post(`/sys-temp-file`, params);
 };
 
 /**
- * 修改
+ * 淇敼
  * @param params
  * @returns {*}
  */
 export const updateSysTempFileApi = (params: SysTempFileForm) => {
-  return http.put(ADMIN_MODULE + `/sys-temp-file`, params);
+  return adminHttp.put(`/sys-temp-file`, params);
 };
 
 /**
- * 删除
+ * 鍒犻櫎
  * @param params
  * @returns {*}
  */
 export const removeSysTempFileApi = (params: { ids: (string | number)[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-temp-file`, params);
+  return adminHttp.delete(`/sys-temp-file`, params);
 };
 
 /**
- * 获取详情
+ * 鑾峰彇璇︽儏
  * @param params
  * @returns {*}
  */
 export const getSysTempFileDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<SysTempFileRow>(ADMIN_MODULE + `/sys-temp-file/${id}`);
+  return adminHttp.get<SysTempFileRow>(`/sys-temp-file/${id}`);
 };
 
 /**
- * 获取历史记录
+ * 鑾峰彇鍘嗗彶璁板綍
  * @param params
  */
 export const getSysTempFileHistoryListApi = (params: SysTempFileHistoryQuery) => {
-  return http.get<IPage<SysTempFileHistory>>(ADMIN_MODULE + `/sys-temp-file-history/history`, params);
+  return adminHttp.get<IPage<SysTempFileHistory>>(`/sys-temp-file-history/history`, params);
 };

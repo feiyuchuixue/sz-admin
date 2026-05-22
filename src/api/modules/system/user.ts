@@ -1,5 +1,4 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type {
   UserQuery,
   UserInfo,
@@ -17,165 +16,162 @@ import type { IPage } from '@/api/types';
 import type { SysDeptDeptSetting, SysDeptTree } from '@/api/types/system/dept';
 
 /**
- * 获取用户列表
+ * 鑾峰彇鐢ㄦ埛鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getUserList = (params: UserQuery) => {
-  return http.get<IPage<UserInfo>>(ADMIN_MODULE + `/sys-user`, params);
+  return adminHttp.get<IPage<UserInfo>>(`/sys-user`, params);
 };
 
 /**
- * 添加用户
+ * 娣诲姞鐢ㄦ埛
  * @param params
  * @returns {*}
  */
 export const addUser = (params: UserForm) => {
-  return http.post(ADMIN_MODULE + `/sys-user`, params);
+  return adminHttp.post(`/sys-user`, params);
 };
 
 /**
- * 修改用户
+ * 淇敼鐢ㄦ埛
  * @param params
  * @returns {*}
  */
 export const editUser = (params: UserForm) => {
-  return http.put(ADMIN_MODULE + `/sys-user`, params);
+  return adminHttp.put(`/sys-user`, params);
 };
 
 /**
- * 删除用户
+ * 鍒犻櫎鐢ㄦ埛
  * @param params
  * @returns {*}
  */
 export const deleteUser = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-user`, params);
+  return adminHttp.delete(`/sys-user`, params);
 };
 
 /**
- * 获取用户角色
+ * 鑾峰彇鐢ㄦ埛瑙掕壊
  * @param params
  * @returns {*}
  */
 export const getUserRole = (params: { userId: number }) => {
-  return http.get<UserRoleData>(ADMIN_MODULE + `/sys-user/role`, params);
+  return adminHttp.get<UserRoleData>(`/sys-user/role`, params);
 };
 
 /**
- * 设置用户角色
+ * 璁剧疆鐢ㄦ埛瑙掕壊
  * @param params
  * @returns {*}
  */
 export const setUserRole = (params: UserRoleForm) => {
-  return http.put(ADMIN_MODULE + `/sys-user/role`, params);
+  return adminHttp.put(`/sys-user/role`, params);
 };
 
 /**
- * （个人）修改密码
+ * 锛堜釜浜猴級淇敼瀵嗙爜
  * @param params
  * @returns {*}
  */
 export const changePassword = (params: UserPasswordForm) => {
-  return http.put(ADMIN_MODULE + `/sys-user/password`, params);
+  return adminHttp.put(`/sys-user/password`, params);
 };
 
 /**
- * 重置密码
+ * 閲嶇疆瀵嗙爜
  * @param params
  */
 export const resetPassword = (params: { id: number }) => {
   const { id } = params;
-  return http.put(ADMIN_MODULE + `/sys-user/reset/password/${id}`, {});
+  return adminHttp.put(`/sys-user/reset/password/${id}`, {});
 };
 
 /**
- * 获取登录用户信息
+ * 鑾峰彇鐧诲綍鐢ㄦ埛淇℃伅
  * @returns {*}
  */
 export const getUserinfo = () => {
-  return http.get<UserInfo>(ADMIN_MODULE + `/sys-user/userinfo`);
+  return adminHttp.get<UserInfo>(`/sys-user/userinfo`);
 };
 
 /**
- * 添加
+ * 娣诲姞
  * @param params
  * @returns {*}
  */
 export const bindUserDeptApi = (params: SysDeptDeptSetting) => {
-  return http.post(ADMIN_MODULE + `/sys-user/dept/bind`, params);
+  return adminHttp.post(`/sys-user/dept/bind`, params);
 };
 
 /**
- * 用户部门属性列表
- */
+ * 鐢ㄦ埛閮ㄩ棬灞炴€у垪琛? */
 export const getUserDeptTree = () => {
-  return http.get<SysDeptTree[]>(ADMIN_MODULE + `/sys-user/dept/tree`);
+  return adminHttp.get<SysDeptTree[]>(`/sys-user/dept/tree`);
 };
 
 /**
- * 解锁用户
+ * 瑙ｉ攣鐢ㄦ埛
  * @param params
  * @returns {*}
  */
 export const unlockUser = (params: { ids: (string | number)[] }) => {
-  return http.post(ADMIN_MODULE + `/sys-user/unlock`, params);
+  return adminHttp.post(`/sys-user/unlock`, params);
 };
 
 /**
- * 获取详情
+ * 鑾峰彇璇︽儏
  * @param params
  * @returns {*}
  */
 export const getUserDetailApi = (params: { id: string }) => {
   const { id } = params;
-  return http.get<UserInfo>(ADMIN_MODULE + `/sys-user/${id}`);
+  return adminHttp.get<UserInfo>(`/sys-user/${id}`);
 };
 
 /**
- * 获取用户数据角色
+ * 鑾峰彇鐢ㄦ埛鏁版嵁瑙掕壊
  * @param params
  * @returns {*}
  */
 export const getDataUserRole = (params: { userId: number }) => {
-  return http.get<UserRoleData>(ADMIN_MODULE + `/sys-user/datarole`, params);
+  return adminHttp.get<UserRoleData>(`/sys-user/datarole`, params);
 };
 
 /**
- * 设置用户类型
+ * 璁剧疆鐢ㄦ埛绫诲瀷
  * @param params
  */
 export const setUserTag = (params: UserTagOptions) => {
-  return http.post(ADMIN_MODULE + `/sys-user/changeset/usertag`, params);
+  return adminHttp.post(`/sys-user/changeset/usertag`, params);
 };
 
 /**
- * 获取当前登录用户基本资料
+ * 鑾峰彇褰撳墠鐧诲綍鐢ㄦ埛鍩烘湰璧勬枡
  * @returns {*}
  */
 export const getUserProfile = () => {
-  return http.get<UserProfileVO>(ADMIN_MODULE + `/sys-user/profile`);
+  return adminHttp.get<UserProfileVO>(`/sys-user/profile`);
 };
 
 /**
- * 更新当前登录用户基本资料
+ * 鏇存柊褰撳墠鐧诲綍鐢ㄦ埛鍩烘湰璧勬枡
  * @param params
  */
 export const updateUserProfile = (params: UserProfileUpdateForm) => {
-  return http.put(ADMIN_MODULE + `/sys-user/profile`, params);
+  return adminHttp.put(`/sys-user/profile`, params);
 };
 
 /**
- * 更新当前登录用户联系方式（手机号/邮箱）
- * @param params
+ * 鏇存柊褰撳墠鐧诲綍鐢ㄦ埛鑱旂郴鏂瑰紡锛堟墜鏈哄彿/閭锛? * @param params
  */
 export const updateUserContact = (params: UserContactUpdateForm) => {
-  return http.put(ADMIN_MODULE + `/sys-user/profile/contact`, params);
+  return adminHttp.put(`/sys-user/profile/contact`, params);
 };
 
 /**
- * 解绑当前登录用户联系方式（手机号/邮箱）
- * @param params
+ * 瑙ｇ粦褰撳墠鐧诲綍鐢ㄦ埛鑱旂郴鏂瑰紡锛堟墜鏈哄彿/閭锛? * @param params
  */
 export const unbindUserContact = (params: UserContactUnbindForm) => {
-  return http.delete(ADMIN_MODULE + `/sys-user/profile/contact`, params);
+  return adminHttp.delete(`/sys-user/profile/contact`, params);
 };

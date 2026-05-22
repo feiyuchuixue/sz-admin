@@ -1,12 +1,10 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { Message } from '@/api/types/system/message';
 
 /**
- * 发送消息
- * @param params
+ * 鍙戦€佹秷鎭? * @param params
  * @returns {*}
  */
 export const sendMessageApi = (params: Message) => {
-  return http.post(ADMIN_MODULE + `/www/message/send`, params);
+  return adminHttp.post(`/www/message/send`, params);
 };

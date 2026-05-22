@@ -1,128 +1,126 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { DictTypeQuery, DictType, DictQuery, Dict, DictCustom, DictSourceQuery, DictSource } from '@/api/types/system/dict';
 import type { IPage } from '@/api/types';
 import type { ScriptExportResult } from '@/api/types/script';
 
 /**
- * 字典类别列表
+ * 瀛楀吀绫诲埆鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getDictType = (params: DictTypeQuery) => {
-  return http.get<IPage<DictType>>(ADMIN_MODULE + `/sys-dict-type`, params);
+  return adminHttp.get<IPage<DictType>>(`/sys-dict-type`, params);
 };
 
 /**
- * 添加字典类别
+ * 娣诲姞瀛楀吀绫诲埆
  * @param params
  * @returns {*}
  */
 export const addDictType = (params: DictType) => {
-  return http.post(ADMIN_MODULE + `/sys-dict-type`, params);
+  return adminHttp.post(`/sys-dict-type`, params);
 };
 
 /**
- * 修改字典类型
+ * 淇敼瀛楀吀绫诲瀷
  * @param params
  * @returns {*}
  */
 export const editDictType = (params: DictType) => {
-  return http.put(ADMIN_MODULE + `/sys-dict-type`, params);
+  return adminHttp.put(`/sys-dict-type`, params);
 };
 
 /**
- * 删除字典类型
+ * 鍒犻櫎瀛楀吀绫诲瀷
  * @param params
  * @returns {*}
  */
 export const deleteDictType = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-dict-type`, params);
+  return adminHttp.delete(`/sys-dict-type`, params);
 };
 
 /**
- * 获取字典数据列表
+ * 鑾峰彇瀛楀吀鏁版嵁鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getDictData = (params: DictQuery) => {
-  return http.get<IPage<Dict>>(ADMIN_MODULE + `/sys-dict`, params);
+  return adminHttp.get<IPage<Dict>>(`/sys-dict`, params);
 };
 
 /**
- * 添加字典类别
+ * 娣诲姞瀛楀吀绫诲埆
  * @param params
  * @returns {*}
  */
 export const addDictData = (params: Dict) => {
-  return http.post(ADMIN_MODULE + `/sys-dict`, params);
+  return adminHttp.post(`/sys-dict`, params);
 };
 
 /**
- * 修改字典类型
+ * 淇敼瀛楀吀绫诲瀷
  * @param params
  * @returns {*}
  */
 export const editDictData = (params: Dict) => {
-  return http.put(ADMIN_MODULE + `/sys-dict`, params);
+  return adminHttp.put(`/sys-dict`, params);
 };
 
 /**
- * 删除字典
+ * 鍒犻櫎瀛楀吀
  * @param params
  * @returns {*}
  */
 export const deleteDictData = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-dict`, params);
+  return adminHttp.delete(`/sys-dict`, params);
 };
 
 /**
- * 获取所有字典信息
- * @returns {*}
+ * 鑾峰彇鎵€鏈夊瓧鍏镐俊鎭? * @returns {*}
  */
 export const getAllDict = () => {
-  return http.get<Record<string, DictCustom[]>>(ADMIN_MODULE + `/sys-dict/dict`, {});
+  return adminHttp.get<Record<string, DictCustom[]>>(`/sys-dict/dict`, {});
 };
 
 export const getDictTypeOptions = () => {
-  return http.get<DictType[]>(ADMIN_MODULE + `/sys-dict-type/selectOptionsType`);
+  return adminHttp.get<DictType[]>(`/sys-dict-type/selectOptionsType`);
 };
 
 export const getDictSourceList = (params: DictSourceQuery) => {
-  return http.get<IPage<DictSource>>(ADMIN_MODULE + `/sys-dict-source`, params);
+  return adminHttp.get<IPage<DictSource>>(`/sys-dict-source`, params);
 };
 
 export const addDictSource = (params: DictSource) => {
-  return http.post(ADMIN_MODULE + `/sys-dict-source`, params);
+  return adminHttp.post(`/sys-dict-source`, params);
 };
 
 export const editDictSource = (params: DictSource) => {
-  return http.put(ADMIN_MODULE + `/sys-dict-source`, params);
+  return adminHttp.put(`/sys-dict-source`, params);
 };
 
 export const deleteDictSource = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-dict-source`, params);
+  return adminHttp.delete(`/sys-dict-source`, params);
 };
 
 /**
- * 导出字典sql
+ * 瀵煎嚭瀛楀吀sql
  * @param params
  */
 export const exportDictSql = (params: { ids: number[] }) => {
-  return http.post<string>(ADMIN_MODULE + `/sys-dict/sql/export`, params);
+  return adminHttp.post<string>(`/sys-dict/sql/export`, params);
 };
 
 export const exportDictScript = (params: { ids: number[]; sqlDialect?: string }) => {
-  return http.post<ScriptExportResult>(ADMIN_MODULE + '/sys-dict/script/export', params);
+  return adminHttp.post<ScriptExportResult>('/sys-dict/script/export', params);
 };
 
 /**
- * 获取指定字典
+ * 鑾峰彇鎸囧畾瀛楀吀
  * @param params
  * @returns {*}
  */
 export const getDictByCode = (params: { typeCode: string[] }) => {
   const searchParams = new URLSearchParams();
   params.typeCode.forEach(code => searchParams.append('typeCode', code));
-  return http.get<Record<string, DictCustom[]>>(ADMIN_MODULE + `/sys-dict/code?${searchParams.toString()}`);
+  return adminHttp.get<Record<string, DictCustom[]>>(`/sys-dict/code?${searchParams.toString()}`);
 };

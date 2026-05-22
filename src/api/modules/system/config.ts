@@ -1,48 +1,47 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { ConfigForm, ConfigInfo, ConfigQuery } from '@/api/types/system/config';
 import type { IPage } from '@/api/types';
 
 /**
- * 获取列表
+ * 鑾峰彇鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getConfigList = (params: ConfigQuery) => {
-  return http.get<IPage<ConfigInfo>>(ADMIN_MODULE + `/sys-config`, params);
+  return adminHttp.get<IPage<ConfigInfo>>(`/sys-config`, params);
 };
 
 /**
- * 添加
+ * 娣诲姞
  * @param params
  * @returns {*}
  */
 export const addConfig = (params: ConfigForm) => {
-  return http.post(ADMIN_MODULE + `/sys-config`, params);
+  return adminHttp.post(`/sys-config`, params);
 };
 
 /**
- * 修改
+ * 淇敼
  * @param params
  * @returns {*}
  */
 export const editConfig = (params: ConfigForm) => {
-  return http.put(ADMIN_MODULE + `/sys-config`, params);
+  return adminHttp.put(`/sys-config`, params);
 };
 
 /**
- * 删除
+ * 鍒犻櫎
  * @param params
  * @returns {*}
  */
 export const deleteConfig = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-config`, params);
+  return adminHttp.delete(`/sys-config`, params);
 };
 
 /**
- * 获取前端参数信息
+ * 鑾峰彇鍓嶇鍙傛暟淇℃伅
  * @returns {*}
  */
 export const getFrontendConfig = () => {
-  return http.get<Record<string, string>>(ADMIN_MODULE + `/sys-config/frontend-configs`, {});
+  return adminHttp.get<Record<string, string>>(`/sys-config/frontend-configs`, {});
 };

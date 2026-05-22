@@ -1,5 +1,4 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { IPage } from '@/api/types';
 import type {
   SysDeptQuery,
@@ -13,92 +12,89 @@ import type {
 } from '@/api/types/system/dept';
 
 /**
- * 查询列表
+ * 鏌ヨ鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getSysDeptListApi = (params: SysDeptQuery) => {
-  return http.get<IPage<SysDeptRow>>(ADMIN_MODULE + `/sys-dept`, params);
+  return adminHttp.get<IPage<SysDeptRow>>(`/sys-dept`, params);
 };
 
 /**
- * 添加
+ * 娣诲姞
  * @param params
  * @returns {*}
  */
 export const createSysDeptApi = (params: SysDeptForm) => {
-  return http.post(ADMIN_MODULE + `/sys-dept`, params);
+  return adminHttp.post(`/sys-dept`, params);
 };
 
 /**
- * 修改
+ * 淇敼
  * @param params
  * @returns {*}
  */
 export const updateSysDeptApi = (params: SysDeptForm) => {
-  return http.put(ADMIN_MODULE + `/sys-dept`, params);
+  return adminHttp.put(`/sys-dept`, params);
 };
 
 /**
- * 删除
+ * 鍒犻櫎
  * @param params
  * @returns {*}
  */
 export const removeSysDeptApi = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-dept`, params);
+  return adminHttp.delete(`/sys-dept`, params);
 };
 
 /**
- * 获取详情
+ * 鑾峰彇璇︽儏
  * @param params
  * @returns {*}
  */
 export const getSysDeptDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<SysDeptRow>(ADMIN_MODULE + `/sys-dept/${id}`);
+  return adminHttp.get<SysDeptRow>(`/sys-dept/${id}`);
 };
 
 /**
- * 获取上级菜单树
- * @param params
+ * 鑾峰彇涓婄骇鑿滃崟鏍? * @param params
  * @returns {*}
  */
 export const getMenuTree = (params: { excludeNodeId?: number; appendRoot?: boolean }) => {
-  return http.get<SysDeptTree[]>(ADMIN_MODULE + `/sys-dept/tree`, params);
+  return adminHttp.get<SysDeptTree[]>(`/sys-dept/tree`, params);
 };
 
 /**
- * 获取部门负责人关系
- * @param params
+ * 鑾峰彇閮ㄩ棬璐熻矗浜哄叧绯? * @param params
  * @returns {*}
  */
 export const getSysDeptLeaderApi = () => {
-  return http.get<SysDeptLeaderData>(ADMIN_MODULE + `/sys-dept/leader`);
+  return adminHttp.get<SysDeptLeaderData>(`/sys-dept/leader`);
 };
 
 /**
- * 获取部门树
- * @param params
+ * 鑾峰彇閮ㄩ棬鏍? * @param params
  * @returns {*}
  */
 export const getDeptTrees = (params: { deptId?: number }) => {
-  return http.get<SysDeptDept>(ADMIN_MODULE + `/sys-dept/datascope`, params);
+  return adminHttp.get<SysDeptDept>(`/sys-dept/datascope`, params);
 };
 
 /**
- * 获取部门角色
+ * 鑾峰彇閮ㄩ棬瑙掕壊
  * @param params
  * @returns {*}
  */
 export const getDeptRole = (params: { deptId: number }) => {
-  return http.get<DeptRoleData>(ADMIN_MODULE + `/sys-dept/role`, params);
+  return adminHttp.get<DeptRoleData>(`/sys-dept/role`, params);
 };
 
 /**
- * 设置部门角色
+ * 璁剧疆閮ㄩ棬瑙掕壊
  * @param params
  * @returns {*}
  */
 export const setDeptRole = (params: DeptRoleForm) => {
-  return http.put(ADMIN_MODULE + `/sys-dept/role`, params);
+  return adminHttp.put(`/sys-dept/role`, params);
 };

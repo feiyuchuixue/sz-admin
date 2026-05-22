@@ -1,77 +1,76 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { IPage } from '@/api/types';
 import type { TeacherStatisticsQuery, TeacherStatisticsRow, TeacherStatisticsForm } from '@/api/types/teacher/teacherStatistics';
 import type { UploadRawFile } from 'element-plus/es/components/upload/src/upload';
 import type { AxiosRequestConfig } from 'axios';
 /**
- * 查询列表
+ * 鏌ヨ鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getTeacherStatisticsListApi = (params: TeacherStatisticsQuery) => {
-  return http.get<IPage<TeacherStatisticsRow>>(ADMIN_MODULE + `/teacher-statistics`, params);
+  return adminHttp.get<IPage<TeacherStatisticsRow>>(`/teacher-statistics`, params);
 };
 
 /**
- * 添加
+ * 娣诲姞
  * @param params
  * @returns {*}
  */
 export const createTeacherStatisticsApi = (params: TeacherStatisticsForm) => {
-  return http.post(ADMIN_MODULE + `/teacher-statistics`, params);
+  return adminHttp.post(`/teacher-statistics`, params);
 };
 
 /**
- * 修改
+ * 淇敼
  * @param params
  * @returns {*}
  */
 export const updateTeacherStatisticsApi = (params: TeacherStatisticsForm) => {
-  return http.put(ADMIN_MODULE + `/teacher-statistics`, params);
+  return adminHttp.put(`/teacher-statistics`, params);
 };
 
 /**
- * 删除
+ * 鍒犻櫎
  * @param params
  * @returns {*}
  */
 export const removeTeacherStatisticsApi = (params: { ids: (string | number)[] }) => {
-  return http.delete(ADMIN_MODULE + `/teacher-statistics`, params);
+  return adminHttp.delete(`/teacher-statistics`, params);
 };
 
 /**
- * 获取详情
+ * 鑾峰彇璇︽儏
  * @param params
  * @returns {*}
  */
 export const getTeacherStatisticsDetailApi = (params: { id: number }) => {
   const { id } = params;
-  return http.get<TeacherStatisticsRow>(ADMIN_MODULE + `/teacher-statistics/${id}`);
+  return adminHttp.get<TeacherStatisticsRow>(`/teacher-statistics/${id}`);
 };
 
 /**
- * 导入excel
+ * 瀵煎叆excel
  * @param params
  */
 export const importTeacherStatisticsExcelApi = (params: UploadRawFile, config?: AxiosRequestConfig<any> | undefined) => {
-  return http.upload(ADMIN_MODULE + `/teacher-statistics/import`, params, config);
+  return adminHttp.upload(`/teacher-statistics/import`, params, config);
 };
 
 /**
- * 导出excel
+ * 瀵煎嚭excel
  * @param params
  * @returns {*}
  */
 export const exportTeacherStatisticsExcelApi = (params: TeacherStatisticsQuery) => {
-  return http.download(ADMIN_MODULE + `/teacher-statistics/export`, params);
+  return adminHttp.download(`/teacher-statistics/export`, params);
 };
 
 /**
- * 远程搜索
+ * 杩滅▼鎼滅储
  * @param params
  */
 export const remoteTeacherStaticsSearchApi = (params: { keyword: string }) => {
   const { keyword } = params;
-  return http.get<string[]>(ADMIN_MODULE + `/teacher-statistics/remote/${keyword}`);
+  return adminHttp.get<string[]>(`/teacher-statistics/remote/${keyword}`);
 };

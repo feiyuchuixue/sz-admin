@@ -1,22 +1,21 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { IPage } from '@/api/types';
 import type { SysLoginLogQuery, SysLoginLogRow } from '@/api/types/system/sysLoginLog';
 
 /**
- * 查询列表
+ * 鏌ヨ鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getSysLoginLogListApi = (params: SysLoginLogQuery) => {
-  return http.get<IPage<SysLoginLogRow>>(ADMIN_MODULE + `/sys-login-log`, params);
+  return adminHttp.get<IPage<SysLoginLogRow>>(`/sys-login-log`, params);
 };
 
 /**
- * 导出excel
+ * 瀵煎嚭excel
  * @param params
  * @returns {*}
  */
 export const exportSysLoginLogExcelApi = (params: SysLoginLogQuery) => {
-  return http.download(ADMIN_MODULE + `/sys-login-log/export`, params);
+  return adminHttp.download(`/sys-login-log/export`, params);
 };

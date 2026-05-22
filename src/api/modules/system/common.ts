@@ -1,35 +1,33 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { CommonTemplateDown, OssTransform } from '@/api/types/system/common';
 import type { SelectorQuery, SelectorResult } from '@/components/MemberSelector/type/selector';
 
 /**
- * 模版下载
+ * 妯＄増涓嬭浇
  */
 export const downloadTemplate = (params: CommonTemplateDown) => {
-  return http.template(ADMIN_MODULE + `/common/download/templates`, params);
+  return adminHttp.template(`/common/download/templates`, params);
 };
 
 /**
- * 多维选择器查询
- * @param params
+ * 澶氱淮閫夋嫨鍣ㄦ煡璇? * @param params
  */
 export const querySelector = (params: SelectorQuery) => {
-  return http.get<SelectorResult>(ADMIN_MODULE + `/common/selector`, params);
+  return adminHttp.get<SelectorResult>(`/common/selector`, params);
 };
 
 /**
- * 获取私有访问地址
+ * 鑾峰彇绉佹湁璁块棶鍦板潃
  * @param params
  */
 export const getPrivateUrl = (params: OssTransform) => {
-  return http.get<string>(ADMIN_MODULE + `/common/oss/objects/private-url`, params);
+  return adminHttp.get<string>(`/common/oss/objects/private-url`, params);
 };
 
 /**
- * 文件下载
+ * 鏂囦欢涓嬭浇
  * @param params
  */
 export const fileDownload = (params: { url: string }) => {
-  return http.downloadWithHeader(ADMIN_MODULE + `/common/files/download`, params);
+  return adminHttp.downloadWithHeader(`/common/files/download`, params);
 };
