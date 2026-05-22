@@ -1,4 +1,4 @@
-import { createHttp } from '@/api';
+import { createHttp } from '@/api/request';
 
 const normalizeApiBase = (value: string | undefined, fallback: string): string => {
   const raw = (value || fallback).trim();

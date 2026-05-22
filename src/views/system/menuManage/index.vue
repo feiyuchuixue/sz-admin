@@ -223,9 +223,9 @@ const changeExpand = () => {
 const changeDataScope = (params: Menu.MenuOptions) => {
   switchLoading.value = true;
   const menuId = params.id;
-  if (IS_PREVIEW && menuId == '85b54322630f43a39296488a5e76ba16') {
+  if (IS_PREVIEW) {
     switchLoading.value = false;
-    ElMessage.warning({ message: '预览环境，禁止修改，请谅解！' });
+    ElMessage.warning({ message: '预览环境，禁止修改菜单数据权限支持，请谅解！' });
     return false;
   }
   const handleSuccess = (resolve: (value: boolean | PromiseLike<boolean>) => void) => {
