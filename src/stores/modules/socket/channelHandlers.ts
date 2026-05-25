@@ -16,6 +16,7 @@ import { useAuthStore } from '@/stores/modules/auth';
 import { useConfigStore } from '@/stores/modules/config';
 import type { SocketMessage } from './messageParser';
 import { useOptionsStore } from '@/stores/modules/options';
+import { handleAuthExpired as handleSessionAuthExpired } from '@/core/authSession';
 
 /**
  * createChannelHandlers 只从外部接收最小控制依赖：close、clearPongTimeout
@@ -44,19 +45,15 @@ export const createChannelHandlers = (options: { close: () => void; clearPongTim
 
   /**
    * 处理 WebSocket 自定义关闭码 4401（服务端鉴权失效）。
-   * 与 axios HTTP 401 / 业务码 C105 共用同一登出语义，
+   * 与 axios 业务码 C105 共用同一登出语义，
    * 但不弹窗阻塞，静默清理并跳转登录页，避免打断用户当前操作。
    * 注意：此函数由 socket.ts 在 onclose 4401 分支主动调用，已在外层禁用重连。
    */
   const handleAuthExpired = () => {
-    // close() 内部会再次执行 canReconnect=false + 清理 socket 引用，幂等安全
-    close();
-    userStore.clear();
-    authStore.clear();
-    // 仅当前不在登录页时跳转，避免重复 replace
-    if (router.currentRoute.value.path !== LOGIN_URL) {
-      router.replace(LOGIN_URL);
-    }
+    handleSessionAuthExpired(undefined, {
+      cleanup: close,
+      notify: false
+    });
   };
 
   const handleSyncFrontendConf = async () => {

@@ -2,28 +2,12 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 
 import router from '@/router';
-import { LOGIN_URL } from '@/config';
-import { checkStatus, CODE_SUCCESS, CODE_TOKEN_FAIL } from '@/api/helper';
+import { checkStatus, CODE_SUCCESS } from '@/api/helper';
 import type { IResultData } from '@/api/types';
 import { useUserStore } from '@/stores/modules/user';
-import { useAuthStore } from '@/stores/modules/auth';
 import { useSocketStore } from '@/stores/modules/socket/socket';
 import { ElMessage } from 'element-plus';
-
-/**
- * 清除登录态并跳转登录页
- * 场景：业务码 C105（token 失效）或 HTTP 401（未认证）
- */
-function clearLoginAndRedirect(message?: string): void {
-  const userStore = useUserStore();
-  const authStore = useAuthStore();
-  const socketStore = useSocketStore();
-  userStore.clear();
-  authStore.clear();
-  socketStore.close();
-  router.replace(LOGIN_URL);
-  if (message) ElMessage.error(message);
-}
+import { handleAuthExpired, isAuthExpiredPayload, markAuthExpiredError } from '@/core/authSession';
 
 export interface CustomAxiosRequestConfig<D = any> extends AxiosRequestConfig<D> {
   loading?: boolean;
@@ -88,17 +72,22 @@ export class RequestHttp {
           if (bizCode && bizCode !== CODE_SUCCESS) {
             // 解码响应头中的中文（后端 URLEncoder 编码）
             const msg = bizMessage ? decodeURIComponent(bizMessage) : '操作失败，请稍后重试！';
+            const payload = { code: bizCode, message: msg };
+            if (isAuthExpiredPayload(payload)) {
+              handleAuthExpired(payload, { cleanup: () => useSocketStore().close() });
+              return Promise.reject(markAuthExpiredError(payload));
+            }
             ElMessage.error(msg);
-            return Promise.reject({ code: bizCode, message: msg });
+            return Promise.reject(payload);
           }
           // 正常文件流，直接返回整个响应对象
           return response;
         }
 
         // 登录失效（业务码 C105）
-        if (data.code === CODE_TOKEN_FAIL) {
-          clearLoginAndRedirect(data.message);
-          return Promise.reject(data);
+        if (isAuthExpiredPayload(data)) {
+          handleAuthExpired(data, { cleanup: () => useSocketStore().close() });
+          return Promise.reject(markAuthExpiredError(data));
         }
         // 全局错误信息拦截
         if (data.code && data.code !== CODE_SUCCESS) {
@@ -113,19 +102,19 @@ export class RequestHttp {
       },
       async error => {
         const { response } = error;
+        const errorMessage = String(error?.message || '');
         // 请求超时 && 网络错误单独判断，没有 response
-        if (error.message.indexOf('timeout') !== -1) {
+        if (errorMessage.includes('timeout')) {
           ElMessage.error('请求超时！请您稍后重试');
         }
-        if (error.message.indexOf('Network Error') !== -1) {
+        if (errorMessage.includes('Network Error')) {
           ElMessage.error('网络错误！请您稍后重试');
         }
         // 根据服务器响应的错误状态码，做不同的处理
         if (response) {
-          // HTTP 401：token 失效或未登录，统一跳转登录页
-          if (response.status === 401) {
-            clearLoginAndRedirect(response.data?.message || '登录失效，请重新登录！');
-            return Promise.reject(error);
+          if (isAuthExpiredPayload(response.data)) {
+            handleAuthExpired(response.data, { cleanup: () => useSocketStore().close() });
+            return Promise.reject(markAuthExpiredError(error));
           }
           checkStatus(response.status, response.data?.message);
         }
