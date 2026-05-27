@@ -18,7 +18,7 @@
     "@highlightjs/vue-plugin": "^2.1.0",
     "@rushstack/eslint-patch": "^1.16.1",
     "@vueuse/core": "^10.11.1",
-    "axios": "1.15.0",
+    "axios": "1.15.2",
     "element-plus": "^2.13.7",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-vue": "^10.9.0",
@@ -58,12 +58,17 @@
     "prettier": "^3.8.3",
     "sass": "~1.87.0",
     "typescript": "~5.2.2",
-    "vite": "6.3.4",
+    "vite": "6.4.2",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vue-devtools": "^7.7.9",
     "vue-tsc": "^2.2.12"
   },
   "pnpm": {
+    "overrides": {
+      "minimatch@10.2.5>brace-expansion": "5.0.6",
+      "svg-baker>micromatch": "4.0.8",
+      "svg-baker>postcss": "8.5.15"
+    },
     "patchedDependencies": {
       "vue-cropper@1.1.4": "patches/vue-cropper@1.1.4.patch"
     }
