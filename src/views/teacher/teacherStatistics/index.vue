@@ -82,6 +82,7 @@ import { useDictOptions } from '@/hooks/useDictOptions';
 import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
 import TeacherStatisticsContentForm from '@/views/teacher/teacherStatistics/components/TeacherStatisticsContentForm.vue';
 import type { Options } from '@/config/typings';
+
 defineOptions({
   name: 'TeacherStatisticsView'
 });
@@ -301,7 +302,7 @@ const batchDelete = async (ids: (string | number)[]) => {
 };
 // 导入
 const ImportExcelRef = ref<InstanceType<typeof ImportExcel>>();
-const importData = () => {
+const importData = async () => {
   const params = {
     title: '教师统计',
     tempApi: downloadTemplate,

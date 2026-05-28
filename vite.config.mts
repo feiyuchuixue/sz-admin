@@ -1,4 +1,4 @@
-// vite.config.mts
+﻿// vite.config.mts
 import { resolve } from 'path';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, ConfigEnv, UserConfig, loadEnv } from 'vite';
@@ -7,6 +7,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import viteCompression from 'vite-plugin-compression';
+// @ts-ignore
 import pkg from './package.json';
 
 // 由于我们使用的是 ESM，不再需要 const path = require('node:path');
@@ -28,11 +29,13 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   });
   const adminApiBase = normalizeApiBase(env.VITE_ADMIN_API_BASE, '/api/admin');
   const generatorApiBase = normalizeApiBase(env.VITE_GENERATOR_API_BASE, '/api/generator');
+  const auditApiBase = normalizeApiBase(env.VITE_AUDIT_API_BASE, '/api/audit');
   const proxyTarget = env.VITE_API_PROXY_TARGET;
   const proxy = proxyTarget
     ? {
         [adminApiBase]: createApiProxy(proxyTarget),
-        [generatorApiBase]: createApiProxy(proxyTarget)
+        [generatorApiBase]: createApiProxy(proxyTarget),
+        [auditApiBase]: createApiProxy(proxyTarget)
       }
     : {};
 
@@ -70,6 +73,21 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         scss: {
           api: 'modern-compiler', // https://github.com/sass/dart-sass/issues/2395#issuecomment-988870897
           additionalData: `@use "@/styles/element/index.scss" as *;`
+        }
+      }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return;
+            if (/[\\/]node_modules[\\/](vue|vue-router|pinia|@vueuse)[\\/]/.test(id)) return 'vue-vendor';
+            if (/[\\/]node_modules[\\/](element-plus|@element-plus)[\\/]/.test(id)) return 'element-plus';
+            if (/[\\/]node_modules[\\/](jodit|dompurify)[\\/]/.test(id)) return 'rich-editor';
+            if (/[\\/]node_modules[\\/](highlight\.js|@highlightjs)[\\/]/.test(id)) return 'highlight';
+            if (/[\\/]node_modules[\\/]axios[\\/]/.test(id)) return 'http';
+            return 'vendor';
+          }
         }
       }
     },

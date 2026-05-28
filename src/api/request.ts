@@ -93,7 +93,7 @@ export class RequestHttp {
         if (data.code && data.code !== CODE_SUCCESS) {
           const customConfig = response.config as CustomAxiosRequestConfig;
           if (customConfig.handleBusinessError !== false) {
-            ElMessage.error({ message: data.message, dangerouslyUseHTMLString: true });
+            ElMessage.error(data.message);
           }
           return Promise.reject(data);
         }

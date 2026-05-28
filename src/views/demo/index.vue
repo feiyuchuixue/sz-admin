@@ -11,17 +11,24 @@
       <el-button type="primary" :icon="Select" @click="openChooseSelector"> 多维选择器 </el-button>
       <el-button type="primary" :icon="Select" @click="openChooseSelector2"> 赋值回显：多维选择器 </el-button>
     </el-row>
-    <MemberSelector v-model:visible="isChooseSelector" :data="selectorData" @change-selected="changeSelector" />
+    <MemberSelector
+      v-if="isChooseSelector"
+      v-model:visible="isChooseSelector"
+      :data="selectorData"
+      @change-selected="changeSelector"
+    />
   </div>
 </template>
 
 <script setup lang="ts" name="authButton">
 import { Position, Select } from '@element-plus/icons-vue';
 import SendMessageForm from '@/views/demo/components/SendMessageForm.vue';
-import { ref } from 'vue';
+import { defineAsyncComponent, ref } from 'vue';
 import { sendMessageApi } from '@/api/modules/demo/demo';
-import MemberSelector from '@/components/MemberSelector/index.vue';
 import { ElMessageBox } from 'element-plus';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
+
+const MemberSelector = defineAsyncComponent(() => import('@/components/MemberSelector/index.vue'));
 
 const selectorData = ref<any>({});
 
@@ -84,11 +91,12 @@ const openChooseSelector2 = () => {
 };
 
 const changeSelector = (data: any) => {
+  const safeJson = sanitizeHtml(JSON.stringify(data, null, 2));
   ElMessageBox({
     title: '多维选择器JSON信息',
     message: `
       <div>
-        <pre>${JSON.stringify(data, null, 2)}</pre>
+        <pre>${safeJson}</pre>
       </div>
     `,
     dangerouslyUseHTMLString: true,

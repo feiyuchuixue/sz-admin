@@ -89,6 +89,7 @@ import { Download } from '@element-plus/icons-vue';
 import { type UploadRequestOptions, type UploadRawFile, ElNotification, ElMessage } from 'element-plus';
 import type { AxiosProgressEvent } from 'axios';
 import ImportExcelResultDialog from './components/ImportExcelResultDialog.vue';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 defineOptions({
   name: 'ImportExcel'
@@ -173,9 +174,10 @@ const createUploadAjaxError = (message: string, options: UploadRequestOptions, s
 };
 
 const notifyBusinessError = async (code: string, message: string) => {
+  const safeMessage = sanitizeHtml(message);
   if (code === 'C1009') {
     await ElMessage({
-      message,
+      message: safeMessage,
       showClose: true,
       dangerouslyUseHTMLString: true,
       type: 'error',
@@ -183,7 +185,7 @@ const notifyBusinessError = async (code: string, message: string) => {
     });
     return;
   }
-  ElMessage.error({ message, dangerouslyUseHTMLString: true });
+  ElMessage.error({ message: safeMessage, dangerouslyUseHTMLString: true });
 };
 
 const showImportResult = (res: any) => {

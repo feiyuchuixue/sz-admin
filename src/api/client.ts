@@ -1,4 +1,4 @@
-import { createHttp } from '@/api/request';
+﻿import { createHttp } from '@/api/request';
 
 const normalizeApiBase = (value: string | undefined, fallback: string): string => {
   const raw = (value || fallback).trim();
@@ -11,6 +11,10 @@ export const ADMIN_API_BASE = normalizeApiBase(import.meta.env.VITE_ADMIN_API_BA
 
 export const GENERATOR_API_BASE = normalizeApiBase(import.meta.env.VITE_GENERATOR_API_BASE, '/api/generator');
 
+export const AUDIT_API_BASE = normalizeApiBase(import.meta.env.VITE_AUDIT_API_BASE, '/api/audit');
+
 export const adminHttp = createHttp(ADMIN_API_BASE);
 
 export const generatorHttp = createHttp(GENERATOR_API_BASE);
+
+export const auditHttp = createHttp(AUDIT_API_BASE);
