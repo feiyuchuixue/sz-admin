@@ -1,4 +1,4 @@
-﻿/// <reference types="vite/client" />
+/// <reference types="vite/client" />
 interface ImportMetaEnv {
   readonly VITE_ADMIN_API_BASE?: string;
   readonly VITE_GENERATOR_API_BASE?: string;

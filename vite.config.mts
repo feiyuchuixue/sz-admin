@@ -7,7 +7,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import viteCompression from 'vite-plugin-compression';
-// @ts-ignore
+// @ts-expect-error package.json is imported for build-time version injection.
 import pkg from './package.json';
 
 // 由于我们使用的是 ESM，不再需要 const path = require('node:path');

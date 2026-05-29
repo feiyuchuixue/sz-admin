@@ -15,7 +15,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import type { ElTable } from 'element-plus';
 import { querySelectorApi } from '@/components/MemberSelector/api/selector';
 import type { DepartmentItem } from '@/components/MemberSelector/type/selector';
@@ -27,7 +27,7 @@ type DepartmentChooseProps = {
   changeSelected?: (data: any[]) => void;
 };
 
-const flattenChildren = (items: any[]) => {
+const flattenChildren = (items: any[] = []) => {
   return items.flatMap((child: any) => {
     const childList = [child];
     if (child.children) {
@@ -42,9 +42,10 @@ const props = withDefaults(defineProps<DepartmentChooseProps>(), {
 });
 
 const departmentTableRef = ref<InstanceType<typeof ElTable>>();
-const tableData = ref<DepartmentItem[]>();
+const tableData = ref<DepartmentItem[]>([]);
+const isSyncingSelection = ref(false);
 const flatTableData = computed(() => {
-  return flattenChildren(tableData.value as DepartmentItem[]);
+  return flattenChildren(tableData.value);
 });
 
 // 获取table列表
@@ -55,16 +56,11 @@ const getDeptList = async () => {
 
 const initData = async () => {
   await getDeptList();
-  const selectedIds = props.selected.map(item => item.id);
-
-  flatTableData.value.forEach(item => {
-    if (selectedIds.includes(item.id)) {
-      departmentTableRef.value?.toggleRowSelection(item, true);
-    }
-  });
+  setSelection(props.selected);
 };
 
 const selectionChange = (selections: any[]) => {
+  if (isSyncingSelection.value) return;
   // 获取当前列表所有数据
   const allIds = flatTableData.value.map((item: any) => item.id);
   const lastSelected: any[] = [];
@@ -89,18 +85,24 @@ const removeSelected = (item: any) => {
   }
 };
 
-const clearSelection = () => {
+const clearSelection = async () => {
+  isSyncingSelection.value = true;
   departmentTableRef.value?.clearSelection?.();
+  await nextTick();
+  isSyncingSelection.value = false;
 };
 
-const setSelection = (selected: any[]) => {
-  clearSelection();
+const setSelection = async (selected: any[] = []) => {
+  isSyncingSelection.value = true;
+  departmentTableRef.value?.clearSelection?.();
   const selectedIds = selected.map(item => item.id);
   flatTableData.value.forEach(item => {
     if (selectedIds.includes(item.id)) {
       departmentTableRef.value?.toggleRowSelection(item, true);
     }
   });
+  await nextTick();
+  isSyncingSelection.value = false;
 };
 
 onMounted(() => {
