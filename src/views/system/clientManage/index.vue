@@ -97,7 +97,7 @@ const columns: ColumnProps<SysClientRow>[] = [
     enum: useDictOptions('device_type'),
     fieldNames: {
       label: 'codeName',
-      value: 'id',
+      value: 'alias',
       tagType: 'callbackShowStyle'
     }
   },
@@ -138,7 +138,7 @@ const searchColumns: SearchProps[] = [
     el: 'select',
     fieldNames: {
       label: 'codeName',
-      value: 'id',
+      value: 'alias',
       tagType: 'callbackShowStyle'
     }
   },

@@ -2,6 +2,7 @@ import mittBus from '@/utils/mittBus';
 import {
   CHANNEL_DEFAULT,
   CHANNEL_KICK_OFF,
+  CHANNEL_PONG,
   SYNC_DICT,
   SYNC_FRONTEND_CONF,
   SYNC_PERMISSIONS,
@@ -17,11 +18,11 @@ import type { SocketMessage } from './messageParser';
 import { useOptionsStore } from '@/stores/modules/options';
 
 /**
- * createChannelHandlers 只从外部接收最小控制依赖：close
+ * createChannelHandlers 只从外部接收最小控制依赖：close、clearPongTimeout
  * 所有业务 store 自行在本文件内 useXxxStore 引入
  */
-export const createChannelHandlers = (options: { close: () => void }) => {
-  const { close } = options;
+export const createChannelHandlers = (options: { close: () => void; clearPongTimeout: () => void }) => {
+  const { close, clearPongTimeout } = options;
 
   const userStore = useUserStore();
   const authStore = useAuthStore();
@@ -39,6 +40,23 @@ export const createChannelHandlers = (options: { close: () => void }) => {
         router.replace(LOGIN_URL);
       }
     });
+  };
+
+  /**
+   * 处理 WebSocket 自定义关闭码 4401（服务端鉴权失效）。
+   * 与 axios HTTP 401 / 业务码 C105 共用同一登出语义，
+   * 但不弹窗阻塞，静默清理并跳转登录页，避免打断用户当前操作。
+   * 注意：此函数由 socket.ts 在 onclose 4401 分支主动调用，已在外层禁用重连。
+   */
+  const handleAuthExpired = () => {
+    // close() 内部会再次执行 canReconnect=false + 清理 socket 引用，幂等安全
+    close();
+    userStore.clear();
+    authStore.clear();
+    // 仅当前不在登录页时跳转，避免重复 replace
+    if (router.currentRoute.value.path !== LOGIN_URL) {
+      router.replace(LOGIN_URL);
+    }
   };
 
   const handleSyncFrontendConf = async () => {
@@ -75,6 +93,11 @@ export const createChannelHandlers = (options: { close: () => void }) => {
    * 后面业务增长时，只需要在这里增加 case 即可
    */
   const channelHandlers: Record<string, (msg: SocketMessage) => void> = {
+    [CHANNEL_PONG]: () => {
+      // 收到心跳响应，清除 pong 超时计时器，连接确认存活
+      clearPongTimeout();
+    },
+
     [CHANNEL_DEFAULT]: msg => {
       // 默认频道简单广播，如果你不需要也可以改成空
       mittBus.emit(`socket.${CHANNEL_DEFAULT}`, msg.data);
@@ -125,6 +148,7 @@ export const createChannelHandlers = (options: { close: () => void }) => {
   };
 
   return {
-    dispatchChannel
+    dispatchChannel,
+    handleAuthExpired
   };
 };
