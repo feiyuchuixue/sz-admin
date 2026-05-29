@@ -3,9 +3,9 @@ export type MenuQuery = {
 };
 
 export type MenuForm = {
-  id?: string;
+  id?: string | number;
   title?: string;
-  pid?: string;
+  pid?: string | number;
   path?: string;
   name?: string;
   icon?: string;
@@ -24,13 +24,13 @@ export type MenuForm = {
 };
 
 export type MenuTree = {
-  id: string;
-  pid: string;
+  id: string | number;
+  pid: string | number;
   title: string;
   children: MenuTree[];
 };
 
 export type MenuPermissionQuery = {
-  id: string;
+  id: string | number;
   permissions: string;
 };

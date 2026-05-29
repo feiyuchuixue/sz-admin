@@ -128,7 +128,7 @@ const menuFormRef = ref<InstanceType<typeof MenuForm>>();
 const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
   let orig = {};
   if (isAdd) {
-    let pid = row.id || '0';
+    let pid = row.id || 0;
     const sort = presort(row, pid);
     orig = {
       pid: pid,
