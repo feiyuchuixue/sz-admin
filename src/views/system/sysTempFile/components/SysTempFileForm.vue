@@ -63,7 +63,7 @@ const fileUrls = ref<string[]>([]);
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
   visible.value = true;
-  fileUrls.value = params.row.url;
+  fileUrls.value = params.row.url ?? [];
 };
 
 // 提交数据（新增/编辑）

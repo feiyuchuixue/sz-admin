@@ -328,7 +328,15 @@ function internalEmit(list: IResourceUploadResult[]) {
 watch(
   () => props.modelValue,
   newVal => {
-    if (!Array.isArray(newVal)) return;
+    if (!Array.isArray(newVal)) {
+      // undefined / null / 非数组时视为空列表，清空已有文件
+      _fileList.value = [];
+      _resultMap.value.clear();
+      internalSnapshot = [];
+      lastAllSuccessSignature = '';
+      initialHydrated = true;
+      return;
+    }
     if (isInternalEmit && isSameList(newVal, internalSnapshot)) {
       logDebug('忽略父组件回声 modelValue');
       return;

@@ -122,7 +122,7 @@ const fileUrls = ref<IResourceUploadResult[] | string[]>([]);
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
   paramsProps.value = params;
-  fileUrls.value = params.row.url; // 附件回显--从表格数据传过来
+  fileUrls.value = params.row.url ?? []; // 附件回显--从表格数据传过来，新增时为空数组
   visible.value = true;
 };
 
@@ -132,7 +132,7 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
-      paramsProps.value.row.url = (fileUrls.value as ResourceUploadResult[]).filter(Boolean);
+      paramsProps.value.row.url = (fileUrls.value as ResourceUploadResult[] ?? []).filter(Boolean);
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
