@@ -49,24 +49,34 @@
         <el-button v-auth="'sys.menu.delete_btn'" v-if="row.id !== 1" type="primary" link :icon="Delete" @click="deleteInfo(row)">
           删除
         </el-button>
+        <el-button v-auth="'sys.role.sql_btn'" type="primary" link :icon="SoldOut" @click="showSqlInfo(row)"> SQL </el-button>
       </template>
     </ProTable>
     <RoleForm ref="roleFormRef" />
     <RoleSimpleDialog ref="roleSimpleDialogRef" />
+    <ScriptPreviewDialog
+      v-model="showScriptDialog"
+      :title="scriptDialogTitle"
+      :script-export="scriptExport"
+      :loading="scriptLoading"
+      @change-dialect="handleScriptDialectChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { CirclePlus, Delete, EditPen } from '@element-plus/icons-vue';
+import { CirclePlus, Delete, EditPen, SoldOut } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
 import { useHandleData } from '@/hooks/useHandleData';
-import { addRole, deleteRole, editRole, getRoleList, setRoleMenus } from '@/api/modules/system/role';
+import { addRole, deleteRole, editRole, exportRoleMenuScript, getRoleList, setRoleMenus } from '@/api/modules/system/role';
 import RoleForm from '@/views/system/roleManage/components/RoleForm.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { RoleInfo, RoleQuery } from '@/api/types/system/role';
-import { ref } from 'vue';
+import type { ScriptExportResult } from '@/api/types/script';
+import { computed, ref } from 'vue';
 import RoleSimpleDialog from '@/views/system/roleManage/components/RoleSimpleDialog.vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
+import ScriptPreviewDialog from '@/components/ScriptPreviewDialog/index.vue';
 
 defineOptions({
   name: 'RoleManage'
@@ -81,7 +91,7 @@ const columns: ColumnProps<RoleInfo>[] = [
   { prop: 'remark', label: '备注' },
   { prop: 'createTime', label: '创建时间' },
   { prop: 'updateTime', label: '修改时间' },
-  { prop: 'operation', label: '操作', width: 250, fixed: 'right' }
+  { prop: 'operation', label: '操作', width: 300, fixed: 'right' }
 ];
 // 表格配置项
 const searchColumns: SearchProps[] = [
@@ -107,6 +117,11 @@ const openRoleForm = (title: string, row = {}, isAdd = true) => {
 };
 
 const roleSimpleDialogRef = ref<InstanceType<typeof RoleSimpleDialog>>();
+const showScriptDialog = ref(false);
+const scriptLoading = ref(false);
+const scriptExport = ref<ScriptExportResult | null>(null);
+const scriptRow = ref<RoleInfo | null>(null);
+const scriptDialogTitle = computed(() => `SQL [${scriptRow.value?.roleName || ''}-权限]`);
 
 const openRoleSimple = (title: string, row = {}) => {
   const params: View.DefaultParams = {
@@ -116,6 +131,28 @@ const openRoleSimple = (title: string, row = {}) => {
     getTableList: proTableRef.value?.getTableList
   };
   roleSimpleDialogRef.value?.acceptParams(params);
+};
+
+const showSqlInfo = async (row: RoleInfo) => {
+  scriptRow.value = row;
+  await loadScript(row.id);
+  showScriptDialog.value = true;
+};
+
+const loadScript = async (id: number, sqlDialect?: string) => {
+  scriptLoading.value = true;
+  try {
+    const { data } = await exportRoleMenuScript({ ids: [id], sqlDialect });
+    scriptExport.value = data;
+  } finally {
+    scriptLoading.value = false;
+  }
+};
+
+const handleScriptDialectChange = (sqlDialect: string) => {
+  if (scriptRow.value?.id) {
+    loadScript(scriptRow.value.id, sqlDialect);
+  }
 };
 
 // 删除信息

@@ -1,6 +1,7 @@
 ﻿import { adminHttp } from '@/api/client';
 import type { RoleQuery, RoleInfo, RoleForm, RoleMenu, RoleMenuForm } from '@/api/types/system/role';
 import type { IPage } from '@/api/types';
+import type { ScriptExportResult } from '@/api/types/script';
 
 /**
  * 鑾峰彇瑙掕壊鍒楄〃
@@ -54,4 +55,12 @@ export const getRoleMenus = (params: { roleId: number }) => {
  */
 export const setRoleMenus = (params: RoleMenuForm) => {
   return adminHttp.put(`/sys-role/menu`, params);
+};
+
+/**
+ * 导出角色权限脚本
+ * @param params
+ */
+export const exportRoleMenuScript = (params: { ids: number[]; sqlDialect?: string }) => {
+  return adminHttp.post<ScriptExportResult>(`/sys-role/menu/script/export`, params);
 };
