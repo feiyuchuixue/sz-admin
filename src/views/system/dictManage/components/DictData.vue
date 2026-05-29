@@ -22,6 +22,7 @@
           <el-button
             type="primary"
             :icon="CirclePlus"
+            :disabled="info?.isLock === 'T'"
             v-auth="'sys.dict.add_btn'"
             @click="openAddEdit('新增字典', { sysDictTypeId: info?.id, sort: 1, callbackShowStyle: 'primary' }, true)"
           >
@@ -48,7 +49,7 @@
           <el-button
             type="primary"
             link
-            :disabled="row.isLock === 'T'"
+            :disabled="row.isLock === 'T' || info?.isLock === 'T'"
             :icon="EditPen"
             v-auth="'sys.dict.update_btn'"
             @click="openAddEdit('编辑字典', row, false)"
@@ -58,7 +59,7 @@
           <el-button
             type="primary"
             link
-            :disabled="row.isLock === 'T'"
+            :disabled="row.isLock === 'T' || info?.isLock === 'T'"
             v-auth="'sys.dict.delete_btn'"
             :icon="Delete"
             @click="deleteInfo(row)"
