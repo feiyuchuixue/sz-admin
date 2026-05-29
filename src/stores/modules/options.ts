@@ -4,6 +4,8 @@ import piniaPersistConfig from '@/stores/helper/persist';
 import type { DictCustom } from '@/api/types/system/dict';
 import { ref } from 'vue';
 
+const DICT_FAILED_RETRY_INTERVAL = 30 * 1000;
+
 export const useOptionsStore = defineStore(
   'options',
   () => {
@@ -12,6 +14,7 @@ export const useOptionsStore = defineStore(
     const loadedTypes = ref<Record<string, boolean>>({});
     const expiredTypes = ref<Record<string, boolean>>({});
     const loadingTypes = ref<Record<string, boolean>>({});
+    const failedTypes = ref<Record<string, number>>({});
 
     async function getAllDictList() {
       if (isLoaded.value) return;
@@ -22,9 +25,6 @@ export const useOptionsStore = defineStore(
     }
 
     function getDictOptions(type: string): DictCustom[] {
-      if (shouldLoad(type)) {
-        void ensureDictByCodes([type]).catch(() => undefined);
-      }
       return dictOptions.value[type] || [];
     }
 
@@ -32,6 +32,7 @@ export const useOptionsStore = defineStore(
       isLoaded.value = false;
       Object.keys(loadedTypes.value).forEach(code => {
         expiredTypes.value[code] = true;
+        delete failedTypes.value[code];
       });
     }
 
@@ -48,6 +49,7 @@ export const useOptionsStore = defineStore(
       const codes = typeCodes?.length ? typeCodes : Object.keys(loadedTypes.value);
       codes.forEach(code => {
         expiredTypes.value[code] = true;
+        delete failedTypes.value[code];
       });
     }
 
@@ -65,6 +67,9 @@ export const useOptionsStore = defineStore(
           dictOptions.value[code] = data[code] || [];
           markLoaded(code);
         });
+      } catch (error) {
+        requestCodes.forEach(markFailed);
+        throw error;
       } finally {
         requestCodes.forEach(code => {
           loadingTypes.value[code] = false;
@@ -73,12 +78,22 @@ export const useOptionsStore = defineStore(
     }
 
     function shouldLoad(type: string): boolean {
-      return !!type && !loadingTypes.value[type] && (!loadedTypes.value[type] || expiredTypes.value[type]);
+      return !!type && !loadingTypes.value[type] && !isFailedCoolingDown(type) && (!loadedTypes.value[type] || expiredTypes.value[type]);
     }
 
     function markLoaded(type: string) {
       loadedTypes.value[type] = true;
       expiredTypes.value[type] = false;
+      delete failedTypes.value[type];
+    }
+
+    function markFailed(type: string) {
+      failedTypes.value[type] = Date.now();
+    }
+
+    function isFailedCoolingDown(type: string): boolean {
+      const failedAt = failedTypes.value[type];
+      return !!failedAt && Date.now() - failedAt < DICT_FAILED_RETRY_INTERVAL;
     }
 
     function normalizeTypeCodes(typeCodes: string[]): string[] {

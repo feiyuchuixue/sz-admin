@@ -21,15 +21,14 @@ import { getMessageListApi } from '@/api/modules/system/message';
 import type { MessageQuery, MessageRow } from '@/api/types/system/message';
 import { useRoute } from 'vue-router';
 import MessageDetail from '@/views/system/message/detail.vue';
-import { useOptionsStore } from '@/stores/modules/options';
 import SelectFilter from '@/components/SelectFilter/index.vue';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'Message'
 });
 
 const route = useRoute();
-const optionsStore = useOptionsStore();
 
 // 表格配置项
 const columns: ColumnProps<MessageRow>[] = [
@@ -38,7 +37,7 @@ const columns: ColumnProps<MessageRow>[] = [
     prop: 'messageTypeCd',
     label: '类型',
     tag: true,
-    enum: optionsStore.getDictOptions('message_type'),
+    enum: useDictOptions('message_type'),
     fieldNames: {
       label: 'codeName',
       value: 'alias',
@@ -50,7 +49,7 @@ const columns: ColumnProps<MessageRow>[] = [
   {
     prop: 'senderId',
     label: '发送人',
-    enum: optionsStore.getDictOptions('dynamic_user_options'),
+    enum: useDictOptions('dynamic_user_options'),
     fieldNames: {
       label: 'codeName',
       value: 'id',

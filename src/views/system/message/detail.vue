@@ -37,7 +37,7 @@
 import { computed, ref } from 'vue';
 import { getMessageInfoApi } from '@/api/modules/system/message';
 import type { MessageRow } from '@/api/types/system/message';
-import { useOptionsStore } from '@/stores/modules/options';
+import { useDictOptions } from '@/hooks/useDictOptions';
 
 defineOptions({
   name: 'MessageDetail'
@@ -48,10 +48,11 @@ type Emits = {
 };
 const emit = defineEmits<Emits>();
 
-const optionsStore = useOptionsStore();
 const visible = ref(false);
 const id = ref<string | number>();
 const detail = ref<MessageRow>();
+const userOptions = useDictOptions('dynamic_user_options');
+const messageTypeOptions = useDictOptions('message_type');
 
 const getDetail = () => {
   getMessageInfoApi(id.value!).then(res => {
@@ -61,15 +62,13 @@ const getDetail = () => {
 
 const username = computed(() => {
   if (!detail.value) return '';
-  const options = optionsStore.getDictOptions('dynamic_user_options');
-  const user = options.find(item => item.id === detail.value?.senderId.toString());
+  const user = userOptions.value.find(item => item.id === detail.value?.senderId.toString());
   return user?.codeName || '';
 });
 
 const messageType = computed(() => {
   if (!detail.value) return '';
-  const options = optionsStore.getDictOptions('message_type');
-  const user = options.find(item => item.alias === detail.value?.messageTypeCd);
+  const user = messageTypeOptions.value.find(item => item.alias === detail.value?.messageTypeCd);
   return user?.codeName || '';
 });
 

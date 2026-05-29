@@ -74,7 +74,7 @@ router.beforeEach(async (to, from, next) => {
   authStore.setRouteName(to.name as string);
 
   // 加载所有字典信息
-  optionsStore.getAllDictList();
+  void optionsStore.getAllDictList().catch(() => undefined);
 
   // 8.正常访问页面
   next();

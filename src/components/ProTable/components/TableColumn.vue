@@ -4,7 +4,7 @@
 
 <script setup lang="tsx">
 import { filterEnum, formatValue, handleProp, handleRowAccordingToProp } from '@/utils';
-import { inject, ref, useSlots } from 'vue';
+import { inject, ref, unref, useSlots } from 'vue';
 import type { ColumnProps, RenderScope, HeaderRenderScope } from '@/components/ProTable/interface';
 
 type DictItem = Record<string, any>;
@@ -17,6 +17,11 @@ defineProps<{ column: ColumnProps }>();
 
 const slots = useSlots();
 const enumMap = inject('enumMap', ref(new Map<string, DictItem[]>()));
+
+const resolveColumnEnum = (dict: unknown) => {
+  const enumData = unref(dict as any);
+  return Array.isArray(enumData) && enumData.length > 0 ? enumData : undefined;
+};
 
 // 获取 tag 的类型
 const getTagType = (val: any, dict: DictItem[] | undefined, fieldNames: { value?: string; tagType?: string }): string => {
@@ -61,7 +66,7 @@ const renderCellData = (item: ColumnProps, scope: RenderScope<any>) => {
   const rawValue = handleRowAccordingToProp(scope.row, item.prop!);
 
   // 优先判断 enum 字典，优先用 item.enum，回退到全局 enumMap
-  const dict = item.enum && Array.isArray(item.enum) && item.enum.length > 0 ? item.enum : enumMap.value.get(item.prop as string);
+  const dict = resolveColumnEnum(item.enum) || enumMap.value.get(item.prop as string);
 
   const fieldNames = item.fieldNames || {};
   const values = normalizeValues(rawValue);
