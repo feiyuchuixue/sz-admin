@@ -36,10 +36,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { HOME_URL, IS_PREVIEW } from '@/config';
+import { useRoute, useRouter } from 'vue-router';
+import { HOME_URL, IS_PREVIEW, LOGIN_URL } from '@/config';
 import { getTimeState } from '@/utils';
 import { getAuthAdapter } from '@/core/auth';
+import { resetAuthExpiredHandling } from '@/core/authSession';
 import { useUserStore } from '@/stores/modules/user';
 import { useTabsStore } from '@/stores/modules/tabs';
 import { useKeepAliveStore } from '@/stores/modules/keepAlive';
@@ -51,6 +52,7 @@ import { ElNotification } from 'element-plus';
 import SliderCaptcha from '@/components/Captcha/SliderCaptcha.vue';
 import { getCaptchaStatus } from '@/api/modules/system/captcha';
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const tabsStore = useTabsStore();
 const keepAliveStore = useKeepAliveStore();
@@ -83,13 +85,14 @@ const performLogin = async (formData = loginForm) => {
     });
 
     userStore.setToken(accessToken);
+    resetAuthExpiredHandling();
 
     await initDynamicRouter();
 
     tabsStore.closeMultipleTab();
     keepAliveStore.setKeepAliveName([]);
 
-    router.push(HOME_URL);
+    router.push(resolveLoginRedirect());
     ElNotification({
       title: getTimeState(),
       message: '欢迎登录 Sz-Admin',
@@ -106,6 +109,20 @@ const performLogin = async (formData = loginForm) => {
   } finally {
     loading.value = false;
   }
+};
+
+const resolveLoginRedirect = () => {
+  const back = Array.isArray(route.query.back) ? route.query.back[0] : route.query.back;
+  if (
+    typeof back === 'string' &&
+    back.startsWith('/') &&
+    !back.startsWith('//') &&
+    back !== LOGIN_URL &&
+    !back.startsWith(`${LOGIN_URL}?`)
+  ) {
+    return back;
+  }
+  return HOME_URL;
 };
 
 const captchaRef = ref<InstanceType<typeof SliderCaptcha>>();
