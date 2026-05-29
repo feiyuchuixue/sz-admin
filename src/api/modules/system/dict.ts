@@ -82,6 +82,10 @@ export const getAllDict = () => {
   return adminHttp.get<Record<string, DictCustom[]>>(`/sys-dict/dict`, {});
 };
 
+export const getStaticDict = () => {
+  return adminHttp.get<Record<string, DictCustom[]>>(`/sys-dict/static`, {});
+};
+
 export const getDictTypeOptions = () => {
   return adminHttp.get<DictType[]>(`/sys-dict-type/selectOptionsType`);
 };
