@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useOptionsStore } from '@/stores/modules/options';
 import type { DictCustom } from '@/api/types/system/dict';
 
@@ -9,5 +9,8 @@ import type { DictCustom } from '@/api/types/system/dict';
  */
 export const useDictOptions = (dictName: string) => {
   const optionsStore = useOptionsStore();
+  onMounted(() => {
+    void optionsStore.ensureDictByCodes([dictName]).catch(() => undefined);
+  });
   return computed<DictCustom[]>(() => optionsStore.getDictOptions(dictName) || []);
 };

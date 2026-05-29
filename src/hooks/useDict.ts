@@ -7,7 +7,7 @@ import { useOptionsStore } from '@/stores/modules/options';
  */
 export function useDict(typeCode: string[]) {
   const optionsStore = useOptionsStore();
-  onMounted(async () => {
-    await optionsStore.getDictByCodes(typeCode);
+  onMounted(() => {
+    void optionsStore.getDictByCodes(typeCode).catch(() => undefined);
   });
 }

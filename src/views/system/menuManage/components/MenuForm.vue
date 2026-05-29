@@ -202,10 +202,10 @@ defineOptions({
   name: 'MenuForm'
 });
 
-const menuOptions = useDictOptions('menu_type').value;
+const menuOptions = useDictOptions('menu_type');
 
 const menuLabel = (type: any, defaultLabel = '') => {
-  return menuOptions[type] || defaultLabel;
+  return menuOptions.value[type] || defaultLabel;
 };
 
 const rules = ref({});
