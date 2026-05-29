@@ -6,9 +6,7 @@ import router from '@/router';
 import type { RouteRecordRaw } from 'vue-router';
 import { useConfigStore } from '@/stores/modules/config';
 import { getUserProfile } from '@/api/modules/system/user';
-
-// 引入 views 文件夹下所有 vue 文件
-const modules = import.meta.glob('@/views/**/*.vue');
+import { resolveMenuComponent } from '@/core/module';
 
 /**
  * @description 初始化动态路由
@@ -51,9 +49,17 @@ export const initDynamicRouter = async () => {
     // 3.添加动态路由
     authStore.flatMenuListGet.forEach(item => {
       if (item.children) delete item.children;
-      if (item.component && typeof item.component == 'string') {
-        item.component = modules['/src/views' + item.component + '.vue'];
+
+      if (item.component && typeof item.component === 'string') {
+        const comp = resolveMenuComponent(item.component);
+        if (!comp) {
+          // 组件未命中（例如后端在当前 edition 中误下发了企业菜单），跳过该菜单
+          console.warn(`[dynamicRouter] 菜单组件未命中，已跳过：${item.component}（菜单：${item.name}）`);
+          return;
+        }
+        item.component = comp as any;
       }
+
       if (item.meta.isFull === 'T') {
         router.addRoute(item as unknown as RouteRecordRaw);
       } else {

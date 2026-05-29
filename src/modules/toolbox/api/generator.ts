@@ -7,7 +7,7 @@ import type {
   GeneratorInfo,
   GeneratorPreviewInfo,
   GeneratorQuery
-} from '@/api/types/toolbox/generator';
+} from '@/modules/toolbox/types/generator';
 
 /**
  * 查询已经导入的表列表

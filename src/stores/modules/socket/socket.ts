@@ -20,7 +20,7 @@ const socketUrl = useSocket
 
 const MAX_RECONNECT_COUNT = 10;
 const BASE_RECONNECT_DELAY = 10_000; // 10s
-const MAX_RECONNECT_DELAY = 30_000;  // 30s
+const MAX_RECONNECT_DELAY = 30_000; // 30s
 const FIXED_RECONNECT_DELAY = 60_000; // 60s
 
 /** 心跳发送间隔：30s */
@@ -66,7 +66,7 @@ export const useSocketStore = defineStore('socket', () => {
       if (socket.value) {
         try {
           socket.value.close();
-        } catch (_) {
+        } catch {
           // ignore
         }
         socket.value = null;

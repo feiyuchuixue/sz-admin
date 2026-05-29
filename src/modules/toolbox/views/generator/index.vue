@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import ProTable from '@/components/ProTable/index.vue';
 import { Delete, Download, EditPen, Upload, View } from '@element-plus/icons-vue';
-import type { GeneratorInfo, GeneratorQuery } from '@/api/types/toolbox/generator';
+import type { GeneratorInfo, GeneratorQuery } from '@/modules/toolbox/types/generator';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import { ref } from 'vue';
 import {
@@ -65,13 +65,13 @@ import {
   saveGenerator,
   downloadZip,
   checkDisk
-} from '@/api/modules/toolbox/generator';
-import Import from '@/views/toolbox/generator/components/Import.vue';
-import EditForm from '@/views/toolbox/generator/components/EditForm.vue';
+} from '@/modules/toolbox/api/generator';
+import Import from '@/modules/toolbox/views/generator/components/Import.vue';
+import EditForm from '@/modules/toolbox/views/generator/components/EditForm.vue';
 import { useDebounceFn } from '@vueuse/core';
 import { isLocalEnv } from '@/utils';
 import { useDownload } from '@/hooks/useDownload';
-import Preview from '@/views/toolbox/generator/components/Preview.vue';
+import Preview from '@/modules/toolbox/views/generator/components/Preview.vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 

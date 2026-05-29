@@ -132,7 +132,7 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
-      paramsProps.value.row.url = (fileUrls.value as ResourceUploadResult[] ?? []).filter(Boolean);
+      paramsProps.value.row.url = ((fileUrls.value as ResourceUploadResult[]) ?? []).filter(Boolean);
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();

@@ -32,6 +32,7 @@ import 'highlight.js/styles/atom-one-dark.css';
 import 'highlight.js/lib/common';
 import hljsVuePlugin from '@highlightjs/vue-plugin';
 import { isLocalEnv } from '@/utils';
+import { ADMIN_EDITION } from '@/editions/admin';
 
 const app = createApp(App);
 
@@ -52,5 +53,8 @@ app.use(I18n);
 
 // app.use(router)
 app.use(hljsVuePlugin);
+
+// 启动 edition：设置登录适配器、注册模块
+ADMIN_EDITION.setup();
 
 app.mount('#app');
