@@ -34,9 +34,9 @@
         </el-button>
       </template>
     </ProTable>
-    <Import ref="importRef" @finished="refreshData" />
-    <EditForm ref="editFormRef" />
-    <Preview ref="previewRef" />
+    <Import v-if="importReady" ref="importRef" @finished="refreshData" />
+    <EditForm v-if="editFormReady" ref="editFormRef" />
+    <Preview v-if="previewReady" ref="previewRef" />
     <el-dialog v-model="generatorVisible" title="代码生成信息" center align-center append-to-body width="65%">
       <div class="tip custom-block">
         <template v-for="item in generatorCodeInfos" :key="item">
@@ -57,7 +57,7 @@ import ProTable from '@/components/ProTable/index.vue';
 import { Delete, Download, EditPen, Upload, View } from '@element-plus/icons-vue';
 import type { GeneratorInfo, GeneratorQuery } from '@/modules/toolbox/types/generator';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
-import { ref } from 'vue';
+import { defineAsyncComponent, nextTick, ref, watch, type Ref } from 'vue';
 import {
   codeGenerator,
   deleteGenerator,
@@ -66,14 +66,50 @@ import {
   downloadZip,
   checkDisk
 } from '@/modules/toolbox/api/generator';
-import Import from '@/modules/toolbox/views/generator/components/Import.vue';
-import EditForm from '@/modules/toolbox/views/generator/components/EditForm.vue';
 import { useDebounceFn } from '@vueuse/core';
 import { isLocalEnv } from '@/utils';
 import { useDownload } from '@/hooks/useDownload';
-import Preview from '@/modules/toolbox/views/generator/components/Preview.vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
+
+const loadImport = () => import('@/modules/toolbox/views/generator/components/Import.vue');
+const loadEditForm = () => import('@/modules/toolbox/views/generator/components/EditForm.vue');
+const loadPreview = () => import('@/modules/toolbox/views/generator/components/Preview.vue');
+
+const Import = defineAsyncComponent(loadImport);
+const EditForm = defineAsyncComponent(loadEditForm);
+const Preview = defineAsyncComponent(loadPreview);
+
+type ImportComponent = {
+  show: () => void;
+};
+type AcceptParamsComponent = {
+  acceptParams: (params: View.DefaultParams | Record<string, unknown>) => void;
+};
+
+const waitForRef = async <T,>(componentRef: Ref<T | undefined>) => {
+  if (componentRef.value) return componentRef.value;
+  await nextTick();
+  if (componentRef.value) return componentRef.value;
+
+  return new Promise<T | undefined>(resolve => {
+    const timer = window.setTimeout(() => {
+      stop();
+      resolve(undefined);
+    }, 3000);
+    const stop = watch(
+      componentRef,
+      value => {
+        if (!value) return;
+        window.clearTimeout(timer);
+        stop();
+        resolve(value);
+      },
+      { flush: 'post' }
+    );
+  });
+};
 
 defineOptions({
   name: 'Generator'
@@ -101,27 +137,36 @@ const proTableRef = ref<ProTableInstance>();
 const checkDiskVisible = ref(false);
 const generatorVisible = ref(false);
 const generatorCodeInfos = ref<string[]>([]);
+const importReady = ref(false);
+const editFormReady = ref(false);
+const previewReady = ref(false);
 
 // 获取table列表
 const getTableList = (params: GeneratorQuery) => getGeneratorList(params);
 
-const importRef = ref<InstanceType<typeof Import>>();
-const openImport = () => {
-  importRef.value?.show();
+const importRef = ref<ImportComponent>();
+const openImport = async () => {
+  await loadImport();
+  importReady.value = true;
+  const importDialog = await waitForRef(importRef);
+  importDialog?.show();
 };
 const refreshData = () => {
   proTableRef.value?.getTableList();
 };
 
-const editFormRef = ref<InstanceType<typeof EditForm>>();
+const editFormRef = ref<AcceptParamsComponent>();
 // 编辑
-const openEditDialog = (title: string, row = {}) => {
+const openEditDialog = async (title: string, row = {}) => {
   const params: View.DefaultParams = {
     title,
     row: { ...row },
     api: saveGenerator
   };
-  editFormRef.value?.acceptParams(params);
+  await loadEditForm();
+  editFormReady.value = true;
+  const editForm = await waitForRef(editFormRef);
+  editForm?.acceptParams(params);
 };
 // 代码生成
 const codeGene = (row: GeneratorInfo) => {
@@ -137,13 +182,13 @@ const codeGene = (row: GeneratorInfo) => {
         if (!record.data.checkedApiPath) {
           context +=
             '<div style="color: var(--el-color-error)">--JAVA项目路径不存在</div><br/><div style="font-size: 12px;font-weight: bold;color: var(--el-color-warning)">' +
-            record.data.pathApi +
+            sanitizeHtml(record.data.pathApi) +
             '</div>';
         }
         if (!record.data.checkedWebPath) {
           context +=
             '<br/><div style="color: var(--el-color-error)">--VUE项目路径不存在</div><br/><div style="font-size: 12px;font-weight: bold;color: var(--el-color-warning)">' +
-            record.data.pathWeb +
+            sanitizeHtml(record.data.pathWeb) +
             '</div>';
         }
         ElMessageBox({
@@ -198,13 +243,16 @@ const delGeneBatch = useDebounceFn(() => {
 });
 
 // 预览
-const previewRef = ref();
-const previewGene = (row: GeneratorInfo) => {
+const previewRef = ref<AcceptParamsComponent>();
+const previewGene = async (row: GeneratorInfo) => {
   const param = {
     title: '',
     tableName: row.tableName
   };
-  previewRef.value?.acceptParams(param);
+  await loadPreview();
+  previewReady.value = true;
+  const preview = await waitForRef(previewRef);
+  preview?.acceptParams(param);
 };
 </script>
 

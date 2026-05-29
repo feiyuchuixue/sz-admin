@@ -1,4 +1,5 @@
 import { moduleRegistry, setAuthAdapter, localAuthAdapter } from '@/core';
+import { auditModule } from '@/modules/audit/register';
 import { toolboxModule } from '@/modules/toolbox/register';
 
 /**
@@ -33,8 +34,9 @@ export const ADMIN_EDITION = {
   setup(): void {
     // 默认登录方式：本地账号密码 + AES challenge + 滑块验证码
     setAuthAdapter(localAuthAdapter);
-
-    // 注册随仓库提供的样板模块（toolbox 代码生成器）
+    // 注册审计模块
+    moduleRegistry.register(auditModule);
+    // 注册代码生成器模块
     moduleRegistry.register(toolboxModule);
   }
 };

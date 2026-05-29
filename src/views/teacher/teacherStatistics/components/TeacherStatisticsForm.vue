@@ -87,13 +87,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { defineAsyncComponent, ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
-import UploadFiles from '@/components/Upload/UploadFiles.vue';
 import type { IResourceUploadResult, ResourceUploadResult } from '@/api/types/system/upload';
-import JoditEditor from '@/components/JoditEditor/index.vue';
 import { useDialogWidth } from '@/hooks/useDialogWidth';
+
+const UploadFiles = defineAsyncComponent(() => import('@/components/Upload/UploadFiles.vue'));
+const JoditEditor = defineAsyncComponent(() => import('@/components/JoditEditor/index.vue'));
 
 defineOptions({
   name: 'TeacherStatisticsForm'
