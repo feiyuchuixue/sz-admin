@@ -95,6 +95,7 @@ const tableData = ref<any[]>([]);
 const pageable = reactive({ pageNum: 1, pageSize: 10, total: 0 });
 const keyword = ref<string>('');
 const isLoading = ref(false);
+const isSyncingSelection = ref(false);
 
 const getTreeData = async () => {
   const { data } = await querySelectorApi({ type: 'department' });
@@ -140,17 +141,11 @@ const initTable = async () => {
 };
 
 const initSelection = () => {
-  const selectedIds = props.selected.map(item => item.id);
-
-  tableData.value.forEach(item => {
-    if (selectedIds.includes(item.id)) {
-      userTableRef.value?.toggleRowSelection(item, true);
-    }
-  });
+  setSelection(props.selected);
 };
 
 const selectionChange = (selections: any[]) => {
-  if (isLoading.value) return;
+  if (isLoading.value || isSyncingSelection.value) return;
   // 获取当前列表所有数据
   const allIds = tableData.value.map((item: any) => item.id);
   const lastSelected: any[] = [];
@@ -185,18 +180,24 @@ const handleCurrentChange = async (page: number) => {
   await initTable();
 };
 
-const clearSelection = () => {
+const clearSelection = async () => {
+  isSyncingSelection.value = true;
   userTableRef.value?.clearSelection?.();
+  await nextTick();
+  isSyncingSelection.value = false;
 };
 
-const setSelection = (selected: any[]) => {
-  clearSelection();
+const setSelection = async (selected: any[] = []) => {
+  isSyncingSelection.value = true;
+  userTableRef.value?.clearSelection?.();
   const selectedIds = selected.map(item => item.id);
   tableData.value.forEach(item => {
     if (selectedIds.includes(item.id)) {
       userTableRef.value?.toggleRowSelection(item, true);
     }
   });
+  await nextTick();
+  isSyncingSelection.value = false;
 };
 
 const handleSearch = async () => {

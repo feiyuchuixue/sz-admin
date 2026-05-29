@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, nextTick } from 'vue';
 import { ElDialog, ElTabs, ElTabPane, ElTag, ElButton } from 'element-plus';
 import UserChoose from '@/components/MemberSelector/user.vue';
 import DepartmentChoose from '@/components/MemberSelector/department.vue';
@@ -116,13 +116,31 @@ const departmentChooseRef = ref<InstanceType<typeof DepartmentChoose>>();
 const current = ref('user');
 const selectedData = ref<any>({});
 
+const normalizeSelectedItems = (items: any) => {
+  if (!Array.isArray(items)) return [];
+  const itemMap = new Map<any, any>();
+  items.forEach(item => {
+    if (item?.id !== undefined && item?.id !== null) {
+      itemMap.set(item.id, { ...item });
+    }
+  });
+  return Array.from(itemMap.values());
+};
+
+const createSelectedData = (data: any = {}) => {
+  const clone = JSON.parse(JSON.stringify(data || {}));
+  return {
+    user: normalizeSelectedItems(clone.user),
+    role: normalizeSelectedItems(clone.role),
+    department: normalizeSelectedItems(clone.department)
+  };
+};
+
 // 记录初始值
 const initialData = ref<any>({});
 
 const onClose = () => {
   emit('update:visible', false);
-  // 关闭时重置为未选状态
-  resetData();
 };
 
 const userChoose = computed(() => {
@@ -141,6 +159,7 @@ const onChangeUser = (data: any[]) => {
   selectedData.value['user'] = data;
 };
 const onRemoveUser = (item: any) => {
+  removeSelectedItem('user', item);
   userChooseRef.value?.removeSelected(item);
 };
 
@@ -148,6 +167,7 @@ const onChangeRole = (data: any[]) => {
   selectedData.value['role'] = data;
 };
 const onRemoveRole = (item: any) => {
+  removeSelectedItem('role', item);
   roleChooseRef.value?.removeSelected(item);
 };
 
@@ -155,47 +175,60 @@ const onChangeDepartment = (data: any[]) => {
   selectedData.value['department'] = data;
 };
 const onRemoveDepartment = (item: any) => {
+  removeSelectedItem('department', item);
   departmentChooseRef.value?.removeSelected(item);
 };
 
 const onCommit = () => {
-  emit('changeSelected', selectedData.value);
+  emit('changeSelected', createSelectedData(selectedData.value));
   onClose();
+};
+
+const removeSelectedItem = (type: 'user' | 'role' | 'department', item: any) => {
+  selectedData.value[type] = (selectedData.value[type] || []).filter((selected: any) => selected.id !== item.id);
 };
 
 const resetData = () => {
   current.value = 'user';
-  selectedData.value = {
-    user: [],
-    role: [],
-    department: []
-  };
+  selectedData.value = createSelectedData();
   // 清空子组件选择（如有暴露 clearSelection 方法）
   userChooseRef.value?.clearSelection?.();
   roleChooseRef.value?.clearSelection?.();
   departmentChooseRef.value?.clearSelection?.();
 };
 
+const syncSelectedData = async () => {
+  initialData.value = createSelectedData(props.data);
+  selectedData.value = createSelectedData(initialData.value);
+  await nextTick();
+  if (!props.visible) return;
+  // 通知子组件刷新选中（如有暴露 setSelection 方法）
+  userChooseRef.value?.setSelection?.(selectedData.value.user);
+  roleChooseRef.value?.setSelection?.(selectedData.value.role);
+  departmentChooseRef.value?.setSelection?.(selectedData.value.department);
+};
+
 watch(
   () => props.visible,
   val => {
     if (val) {
-      // 记录初始值
-      initialData.value = JSON.parse(JSON.stringify(props.data || {}));
-      // 打开时根据初始值回显
-      selectedData.value =
-        initialData.value && Object.keys(initialData.value).length
-          ? JSON.parse(JSON.stringify(initialData.value))
-          : { user: [], role: [], department: [] };
-      // 通知子组件刷新选中（如有暴露 setSelection 方法）
-      userChooseRef.value?.setSelection?.(selectedData.value.user || []);
-      roleChooseRef.value?.setSelection?.(selectedData.value.role || []);
-      departmentChooseRef.value?.setSelection?.(selectedData.value.department || []);
+      syncSelectedData();
     } else {
       // 关闭时重置
       resetData();
     }
-  }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.data,
+  () => {
+    if (props.visible) {
+      syncSelectedData();
+    }
+  },
+  { deep: true }
 );
 </script>
 

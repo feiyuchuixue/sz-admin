@@ -29,7 +29,7 @@
     <el-button :icon="CircleClose" round size="large" @click="resetForm"> 重置 </el-button>
     <el-button :icon="UserFilled" round size="large" type="primary" :loading="loading" @click="login"> 登录 </el-button>
   </div>
-  <div v-if="IS_PREVIEW" style="margin-top: 20px; color: var(--el-color-warning)">
+  <div v-if="IS_PREVIEW" class="login-preview-tip">
     <span>如无法登陆请联系作者：feiyuchuixue@163.com</span>
   </div>
   <SliderCaptcha ref="captchaRef" @success="onSliderSuccess" @close="onCaptchaClose" />

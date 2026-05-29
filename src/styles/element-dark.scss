@@ -15,16 +15,37 @@ html.dark {
 
   /* login */
   .login-container {
-    background-color: #191919 !important;
+    background-color: #111315 !important;
 
     .login-box {
-      background-color: rgb(0 0 0 / 80%) !important;
+      background-color: rgb(0 0 0 / 72%) !important;
+      border-color: rgb(255 255 255 / 6%) !important;
+
+      .login-left-img {
+        opacity: 0.86;
+        filter: saturate(0.92) brightness(0.95);
+      }
 
       .login-form {
-        box-shadow: rgb(255 255 255 / 12%) 0 2px 10px 2px !important;
+        background-color: rgb(22 24 27 / 92%) !important;
+        border-color: rgb(255 255 255 / 8%) !important;
+        box-shadow: 0 18px 48px rgb(0 0 0 / 36%) !important;
 
         .logo-text {
           color: var(--el-text-color-primary) !important;
+        }
+
+        .logo-desc {
+          color: var(--el-text-color-secondary) !important;
+        }
+
+        .el-input__wrapper {
+          background-color: rgb(255 255 255 / 3%) !important;
+          box-shadow: 0 0 0 1px rgb(255 255 255 / 16%) inset !important;
+        }
+
+        .el-input__wrapper.is-focus {
+          box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;
         }
       }
     }

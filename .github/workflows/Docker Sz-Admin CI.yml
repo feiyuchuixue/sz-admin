@@ -40,7 +40,7 @@ jobs:
       - name: Set up Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.19.5'
 
       # 3. 安装 pnpm 包管理工具
       - name: Install pnpm globally
