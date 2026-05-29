@@ -15,6 +15,26 @@ import pkg from './package.json';
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const root = process.cwd();
   const env = loadEnv(mode, root);
+  const normalizeApiBase = (value: string | undefined, fallback: string) => {
+    const raw = (value || fallback).trim();
+    const withLeadingSlash = raw.startsWith('/') ? raw : `/${raw}`;
+    return withLeadingSlash.replace(/\/+$/, '');
+  };
+  const createApiProxy = (target: string) => ({
+    target,
+    changeOrigin: true,
+    ws: true,
+    ...(/^https:\/\//.test(target) ? { secure: false } : {})
+  });
+  const adminApiBase = normalizeApiBase(env.VITE_ADMIN_API_BASE, '/api/admin');
+  const generatorApiBase = normalizeApiBase(env.VITE_GENERATOR_API_BASE, '/api/generator');
+  const proxyTarget = env.VITE_API_PROXY_TARGET;
+  const proxy = proxyTarget
+    ? {
+        [adminApiBase]: createApiProxy(proxyTarget),
+        [generatorApiBase]: createApiProxy(proxyTarget)
+      }
+    : {};
 
   return {
     base: env.VITE_PUBLIC_PATH,
@@ -57,16 +77,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       host: '0.0.0.0',
       port: Number(env.VITE_PORT),
       open: env.VITE_OPEN === 'true',
-      proxy: {
-        '/api': {
-          target: env.VITE_API_URL,
-          changeOrigin: true,
-          ws: true,
-          rewrite: path => path.replace(new RegExp(`^/api`), ''),
-          // https is require secure=false
-          ...(/^https:\/\//.test(env.VITE_API_URL) ? { secure: false } : {})
-        }
-      }
+      proxy
     }
   };
 });

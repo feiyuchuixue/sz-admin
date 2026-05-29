@@ -1,90 +1,88 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { MenuQuery, MenuForm, MenuTree, MenuPermissionQuery } from '@/api/types/system/menu';
 import type { ScriptExportResult } from '@/api/types/script';
 
 /**
- * 获取菜单列表
+ * 鑾峰彇鑿滃崟鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getMenuList = (params: MenuQuery) => {
-  return http.get<Menu.MenuOptions[]>(ADMIN_MODULE + `/sys-menu`, params);
+  return adminHttp.get<Menu.MenuOptions[]>(`/sys-menu`, params);
 };
 
 /**
- * 添加菜单
+ * 娣诲姞鑿滃崟
  * @param params
  * @returns {*}
  */
 export const addMenu = (params: MenuForm) => {
-  return http.post(ADMIN_MODULE + `/sys-menu`, params);
+  return adminHttp.post(`/sys-menu`, params);
 };
 
 /**
- * 修改菜单
+ * 淇敼鑿滃崟
  * @param params
  * @returns {*}
  */
 export const editMenu = (params: MenuForm) => {
-  return http.put(ADMIN_MODULE + `/sys-menu`, params);
+  return adminHttp.put(`/sys-menu`, params);
 };
 
 /**
- * 删除菜单
+ * 鍒犻櫎鑿滃崟
  * @param params
  * @returns {*}
  */
 export const deleteMenu = (params: { ids: string[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-menu`, params);
+  return adminHttp.delete(`/sys-menu`, params);
 };
 
 /**
- * 获取菜单详情
+ * 鑾峰彇鑿滃崟璇︽儏
  * @param params
  * @returns {*}
  */
 export const getMenuInfo = (params: { id: string }) => {
   const { id } = params;
-  return http.get(ADMIN_MODULE + `/sys-menu/${id}`);
+  return adminHttp.get(`/sys-menu/${id}`);
 };
 
 /**
- * 获取上级菜单树
- * @param params
+ * 鑾峰彇涓婄骇鑿滃崟鏍? * @param params
  * @returns {*}
  */
 export const getMenuTree = (params: { nodeId?: string }) => {
-  return http.get<MenuTree[]>(ADMIN_MODULE + `/sys-menu/tree`, params);
+  return adminHttp.get<MenuTree[]>(`/sys-menu/tree`, params);
 };
 
 /**
- * 菜单权限是否存在验证
+ * 鑿滃崟鏉冮檺鏄惁瀛樺湪楠岃瘉
  * @param params
  * @returns {*}
  */
 export const getBtnExits = (params: MenuPermissionQuery) => {
-  return http.get<{ permissionCount: number }>(ADMIN_MODULE + `/sys-menu/btn/exists`, params);
+  return adminHttp.get<{ permissionCount: number }>(`/sys-menu/btn/exists`, params);
 };
 
 /**
- * 导出菜单sql
+ * 瀵煎嚭鑿滃崟sql
  * @param params
  */
 export const exportMenuSql = (params: { ids: string[] }) => {
-  return http.post<string>(ADMIN_MODULE + `/sys-menu/sql/export`, params);
+  return adminHttp.post<string>(`/sys-menu/sql/export`, params);
 };
 
 export const exportMenuScript = (params: { ids: string[]; sqlDialect?: string }) => {
-  return http.post<ScriptExportResult>(ADMIN_MODULE + '/sys-menu/script/export', params);
+  return adminHttp.post<ScriptExportResult>('/sys-menu/script/export', params);
 };
 
 /**
- * 修改菜单数据权限
+ * 淇敼鑿滃崟鏁版嵁鏉冮檺
  * @param params
  * @returns {*}
  */
 export const chaneDataRole = (params: { id: string }) => {
   const { id } = params;
-  return http.put(ADMIN_MODULE + `/sys-menu/datarole/change/${id}`);
+  return adminHttp.put(`/sys-menu/datarole/change/${id}`);
 };

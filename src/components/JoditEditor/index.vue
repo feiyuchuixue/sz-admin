@@ -11,12 +11,11 @@ import type { DeepPartial } from 'jodit/types/types';
 import type { Config } from 'jodit/types/config';
 import { useUserStore } from '@/stores/modules/user';
 import merge from 'lodash.merge';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+import { ADMIN_API_BASE } from '@/api/client';
 
 defineOptions({
   name: 'JoditEditor'
 });
-const baseUrl = import.meta.env.VITE_API_URL as string;
 const userStore = useUserStore();
 
 interface Plugin {
@@ -241,7 +240,7 @@ const mergedConfig = computed(() => {
 });
 
 const createUploader = (sceneCode: string): any => ({
-  url: `${baseUrl}${ADMIN_MODULE}/resource/batchUpload`,
+  url: `${ADMIN_API_BASE}/resource/batchUpload`,
   headers: { Authorization: `Bearer ${userStore.token}` },
   method: 'POST',
   data: { sceneCode },

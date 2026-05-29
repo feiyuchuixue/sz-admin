@@ -1,5 +1,4 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+import { generatorHttp } from '@/api/client';
 import type { IPage, IPageQuery } from '@/api/types';
 import type {
   GeneratorCheckInfo,
@@ -15,7 +14,7 @@ import type {
  * @returns {*}
  */
 export const getGeneratorList = (params: GeneratorQuery) => {
-  return http.get<IPage<GeneratorInfo>>(ADMIN_MODULE + `/generator/list`, params);
+  return generatorHttp.get<IPage<GeneratorInfo>>('/list', params);
 };
 
 /**
@@ -23,7 +22,7 @@ export const getGeneratorList = (params: GeneratorQuery) => {
  * @param params
  */
 export const getGeneratorSchemaList = (params: IPageQuery) => {
-  return http.get<IPage<GeneratorInfo>>(ADMIN_MODULE + `/generator/schema/list`, params);
+  return generatorHttp.get<IPage<GeneratorInfo>>('/schema/list', params);
 };
 
 /**
@@ -31,7 +30,7 @@ export const getGeneratorSchemaList = (params: IPageQuery) => {
  * @param params
  */
 export const importGenerator = (params: { tableName: (string | number)[] }) => {
-  return http.post(ADMIN_MODULE + `/generator/import`, params);
+  return generatorHttp.post('/import', params);
 };
 
 /**
@@ -39,7 +38,7 @@ export const importGenerator = (params: { tableName: (string | number)[] }) => {
  * @param params
  */
 export const saveGenerator = (params: GeneratorForm) => {
-  return http.put(ADMIN_MODULE + `/generator`, params);
+  return generatorHttp.put('', params);
 };
 
 /**
@@ -47,7 +46,7 @@ export const saveGenerator = (params: GeneratorForm) => {
  * @param tableName
  */
 export const getGeneratorInfo = (tableName: string) => {
-  return http.get<GeneratorForm>(ADMIN_MODULE + `/generator/${tableName}`);
+  return generatorHttp.get<GeneratorForm>(`/${tableName}`);
 };
 
 /**
@@ -55,7 +54,7 @@ export const getGeneratorInfo = (tableName: string) => {
  * @param params
  */
 export const codeGenerator = (tableName: string) => {
-  return http.post<string[]>(ADMIN_MODULE + `/generator/generator/${tableName}`);
+  return generatorHttp.post<string[]>(`/generator/${tableName}`);
 };
 
 /**
@@ -63,7 +62,7 @@ export const codeGenerator = (tableName: string) => {
  * @param params
  */
 export const deleteGenerator = (params: { tableNames: (string | number)[] }) => {
-  return http.delete(ADMIN_MODULE + `/generator`, params);
+  return generatorHttp.delete('', params);
 };
 
 /**
@@ -72,7 +71,7 @@ export const deleteGenerator = (params: { tableNames: (string | number)[] }) => 
  * @returns {*}
  */
 export const downloadZip = (params: { tableNames: string[] }) => {
-  return http.download(ADMIN_MODULE + `/generator/zip`, params);
+  return generatorHttp.download('/zip', params);
 };
 
 /**
@@ -80,12 +79,12 @@ export const downloadZip = (params: { tableNames: string[] }) => {
  * @param tableName
  */
 export const previewCode = (tableName: string) => {
-  return http.get<GeneratorPreviewInfo[]>(ADMIN_MODULE + `/generator/preview/${tableName}`);
+  return generatorHttp.get<GeneratorPreviewInfo[]>(`/preview/${tableName}`);
 };
 /**
  * 验证磁盘
  * @param tableName
  */
 export const checkDisk = (tableName: string) => {
-  return http.get<GeneratorCheckInfo>(ADMIN_MODULE + `/generator/check/${tableName}`);
+  return generatorHttp.get<GeneratorCheckInfo>(`/check/${tableName}`);
 };

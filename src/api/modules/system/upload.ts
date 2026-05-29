@@ -1,5 +1,5 @@
-import http, { type CustomAxiosRequestConfig } from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import type { CustomAxiosRequestConfig } from '@/api';
+import { adminHttp } from '@/api/client';
 import type {
   IUploadResult,
   ResourceUploadFile,
@@ -10,30 +10,28 @@ import type {
 import type { AxiosRequestConfig } from 'axios';
 
 /**
- * 上传文件
+ * 涓婁紶鏂囦欢
  * @param params
  * @returns {*}
  */
-/** @deprecated 旧上传响应结果，请使用 ResourceUploadResult */
+/** @deprecated 鏃т笂浼犲搷搴旂粨鏋滐紝璇蜂娇鐢?ResourceUploadResult */
 export const uploadFile = (params: UploadFile, config?: AxiosRequestConfig<any> | undefined) => {
-  return http.upload<UploadResult>(ADMIN_MODULE + `/sys-file/upload`, params, config);
+  return adminHttp.upload<UploadResult>(`/sys-file/upload`, params, config);
 };
 
 /**
- * 上传模板文件
+ * 涓婁紶妯℃澘鏂囦欢
  * @param params
  * @param config
  * @returns {*}
  */
 export const uploadTmpFile = (params: UploadFile, config?: AxiosRequestConfig<any> | undefined) => {
-  return http.upload<IUploadResult>(ADMIN_MODULE + `/sys-temp-file/upload`, params, config);
+  return adminHttp.upload<IUploadResult>(`/sys-temp-file/upload`, params, config);
 };
 
 /**
- * 统一资源上传接口（POST /resource/upload）
- * @param params sceneCode 必填，bizKey 可选
- * @param config axios 配置
+ * 缁熶竴璧勬簮涓婁紶鎺ュ彛锛圥OST /resource/upload锛? * @param params sceneCode 蹇呭～锛宐izKey 鍙€? * @param config axios 閰嶇疆
  */
 export const uploadResource = (params: ResourceUploadFile, config?: CustomAxiosRequestConfig<any> | undefined) => {
-  return http.upload<ResourceUploadResult>(ADMIN_MODULE + `/resource/upload`, params, config);
+  return adminHttp.upload<ResourceUploadResult>(`/resource/upload`, params, config);
 };

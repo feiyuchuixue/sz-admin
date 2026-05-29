@@ -1,58 +1,57 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { RoleQuery, RoleInfo, RoleForm, RoleMenu, RoleMenuForm } from '@/api/types/system/role';
 import type { IPage } from '@/api/types';
 
 /**
- * 获取角色列表
+ * 鑾峰彇瑙掕壊鍒楄〃
  * @param params
  * @returns {*}
  */
 export const getRoleList = (params: RoleQuery) => {
-  return http.get<IPage<RoleInfo>>(ADMIN_MODULE + `/sys-role`, params);
+  return adminHttp.get<IPage<RoleInfo>>(`/sys-role`, params);
 };
 
 /**
- * 添加角色
+ * 娣诲姞瑙掕壊
  * @param params
  * @returns {*}
  */
 export const addRole = (params: RoleForm) => {
-  return http.post(ADMIN_MODULE + `/sys-role`, params);
+  return adminHttp.post(`/sys-role`, params);
 };
 
 /**
- * 修改角色
+ * 淇敼瑙掕壊
  * @param params
  * @returns {*}
  */
 export const editRole = (params: RoleForm) => {
-  return http.put(ADMIN_MODULE + `/sys-role`, params);
+  return adminHttp.put(`/sys-role`, params);
 };
 
 /**
- * 删除角色
+ * 鍒犻櫎瑙掕壊
  * @param params
  * @returns {*}
  */
 export const deleteRole = (params: { ids: number[] }) => {
-  return http.delete(ADMIN_MODULE + `/sys-role`, params);
+  return adminHttp.delete(`/sys-role`, params);
 };
 
 /**
- * 获取角色菜单权限
+ * 鑾峰彇瑙掕壊鑿滃崟鏉冮檺
  * @param params
  * @returns {*}
  */
 export const getRoleMenus = (params: { roleId: number }) => {
-  return http.get<RoleMenu>(ADMIN_MODULE + `/sys-role/menu`, params);
+  return adminHttp.get<RoleMenu>(`/sys-role/menu`, params);
 };
 
 /**
- * 设置角色菜单权限
+ * 璁剧疆瑙掕壊鑿滃崟鏉冮檺
  * @param params
  * @returns {*}
  */
 export const setRoleMenus = (params: RoleMenuForm) => {
-  return http.put(ADMIN_MODULE + `/sys-role/menu`, params);
+  return adminHttp.put(`/sys-role/menu`, params);
 };

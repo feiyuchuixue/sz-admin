@@ -37,16 +37,16 @@ type CustomInternalAxiosRequestConfig<D = any> = InternalAxiosRequestConfig<D> &
   handleBusinessError?: boolean;
 };
 
-const config = {
+const config: AxiosRequestConfig = {
   // 默认地址请求地址，可在 .env.** 文件中修改
-  baseURL: import.meta.env.VITE_API_URL as string,
+  baseURL: '',
   // 设置超时时间，默认超时时间60s
   timeout: import.meta.env.VITE_APP_HTTP_TIMEOUT || 60000
   // 跨域时候允许携带凭证
   // withCredentials: true
 };
 
-class RequestHttp {
+export class RequestHttp {
   instance: AxiosInstance;
 
   constructor(config: AxiosRequestConfig) {
@@ -182,5 +182,13 @@ class RequestHttp {
     });
   }
 }
+
+export const createHttp = (baseURL: string, customConfig: AxiosRequestConfig = {}) => {
+  return new RequestHttp({
+    ...config,
+    ...customConfig,
+    baseURL
+  });
+};
 
 export default new RequestHttp(config);

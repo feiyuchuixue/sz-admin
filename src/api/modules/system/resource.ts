@@ -1,11 +1,10 @@
-import http from '@/api';
-import { ADMIN_MODULE } from '@/api/helper/prefix';
+﻿import { adminHttp } from '@/api/client';
 import type { IPage } from '@/api/types';
 import type { SysResourceQuery, SysResourceRow } from '@/api/types/system/resource';
 
 /**
- * 资源分页查询
+ * 璧勬簮鍒嗛〉鏌ヨ
  */
 export const getSysResourcePageApi = (params: SysResourceQuery) => {
-  return http.get<IPage<SysResourceRow>>(ADMIN_MODULE + `/resource`, params);
+  return adminHttp.get<IPage<SysResourceRow>>(`/resource`, params);
 };
