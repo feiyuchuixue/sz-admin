@@ -53,6 +53,7 @@ export const useDownload = async (
     document.body.removeChild(exportFile);
     window.URL.revokeObjectURL(blobUrl);
   } catch (error) {
-    console.log(error);
+    // 拦截器已统一弹出错误提示，此处 re-throw 让调用方可感知失败（如回收 loading 状态）
+    return Promise.reject(error);
   }
 };

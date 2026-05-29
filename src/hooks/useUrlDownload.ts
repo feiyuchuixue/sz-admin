@@ -40,30 +40,35 @@ export function useUrlDownload(file: { url: string; filename?: string }) {
   }
 
   async function proxyDownload(url: string, filename?: string) {
-    // 1. 通过代理接口拿到 AxiosResponse<Blob>
-    const res = await fileDownload({ url });
+    try {
+      // 1. 通过代理接口拿到 AxiosResponse<Blob>
+      const res = await fileDownload({ url });
 
-    // 2. 从响应头中取 Content-Disposition
-    const cd =
-      (res.headers['content-disposition'] as string | undefined) ?? (res.headers['Content-Disposition'] as string | undefined);
+      // 2. 从响应头中取 Content-Disposition
+      const cd =
+        (res.headers['content-disposition'] as string | undefined) ?? (res.headers['Content-Disposition'] as string | undefined);
 
-    // 3. 计算最终文件名：前端传入 > 响应头 > URL > 'download'
-    let finalName = filename;
-    const cdName = extractFileNameFromCD(cd);
-    if (!finalName && cdName) finalName = cdName;
-    if (!finalName) finalName = getFileNameFromUrl(url) || 'download';
+      // 3. 计算最终文件名：前端传入 > 响应头 > URL > 'download'
+      let finalName = filename;
+      const cdName = extractFileNameFromCD(cd);
+      if (!finalName && cdName) finalName = cdName;
+      if (!finalName) finalName = getFileNameFromUrl(url) || 'download';
 
-    // 4. 触发浏览器下载
-    const blob = res.data as Blob;
-    const objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = objectUrl;
-    a.download = finalName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      // 4. 触发浏览器下载
+      const blob = res.data as Blob;
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = objectUrl;
+      a.download = finalName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      // 拦截器已统一弹出错误提示，re-throw 让调用方可感知失败
+      return Promise.reject(error);
+    }
   }
 
   const { url, filename } = file;

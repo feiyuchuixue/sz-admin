@@ -44,6 +44,7 @@ import { ref, reactive, onBeforeUnmount, computed } from 'vue';
 import { Refresh, DArrowRight } from '@element-plus/icons-vue';
 import { getImageCodeApi, verifyImageCodeApi } from '@/api/modules/system/captcha';
 import { aesEncrypt } from '@/utils';
+import { CODE_SUCCESS } from '@/api/helper';
 
 defineOptions({ name: 'SliderCaptcha' });
 
@@ -253,7 +254,7 @@ const verifyImageCode = async (params: { requestId: string; startTime: number; m
   try {
     const { code } = await verifyImageCodeApi(params);
     const duration = ((Date.now() - params.startTime) / 1000).toFixed(2);
-    if (code === '0000') {
+    if (code === CODE_SUCCESS) {
       slideData.isSuccess = true;
       overlayVisible.value = true;
       overlayMessage.value = `验证通过，耗时 ${duration}s`;

@@ -10,6 +10,21 @@ import { useAuthStore } from '@/stores/modules/auth';
 import { useSocketStore } from '@/stores/modules/socket/socket';
 import { ElMessage } from 'element-plus';
 
+/**
+ * 清除登录态并跳转登录页
+ * 场景：业务码 C105（token 失效）或 HTTP 401（未认证）
+ */
+function clearLoginAndRedirect(message?: string): void {
+  const userStore = useUserStore();
+  const authStore = useAuthStore();
+  const socketStore = useSocketStore();
+  userStore.clear();
+  authStore.clear();
+  socketStore.close();
+  router.replace(LOGIN_URL);
+  if (message) ElMessage.error(message);
+}
+
 export interface CustomAxiosRequestConfig<D = any> extends AxiosRequestConfig<D> {
   loading?: boolean;
   cancel?: boolean;
@@ -65,27 +80,27 @@ class RequestHttp {
     this.instance.interceptors.response.use(
       response => {
         const { data } = response;
-        const userStore = useUserStore();
-        const socketStore = useSocketStore();
-        const authStore = useAuthStore();
-        // 如果是文件流，直接返回整个响应对象
+
+        // blob 响应：检查是否为错误（后端通过响应头传递业务信息）
         if (response.config.responseType === 'blob') {
+          const bizCode = response.headers['x-biz-code'];
+          const bizMessage = response.headers['x-biz-message'];
+          if (bizCode && bizCode !== CODE_SUCCESS) {
+            // 解码响应头中的中文（后端 URLEncoder 编码）
+            const msg = bizMessage ? decodeURIComponent(bizMessage) : '操作失败，请稍后重试！';
+            ElMessage.error(msg);
+            return Promise.reject({ code: bizCode, message: msg });
+          }
+          // 正常文件流，直接返回整个响应对象
           return response;
         }
 
-        //tryHideFullScreenLoading()
-        // 登陆失效
+        // 登录失效（业务码 C105）
         if (data.code === CODE_TOKEN_FAIL) {
-          userStore.clear();
-          authStore.clear();
-          // 关闭socket
-          socketStore.close();
-
-          router.replace(LOGIN_URL);
-          ElMessage.error(data.message);
+          clearLoginAndRedirect(data.message);
           return Promise.reject(data);
         }
-        // 全局错误信息拦截（防止下载文件的时候返回数据流，没有 code 直接报错）
+        // 全局错误信息拦截
         if (data.code && data.code !== CODE_SUCCESS) {
           const customConfig = response.config as CustomAxiosRequestConfig;
           if (customConfig.handleBusinessError !== false) {
@@ -93,12 +108,11 @@ class RequestHttp {
           }
           return Promise.reject(data);
         }
-        // 成功请求（在页面上除非特殊情况，否则不用处理失败逻辑）
+        // 成功请求
         return data;
       },
       async error => {
         const { response } = error;
-        // tryHideFullScreenLoading()
         // 请求超时 && 网络错误单独判断，没有 response
         if (error.message.indexOf('timeout') !== -1) {
           ElMessage.error('请求超时！请您稍后重试');
@@ -108,9 +122,14 @@ class RequestHttp {
         }
         // 根据服务器响应的错误状态码，做不同的处理
         if (response) {
-          checkStatus(response?.status, response?.data?.message);
+          // HTTP 401：token 失效或未登录，统一跳转登录页
+          if (response.status === 401) {
+            clearLoginAndRedirect(response.data?.message || '登录失效，请重新登录！');
+            return Promise.reject(error);
+          }
+          checkStatus(response.status, response.data?.message);
         }
-        // 服务器结果都没有返回(可能服务器错误可能客户端断网)，断网处理:可以跳转到断网页面
+        // 服务器结果都没有返回(可能服务器错误可能客户端断网)，断网处理
         if (!window.navigator.onLine) {
           router.replace('/500');
         }
