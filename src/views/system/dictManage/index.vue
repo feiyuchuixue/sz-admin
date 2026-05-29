@@ -76,16 +76,20 @@
     </el-tabs>
     <DictTypeForm ref="dictTypeRef" />
     <DictData ref="dictDataRef" />
-    <el-dialog v-model="showSqlDialog" :title="sqlDialTitle" width="80%">
-      <HighCode :code="sqlData" language="sql" title="字典SQL" class="sql-box" />
-    </el-dialog>
+    <ScriptPreviewDialog
+      v-model="showScriptDialog"
+      :title="scriptDialogTitle"
+      :script-export="scriptExport"
+      :loading="scriptLoading"
+      @change-dialect="handleScriptDialectChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { CirclePlus, Delete, EditPen, SoldOut } from '@element-plus/icons-vue';
 import ProTable from '@/components/ProTable/index.vue';
-import { addDictType, deleteDictType, editDictType, exportDictSql, getDictType } from '@/api/modules/system/dict';
+import { addDictType, deleteDictType, editDictType, exportDictScript, getDictType } from '@/api/modules/system/dict';
 import { yesNoOptions, yesNoOptionsLabel } from '@/config/consts';
 import DictTypeForm from '@/views/system/dictManage/components/DictTypeForm.vue';
 import DictSourceTab from '@/views/system/dictManage/components/DictSourceTab.vue';
@@ -93,9 +97,10 @@ import { useHandleData } from '@/hooks/useHandleData';
 import DictData from '@/views/system/dictManage/components/DictData.vue';
 import type { ColumnProps, ProTableInstance, SearchProps } from '@/components/ProTable/interface';
 import type { DictType, DictTypeQuery } from '@/api/types/system/dict';
+import type { ScriptExportResult } from '@/api/types/script';
 import { ref, computed } from 'vue';
-import HighCode from '@/components/HighCode/index.vue';
 import { useAuthStore } from '@/stores/modules/auth';
+import ScriptPreviewDialog from '@/components/ScriptPreviewDialog/index.vue';
 
 defineOptions({
   name: 'DictManage'
@@ -126,9 +131,11 @@ const searchColumns: SearchProps[] = [
   { prop: 'typeCode', label: '类型', el: 'input' }
 ];
 
-const showSqlDialog = ref(false);
-const sqlData = ref<string>('');
-const sqlDialTitle = ref('');
+const showScriptDialog = ref(false);
+const scriptLoading = ref(false);
+const scriptExport = ref<ScriptExportResult | null>(null);
+const scriptRow = ref<any>({});
+const scriptDialogTitle = computed(() => `SQL [${scriptRow.value?.typeCode || ''}]`);
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTableRef = ref<ProTableInstance>();
@@ -170,17 +177,24 @@ const openDictDta = (row: DictType) => {
   dictDataRef.value?.show(row);
 };
 const showSqlInfo = async (row: any = {}) => {
-  sqlDialTitle.value = `字典【${row.typeCode}】`;
-  const { data } = await exportDictSql({ ids: [row.id] });
-  showSqlDialog.value = true;
-  sqlData.value = data;
+  scriptRow.value = row;
+  await loadScript(row.id);
+  showScriptDialog.value = true;
+};
+
+const loadScript = async (id: number, sqlDialect?: string) => {
+  scriptLoading.value = true;
+  try {
+    const { data } = await exportDictScript({ ids: [id], sqlDialect });
+    scriptExport.value = data;
+  } finally {
+    scriptLoading.value = false;
+  }
+};
+
+const handleScriptDialectChange = (sqlDialect: string) => {
+  if (scriptRow.value?.id) {
+    loadScript(scriptRow.value.id, sqlDialect);
+  }
 };
 </script>
-<style lang="scss" scoped>
-.sql-box {
-  margin: 0 auto;
-  width: 90%;
-  max-height: 60vh;
-  overflow: auto;
-}
-</style>

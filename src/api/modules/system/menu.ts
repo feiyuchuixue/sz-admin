@@ -1,6 +1,7 @@
 import http from '@/api';
 import { ADMIN_MODULE } from '@/api/helper/prefix';
 import type { MenuQuery, MenuForm, MenuTree, MenuPermissionQuery } from '@/api/types/system/menu';
+import type { ScriptExportResult } from '@/api/types/script';
 
 /**
  * 获取菜单列表
@@ -72,6 +73,10 @@ export const getBtnExits = (params: MenuPermissionQuery) => {
  */
 export const exportMenuSql = (params: { ids: string[] }) => {
   return http.post<string>(ADMIN_MODULE + `/sys-menu/sql/export`, params);
+};
+
+export const exportMenuScript = (params: { ids: string[]; sqlDialect?: string }) => {
+  return http.post<ScriptExportResult>(ADMIN_MODULE + '/sys-menu/script/export', params);
 };
 
 /**
