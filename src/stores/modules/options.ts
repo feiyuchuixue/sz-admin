@@ -78,7 +78,12 @@ export const useOptionsStore = defineStore(
     }
 
     function shouldLoad(type: string): boolean {
-      return !!type && !loadingTypes.value[type] && !isFailedCoolingDown(type) && (!loadedTypes.value[type] || expiredTypes.value[type]);
+      return (
+        !!type &&
+        !loadingTypes.value[type] &&
+        !isFailedCoolingDown(type) &&
+        (!loadedTypes.value[type] || expiredTypes.value[type])
+      );
     }
 
     function markLoaded(type: string) {
