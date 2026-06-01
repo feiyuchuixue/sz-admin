@@ -970,7 +970,7 @@ const handleSubmit = () => {
 
     paramsProps.value.api!({
       baseInfo: baseInfo.value,
-      columns: columnsInfos.value,
+      columns: serializeColumns(columnsInfos.value),
       generatorInfo: generatorInfo.value
     }).then(() => {
       ElMessage.success({ message: '保存成功！' });
@@ -978,6 +978,13 @@ const handleSubmit = () => {
     });
   });
 };
+
+const serializeColumns = (columns: GeneratorColumnInfo[]) =>
+  columns.map(row => {
+    const column = { ...row };
+    delete column.smartHints;
+    return column;
+  });
 
 const normalizeDerivedGeneratorInfo = () => {
   if (!generatorInfo.value.frontendLayout) {

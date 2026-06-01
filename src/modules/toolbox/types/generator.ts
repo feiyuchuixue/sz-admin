@@ -24,7 +24,7 @@ export type GeneratorInfo = {
   functionName: string;
   functionAuthor: string;
   type: string;
-  options: string;
+  options: string | Record<string, unknown>;
   path: string;
   createId: number;
   createTime: string;
@@ -71,12 +71,20 @@ export type GeneratorColumnInfo = {
   javaField: string;
   javaType: string;
   javaTypePackage: string;
-  options: string;
+  options: string | Record<string, unknown>;
   queryType: string;
   searchType: string;
   specialPackages: string;
   tableId: number;
+  tsType?: string;
   upCamelField: string;
+  smartHints?: GeneratorColumnSmartHint[];
+};
+
+export type GeneratorColumnSmartHint = {
+  type: 'info' | 'warning' | 'danger';
+  label: string;
+  message: string;
 };
 
 export type GeneratorGeneratorInfo = {
