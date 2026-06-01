@@ -134,7 +134,6 @@ const searchColumns: SearchProps[] = [
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTableRef = ref<ProTableInstance>();
-const checkDiskVisible = ref(false);
 const generatorVisible = ref(false);
 const generatorCodeInfos = ref<string[]>([]);
 const importReady = ref(false);
@@ -183,7 +182,6 @@ const codeGene = (row: GeneratorInfo) => {
         !record.data.checkedDataScope ||
         record.data.errors?.length
       ) {
-        checkDiskVisible.value = true;
         let context = '';
         if (record.data.errors?.length) {
           context += record.data.errors

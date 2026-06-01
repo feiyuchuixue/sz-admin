@@ -59,7 +59,9 @@ export type GeneratorColumnInfo = {
   isAutofill: string;
   isEdit: string;
   isIncrement: string;
+  isImport: string;
   isInsert: string;
+  isExport: string;
   isList: string;
   isLogicDel: string;
   isPk: string;
