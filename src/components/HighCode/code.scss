@@ -1,116 +1,159 @@
-/* 语法高亮 */
+/* 只读代码查看器 */
 .hljs-container {
-  position: relative;
   display: flex;
   flex-direction: column;
-  width: max-content;
-  overflow-x: hidden;
-  font-size: 14px;
-  line-height: 24px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: #d6deeb;
   text-align: left;
-  background: #21252b;
-
-  .hljs-header {
-    width: 100%;
-    background-color: #21252b;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 100;
-  }
-
-  .hljs-wrapper {
-    display: flex;
-    align-items: flex-start;
-  }
-
-  /** 行数样式 */
-  .hljs-code-number {
-    padding: 17px 10px 0;
-    color: #d1d8e6;
-    font-size: 12px;
-    list-style: none;
-    background: #21252b;
-    position: sticky;
-    left: 0;
-  }
-
-  pre {
-    flex: 1;
-  }
+  background: #20242c;
 }
 
-/** 3个点 */
-.hljs-container .hljs-header::before {
-  position: absolute;
-  top: 10px;
-  left: 15px;
-  width: 12px;
-  height: 12px;
-  overflow: visible;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 12px;
-  white-space: nowrap;
-  text-indent: 75px;
-  background-color: #fc625d;
-  border-radius: 16px;
+.hljs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  gap: 12px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  background: #1b1f27;
+}
+
+.hljs-title,
+.hljs-actions {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.hljs-title {
+  gap: 9px;
+}
+
+.hljs-window-dot {
+  position: relative;
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  margin-right: 34px;
+  border-radius: 999px;
+  background: #ff5f57;
   box-shadow:
-    20px 0 #fdbc40,
-    40px 0 #35cd4b;
-  content: attr(codetype);
+    18px 0 #ffbd2e,
+    36px 0 #28c840;
 }
 
-/** 滚动条 */
-:deep(.hljs) {
-  overflow-x: auto;
+.hljs-file-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  color: #d6deeb;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-:deep(.hljs::-webkit-scrollbar) {
-  width: 12px !important;
-  height: 12px !important;
+.hljs-language {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border: 1px solid rgb(125 211 252 / 35%);
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7dd3fc;
+  background: rgb(14 165 233 / 10%);
 }
 
-:deep(.hljs::-webkit-scrollbar-thumb) {
-  height: 30px !important;
-  background: #d1d8e6;
-  background-clip: content-box;
-  border: 2px solid transparent;
-  border-radius: 19px;
-  opacity: 0.8;
+.hljs-actions {
+  flex: 0 0 auto;
+  gap: 6px;
 }
 
-:deep(.hljs::-webkit-scrollbar-thumb:hover) {
-  background: #a5b3cf;
-  background-clip: content-box;
-  border: 2px solid transparent;
+.hljs-actions :deep(.el-button) {
+  height: 28px;
+  padding: 0 6px;
+  color: #5eead4;
 }
 
-:deep(.hljs::-webkit-scrollbar-track-piece) {
-  width: 30px;
-  height: 30px;
-  background: #333;
+.hljs-actions :deep(.el-button:hover) {
+  color: #99f6e4;
+  background: rgb(45 212 191 / 10%);
 }
 
-::-webkit-scrollbar-button {
-  display: none;
+.hljs-wrapper {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 3%) 1px, transparent 1px) 0 0 / 42px 42px,
+    #20242c;
 }
 
-/** 复制样式 */
-.hljs-copy {
-  width: auto;
-  height: 30px;
-  color: #d7d7e1;
-  cursor: pointer;
+.hljs-code-number {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  flex: 0 0 auto;
+  min-width: 52px;
+  padding: 16px 12px 16px 10px;
+  margin: 0;
+  border-right: 1px solid rgb(255 255 255 / 7%);
+  color: #667085;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 22px;
+  text-align: right;
+  list-style: none;
+  background: #20242c;
   user-select: none;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-  margin: 0 2px;
+}
 
-  .sql-box {
-    text-align: unset;
-  }
+.hljs-wrapper pre {
+  flex: 1;
+  min-width: max-content;
+  margin: 0;
+}
+
+.hljs-wrapper :deep(code.hljs) {
+  min-height: 100%;
+  padding: 16px 18px;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 22px;
+  background: transparent;
+}
+
+.hljs-empty {
+  flex: 1;
+  background: #20242c;
+}
+
+.hljs-empty :deep(.el-empty__description p) {
+  color: #94a3b8;
+}
+
+.hljs-wrapper::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+.hljs-wrapper::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #596273;
+  background-clip: content-box;
+}
+
+.hljs-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #748196;
+  background-clip: content-box;
+}
+
+.hljs-wrapper::-webkit-scrollbar-track {
+  background: #20242c;
 }

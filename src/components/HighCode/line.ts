@@ -14,11 +14,14 @@ const buildLineNumber = (el: any) => {
   const code = el.querySelector('code.hljs');
   const pre = el.querySelector('pre');
   const html = code?.innerHTML;
-  const size = html.split('\n').length;
   const codeNumber = el.querySelector('.hljs-code-number');
   if (codeNumber) {
     el.removeChild(codeNumber);
   }
+  if (!html) {
+    return;
+  }
+  const size = html.split('\n').length;
   //插入行数
   const ul = document.createElement('ul');
   for (let i = 1; i <= size; i++) {

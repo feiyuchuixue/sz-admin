@@ -93,7 +93,11 @@
           <template #columnName="scope">
             <div class="field-cell-main">
               <span>{{ scope.row.columnName }}</span>
-              <el-tag v-if="scope.row.isPk === '1'" size="small" effect="plain">PK</el-tag>
+              <div v-if="getConstraintTags(scope.row).length" class="constraint-tags">
+                <el-tag v-for="tag in getConstraintTags(scope.row)" :key="tag.label" :type="tag.type" size="small" effect="plain">
+                  {{ tag.label }}
+                </el-tag>
+              </div>
             </div>
           </template>
           <template #columnComment="scope">
@@ -285,6 +289,7 @@ type BulkTarget = 'form' | 'list' | 'query' | 'import' | 'export';
 type CheckboxValue = string | number | boolean;
 type FieldStatusType = 'success' | 'warning' | 'danger' | 'info';
 type FieldHint = { label: string; type: FieldStatusType; description: string };
+type ConstraintTag = { label: string; type?: 'success' | 'warning' | 'danger' | 'info' };
 const fieldViewLabelMap: Record<FieldView, string> = {
   all: '全部字段',
   form: '表单字段',
@@ -478,6 +483,16 @@ function dictTypeChange(row: GeneratorColumnInfo) {
   if (row.dictType && !row.dictShowWay) {
     row.dictShowWay = dictShowWayOptions[0]?.value || '0';
   }
+}
+
+function getConstraintTags(row: GeneratorColumnInfo): ConstraintTag[] {
+  const tags: ConstraintTag[] = [];
+  if (row.isPk === '1') tags.push({ label: 'PK' });
+  if (row.isIncrement === '1') tags.push({ label: '自增', type: 'success' });
+  if (row.isUniqueValid === '1') tags.push({ label: '唯一', type: 'warning' });
+  if (row.isRequired === '1') tags.push({ label: '必填', type: 'danger' });
+  if (row.isLogicDel === '1') tags.push({ label: '逻辑删', type: 'info' });
+  return tags;
 }
 
 function getFieldHint(row: GeneratorColumnInfo): FieldHint {
@@ -881,9 +896,13 @@ function toggleVisibleFieldsByValue(target: BulkTarget, value: CheckboxValue) {
   color: var(--el-text-color-primary);
 }
 
-.field-cell-main {
+.field-cell-main,
+.constraint-tags {
   display: flex;
   align-items: center;
+}
+
+.field-cell-main {
   gap: 6px;
   min-width: 0;
 
@@ -892,6 +911,18 @@ function toggleVisibleFieldsByValue(target: BulkTarget, value: CheckboxValue) {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+.constraint-tags {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.constraint-tags :deep(.el-tag) {
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
 }
 
 :deep(.el-card) {
