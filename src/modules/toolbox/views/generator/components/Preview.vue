@@ -105,7 +105,7 @@
             </div>
             <div class="detail-path-row">
               <span class="detail-path-label">相对路径</span>
-              <span class="detail-path">{{ selectedItem.relativePath || selectedItem.name }}</span>
+              <span class="detail-path">{{ selectedDisplayPath || selectedItem.relativePath || selectedItem.name }}</span>
             </div>
             <div v-if="selectedItem.fullPath" class="detail-path-row">
               <span class="detail-path-label">完整路径</span>
@@ -190,7 +190,16 @@ const scopeSummary = computed(() => ({
 }));
 
 const targetText = computed(() => {
-  const projects = Array.from(new Set(codeList.value.map(item => item.projectName).filter(Boolean)));
+  const projects = Array.from(
+    new Set(
+      codeList.value
+        .map(item => {
+          const scope = resolveScope(item);
+          return firstPathSegment(resolveDisplayPath(item, scope));
+        })
+        .filter(Boolean)
+    )
+  );
   return projects.length ? projects.join(' / ') : '-';
 });
 
@@ -233,6 +242,10 @@ const selectedLanguage = computed(() => {
 
 const selectedScope = computed<PreviewScope>(() => {
   return selectedItem.value ? resolveScope(selectedItem.value) : 'other';
+});
+
+const selectedDisplayPath = computed(() => {
+  return selectedItem.value ? resolveDisplayPath(selectedItem.value, selectedScope.value) : '';
 });
 
 watch(filteredItems, items => {
@@ -295,8 +308,7 @@ const buildTree = (items: GeneratorPreviewInfo[]) => {
 
   items.forEach(item => {
     const scope = resolveScope(item);
-    const relativePath = normalizePath(item.relativePath || item.name);
-    const displayPath = withProjectRoot(item, relativePath, scope);
+    const displayPath = resolveDisplayPath(item, scope);
     const segments = displayPath.split('/').filter(Boolean);
     let currentChildren = roots;
     let currentPath = '';
@@ -304,17 +316,18 @@ const buildTree = (items: GeneratorPreviewInfo[]) => {
 
     segments.forEach((segment, index) => {
       currentPath = currentPath ? `${currentPath}/${segment}` : segment;
-      let node = nodeMap.get(currentPath);
+      const nodeKey = `${scope}:${currentPath}`;
+      let node = nodeMap.get(nodeKey);
       if (!node) {
         node = {
-          id: currentPath,
+          id: nodeKey,
           label: index === 0 ? formatRootLabel(segment, scope) : segment,
           path: currentPath,
           scope,
           isScopeRoot: index === 0,
           children: []
         };
-        nodeMap.set(currentPath, node);
+        nodeMap.set(nodeKey, node);
         currentChildren.push(node);
       }
       if (index === 0) {
@@ -395,7 +408,7 @@ const compactSourcePath = (node: PreviewTreeNode): PreviewTreeNode | PreviewTree
       if (sourceChildren.length && sourceChildren.length === mainNode.children?.length) {
         return sourceChildren.map(child => ({
           ...child,
-          id: child.path,
+          id: child.id,
           label: `${node.label}/${mainNode.label}/${child.label}`,
           children: child.children ? compactTree(child.children) : undefined
         }));
@@ -405,7 +418,7 @@ const compactSourcePath = (node: PreviewTreeNode): PreviewTreeNode | PreviewTree
   }
   return {
     ...targetNode,
-    id: targetNode.path,
+    id: targetNode.id,
     label: `${node.label}/${mainNode.label}/${targetNode.label}`,
     children: targetNode.children ? compactTree(targetNode.children) : undefined
   };
@@ -425,7 +438,7 @@ const compactPackagePath = (node: PreviewTreeNode) => {
   }
   return {
     ...current,
-    id: current.path,
+    id: current.id,
     label: labels.join('.'),
     children: current.children ? compactTree(current.children) : undefined
   };
@@ -465,6 +478,10 @@ const normalizePath = (path?: string) => {
   return (path || '').replace(/\\/g, '/');
 };
 
+const firstPathSegment = (path?: string) => {
+  return normalizePath(path).split('/').filter(Boolean)[0] || '';
+};
+
 const resolveScope = (item: GeneratorPreviewInfo): PreviewScope => {
   const source = normalizePath(`${item.projectName || ''}/${item.relativePath || ''}/${item.fullPath || ''}`).toLowerCase();
   if (item.operationType === 'SCRIPT' || source.includes('/scripts/') || source.startsWith('scripts/')) {
@@ -484,14 +501,59 @@ const resolveScope = (item: GeneratorPreviewInfo): PreviewScope => {
   return 'other';
 };
 
-const withProjectRoot = (item: GeneratorPreviewInfo, relativePath: string, scope: PreviewScope) => {
-  const normalizedPath = normalizePath(relativePath);
-  const firstSegment = normalizedPath.split('/').filter(Boolean)[0];
-  const root = item.projectName || defaultRootByScope(scope);
-  if (!root || firstSegment === root) {
-    return normalizedPath;
+const resolveDisplayPath = (item: GeneratorPreviewInfo, scope: PreviewScope) => {
+  const pathSegments = normalizePath(item.relativePath || item.name)
+    .split('/')
+    .filter(Boolean);
+  const root = resolveProjectRoot(item, scope, pathSegments);
+  const innerSegments = stripMismatchedRoot(pathSegments, scope, root);
+  if (!root) {
+    return innerSegments.join('/');
   }
-  return `${root}/${normalizedPath}`;
+  if (innerSegments[0] === root) {
+    return innerSegments.join('/');
+  }
+  return [root, ...innerSegments].filter(Boolean).join('/');
+};
+
+const resolveProjectRoot = (item: GeneratorPreviewInfo, scope: PreviewScope, pathSegments: string[]) => {
+  const firstSegment = pathSegments[0] || '';
+  const projectName = firstPathSegment(item.projectName);
+  if (scope === 'frontend') {
+    return isFrontendRoot(firstSegment) || isFrontendRoot(projectName) ? 'sz-admin' : defaultRootByScope(scope);
+  }
+  if (scope === 'backend') {
+    return isBackendRoot(firstSegment) || isBackendRoot(projectName) ? 'sz-boot-parent' : defaultRootByScope(scope);
+  }
+  if (scope === 'script') {
+    return defaultRootByScope(scope);
+  }
+  return projectName || firstSegment || defaultRootByScope(scope);
+};
+
+const stripMismatchedRoot = (segments: string[], scope: PreviewScope, root: string) => {
+  const firstSegment = segments[0];
+  if (!firstSegment || firstSegment === root) {
+    return segments;
+  }
+  if (scope === 'frontend' && isBackendRoot(firstSegment)) {
+    return segments.slice(1);
+  }
+  if (scope === 'backend' && isFrontendRoot(firstSegment)) {
+    return segments.slice(1);
+  }
+  if (scope === 'script' && (isFrontendRoot(firstSegment) || isBackendRoot(firstSegment))) {
+    return segments.slice(1);
+  }
+  return segments;
+};
+
+const isFrontendRoot = (segment?: string) => {
+  return segment === 'sz-admin';
+};
+
+const isBackendRoot = (segment?: string) => {
+  return segment === 'sz-boot-parent';
 };
 
 const defaultRootByScope = (scope: PreviewScope) => {

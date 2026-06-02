@@ -1,686 +1,441 @@
 <template>
   <el-dialog
+    class="generator-edit-dialog"
     v-model="visible"
     :title="`${paramsProps.title}：${paramsProps.row?.tableName}`"
     :destroy-on-close="true"
     :close-on-click-modal="false"
     :close-on-press-escape="true"
     width="95vw"
-    top="5vh"
+    top="4vh"
     append-to-body
   >
-    <el-steps :active="active" align-center finish-status="success">
-      <el-step title="基本信息" @click="active = 0" />
-      <el-step title="字段信息" @click="active = 1" />
-      <el-step title="生成信息" @click="active = 2" />
-    </el-steps>
-    <div class="mt20">
-      <div v-show="active === 0">
-        <el-form
-          ref="baseFormRef"
-          label-width="120px"
-          label-suffix=" :"
-          :rules="baseRules"
-          :model="baseInfo"
-          @submit.enter.prevent="handleSubmit"
-        >
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="表名称" prop="tableName">
-                <el-input v-model="baseInfo.tableName" clearable disabled />
-              </el-form-item>
-            </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="表描述" prop="tableComment">
-                <template #label>
-                  <el-space :size="4">
-                    <span>表描述</span>
-                    <el-tooltip effect="dark" content="表名，注释信息" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input v-model="baseInfo.tableComment" placeholder="请填写表描述" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="实体类名称" prop="className">
-                <template #label>
-                  <el-space :size="4">
-                    <span>实体类名称</span>
-                    <el-tooltip effect="dark" content="java PO层" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input v-model="baseInfo.className" placeholder="请填写实体类名称" clearable />
-              </el-form-item>
-            </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="作者" prop="functionAuthor">
-                <el-input v-model="baseInfo.functionAuthor" placeholder="请填写作者" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="备注" prop="remark">
-                <el-input v-model="baseInfo.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-      </div>
-      <div v-show="active === 1" style="margin: 0 20px">
-        <h4 class="form-header h4">选择模版</h4>
-        <div class="form-type">
-          <el-radio-group v-model="generatorInfo.generateType" size="large" @change="changeRadio">
-            <el-radio-button label="全量" value="all" />
-            <el-radio-button label="后端" value="server" />
-            <el-radio-button label="接口" value="service" />
-            <el-radio-button label="数据库" value="db" />
-          </el-radio-group>
-          <div class="tip custom-block">
-            <p style="color: var(--el-color-info)">Tip： {{ typeContent[generatorInfo.generateType].tooltip }}</p>
-            <p>{{ typeContent[generatorInfo.generateType].text }}</p>
-          </div>
-          <el-row>
-            <el-col :span="6" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
-              <el-form-item prop="type">
-                <template #label>
-                  <el-space :size="4">
-                    <span>Excel支持</span>
-                    <el-tooltip effect="dark" content="是否支持列表的导入导出" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-checkbox label="导入" name="type" v-model="generatorInfo.hasImport" true-value="1" false-value="0" />
-                <el-checkbox label="导出" name="type" v-model="generatorInfo.hasExport" true-value="1" false-value="0" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="3">
-              <el-form-item prop="type">
-                <template #label>
-                  <el-space :size="4">
-                    <span>自动填充</span>
-                    <el-tooltip effect="dark" content="对create、update操作进行自动填充。需遵循约定。" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-checkbox name="type" v-model="generatorInfo.isAutofill" true-value="1" false-value="0" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item prop="type">
-                <template #label>
-                  <el-space :size="4">
-                    <span>窗口展示方式</span>
-                    <el-tooltip effect="dark" content="控制详情页组件的窗口展示方式：弹窗、抽屉。" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-radio-group v-model="generatorInfo.windowShowType">
-                  <el-radio value="0"> 弹窗Dialog </el-radio>
-                  <el-radio value="1"> 抽屉Drawer </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
+    <div class="edit-shell" :class="{ 'is-field-step': active === 1 }">
+      <el-steps class="edit-steps" :active="active" align-center finish-status="success">
+        <el-step title="基本信息" @click="active = 0" />
+        <el-step title="字段信息" @click="active = 1" />
+        <el-step title="生成边界" @click="active = 2" />
+      </el-steps>
+      <div class="edit-summary">
+        <div>
+          <span class="summary-label">当前表</span>
+          <strong>{{ baseInfo.tableName || '-' }}</strong>
         </div>
-        <h4 class="form-header h4">配置字段</h4>
-        <div style="padding: 0 18px 0 10px">
-          <ProTable
-            ref="editProTableRef"
-            title="代码生成"
-            :indent="20"
-            :columns="columns"
-            :data="columnsInfos"
-            row-key="columnId"
-            :pagination="false"
-            :tool-button="false"
+        <el-tag size="small" effect="plain">{{
+          generatorInfo.generateType === 'all' ? '全栈生成' : generatorInfo.generateType === 'server' ? '仅后端' : '仅数据库'
+        }}</el-tag>
+        <el-tag size="small" type="info" effect="plain">{{ columnsInfos.length }} 个字段</el-tag>
+      </div>
+      <div class="edit-content" :class="{ 'is-field-content': active === 1 }">
+        <div v-show="active === 0" class="base-step">
+          <el-form
+            ref="baseFormRef"
+            label-width="120px"
+            label-suffix=" :"
+            :rules="baseRules"
+            :model="baseInfo"
+            @submit.enter.prevent="handleSubmit"
           >
-            <template #isUniqueValidHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="添加和修改时根据此属性进行唯一性校验." placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="表名称" prop="tableName">
+                  <el-input v-model="baseInfo.tableName" clearable disabled />
+                </el-form-item>
+              </el-col>
 
-            <template #isLogicDelHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip
-                  effect="dark"
-                  content="逻辑删除标识，需配合mf配置 deleted-value-of-logic-delete 、normal-value-of-logic-delete 使用。sz-admin中默认设置其属性为T、F"
-                  placement="top"
-                >
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
+              <el-col :span="12">
+                <el-form-item label="表描述" prop="tableComment">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>表描述</span>
+                      <el-tooltip effect="dark" content="表名，注释信息" placement="top">
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input v-model="baseInfo.tableComment" placeholder="请填写表描述" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="实体类名称" prop="className">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>实体类名称</span>
+                      <el-tooltip effect="dark" content="java PO层" placement="top">
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input v-model="baseInfo.className" placeholder="请填写实体类名称" clearable />
+                </el-form-item>
+              </el-col>
 
-            <template #isInsertHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="xxCreateDTO.java元素" placement="top" style="line-height: 1">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #isEditHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="xxUpdateDTO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #isListHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="xxVO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #isQueryHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="xxListDTO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #isImportHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="xxImportDTO.java元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #isExportHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="excel表格导出元素" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #queryTypeHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="sql条件查询关键字" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #htmlTypeHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="vue 组件" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #dictTypeHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="对应字典表，字典管理。" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-            <template #dictShowWayHeader="scope">
-              {{ scope?.column.label }}
-              <el-space :size="2" class="column-table-header-yiwen">
-                <el-tooltip effect="dark" content="字典展示类型：0 唯一标识；1 别名。" placement="top">
-                  <i :class="'iconfont icon-yiwen'" />
-                </el-tooltip>
-              </el-space>
-            </template>
-
-            <template #columnComment="{ row }">
-              <el-input v-model="row.columnComment" />
-            </template>
-
-            <template #javaType="{ row }">
-              <el-select v-model="row.javaType" filterable>
-                <el-option v-for="item in javaTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </template>
-
-            <template #isPk="{ row }">
-              <el-checkbox v-model="row.isPk" true-value="1" false-value="0" />
-            </template>
-
-            <template #isIncrement="{ row }">
-              <el-checkbox v-model="row.isIncrement" true-value="1" false-value="0" />
-            </template>
-
-            <template #isUniqueValid="{ row }">
-              <el-checkbox v-model="row.isUniqueValid" true-value="1" false-value="0" />
-            </template>
-
-            <template #isRequired="{ row }">
-              <el-checkbox v-model="row.isRequired" true-value="1" false-value="0" />
-            </template>
-
-            <template #isLogicDel="{ row }">
-              <el-checkbox v-model="row.isLogicDel" true-value="1" false-value="0" />
-            </template>
-
-            <template #isInsert="{ row }">
-              <el-checkbox v-model="row.isInsert" true-value="1" false-value="0" />
-            </template>
-
-            <template #isEdit="{ row }">
-              <el-checkbox v-model="row.isEdit" true-value="1" false-value="0" />
-            </template>
-
-            <template #isList="{ row }">
-              <el-checkbox v-model="row.isList" true-value="1" false-value="0" />
-            </template>
-
-            <template #isQuery="{ row }">
-              <el-checkbox v-model="row.isQuery" true-value="1" false-value="0" />
-            </template>
-
-            <template #isImport="{ row }">
-              <el-checkbox v-model="row.isImport" true-value="1" false-value="0" />
-            </template>
-
-            <template #isExport="{ row }">
-              <el-checkbox v-if="row.isList == '1'" v-model="row.isExport" true-value="1" false-value="0" />
-            </template>
-
-            <template #queryType="{ row }">
-              <el-select v-if="row.isLogicDel == '0' && row.isQuery == '1'" v-model="row.queryType" filterable>
-                <el-option v-for="item in queryTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </template>
-
-            <template #htmlType="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0' && row.isPk == '0' && (row.isInsert == '1' || row.isEdit == '1')"
-                v-model="row.htmlType"
-                filterable
-                @change="htmlTypeChange(row)"
-              >
-                <el-option v-for="item in htmlTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </template>
-
-            <template #dictType="{ row }">
-              <el-select
-                v-if="row.isLogicDel == '0'"
-                v-model="row.dictType"
-                :clearable="!isDictionaryDisplayType(row.htmlType)"
-                filterable
-                :placeholder="isDictionaryDisplayType(row.htmlType) ? '必选字典类型' : '请选择字典类型'"
-                @change="dictTypeChange(row)"
-              >
-                <el-option-group v-for="group in dictTypeOptions" :key="group.label" :label="group.label">
-                  <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value" />
-                </el-option-group>
-              </el-select>
-              <el-text
-                v-if="isDictionaryDisplayType(row.htmlType) && !row.dictType"
-                class="dict-required-tip"
-                type="danger"
-                size="small"
-              >
-                必填
-              </el-text>
-            </template>
-
-            <template #dictShowWay="{ row }">
-              <el-select v-if="row.isLogicDel == '0' && row.dictType" v-model="row.dictShowWay" filterable>
-                <el-option v-for="item in dictShowWayOptions" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </template>
-          </ProTable>
+              <el-col :span="12">
+                <el-form-item label="作者" prop="functionAuthor">
+                  <el-input v-model="baseInfo.functionAuthor" placeholder="请填写作者" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">
+                <el-form-item label="备注" prop="remark">
+                  <el-input v-model="baseInfo.remark" placeholder="请填写备注" :rows="2" type="textarea" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
         </div>
-      </div>
-      <div v-show="active === 2">
-        <el-form
-          ref="generatorFormRef"
-          class="generator-form"
-          label-width="180px"
-          label-suffix=" :"
-          :rules="generatorRules"
-          :model="generatorInfo"
-          @submit.enter.prevent="handleSubmit"
-        >
-          <h4 class="form-header h4">生成目标</h4>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="后端目标" prop="backendTargetType">
-                <el-radio-group v-model="generatorInfo.backendTargetType" @change="backendTargetChange">
-                  <el-radio value="existing"> 现有模块 </el-radio>
-                  <el-radio value="new"> 新建模块 </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" v-if="generatorInfo.backendTargetType === 'existing'">
-              <el-form-item label="后端模块" prop="backendModuleName">
-                <el-select
-                  v-model="generatorInfo.backendModuleName"
-                  filterable
-                  placeholder="请选择后端模块"
-                  popper-class="generator-module-popper"
-                  @change="backendModuleChange"
-                >
-                  <el-option
-                    v-for="item in backendModuleOptions"
-                    :key="item.moduleName"
-                    :label="item.moduleName"
-                    :value="item.moduleName"
+        <FieldConfigStep
+          v-show="active === 1"
+          :columns-infos="columnsInfos"
+          :generator-info="generatorInfo"
+          :dict-type-options="dictTypeOptions"
+          :focus-issues="focusFieldIssues"
+        />
+        <div v-show="active === 2" class="generator-step">
+          <el-form
+            ref="generatorFormRef"
+            class="generator-form"
+            label-width="180px"
+            label-suffix=" :"
+            :rules="generatorRules"
+            :model="generatorInfo"
+            @submit.enter.prevent="handleSubmit"
+          >
+            <h4 class="form-header h4">生成目标</h4>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="后端目标" prop="backendTargetType">
+                  <el-radio-group v-model="generatorInfo.backendTargetType" @change="backendTargetChange">
+                    <el-radio value="existing"> 现有模块 </el-radio>
+                    <el-radio value="new"> 新建模块 </el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" v-if="generatorInfo.backendTargetType === 'existing'">
+                <el-form-item label="后端模块" prop="backendModuleName">
+                  <el-select
+                    v-model="generatorInfo.backendModuleName"
+                    filterable
+                    placeholder="请选择后端模块"
+                    popper-class="generator-module-popper"
+                    @change="backendModuleChange"
                   >
-                    <div class="module-option-row">
-                      <span class="module-option-name">{{ item.moduleName }}</span>
-                      <el-tag
-                        class="module-option-status"
-                        size="small"
-                        :type="backendModuleStatusType(item.status)"
-                        effect="plain"
+                    <el-option
+                      v-for="item in backendModuleOptions"
+                      :key="item.moduleName"
+                      :label="item.moduleName"
+                      :value="item.moduleName"
+                    >
+                      <div class="module-option-row">
+                        <span class="module-option-name">{{ item.moduleName }}</span>
+                        <el-tag
+                          class="module-option-status"
+                          size="small"
+                          :type="backendModuleStatusType(item.status)"
+                          effect="plain"
+                        >
+                          {{ backendModuleStatusText(item.status) }}
+                        </el-tag>
+                      </div>
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" v-else>
+                <el-form-item label="新模块名" prop="backendModuleName">
+                  <el-input
+                    v-model="generatorInfo.backendModuleName"
+                    placeholder="建议使用 sz-module-demo，非强制"
+                    clearable
+                    @input="newBackendModuleChange"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <div v-if="moduleTargetSummary" class="target-summary">
+              <el-tag size="small" :type="moduleTargetTagType" effect="plain">{{ moduleTargetTagText }}</el-tag>
+              <span>{{ moduleTargetSummary }}</span>
+            </div>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="api项目路径" prop="pathApi">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>api项目路径</span>
+                      <el-tooltip effect="dark" content="后端代码生成到该模块的真实磁盘路径" placement="top">
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-select
+                    v-if="generatorInfo.backendTargetType === 'existing'"
+                    v-model="generatorInfo.pathApi"
+                    filterable
+                    placeholder="请选择后端模块路径"
+                    popper-class="generator-path-popper"
+                    @change="apiPathChange"
+                  >
+                    <el-option
+                      v-for="item in existingApiPathOptions"
+                      :key="item.path"
+                      class="path-option"
+                      :label="item.path"
+                      :value="item.path"
+                    >
+                      <div class="path-option-title">
+                        <span>{{ item.name }}</span>
+                        <el-tag v-if="item.status" size="small" :type="backendModuleStatusType(item.status)" effect="plain">
+                          {{ backendModuleStatusText(item.status) }}
+                        </el-tag>
+                      </div>
+                      <div class="path-option-value">{{ item.path }}</div>
+                    </el-option>
+                  </el-select>
+                  <el-input
+                    v-else
+                    v-model="generatorInfo.pathApi"
+                    placeholder="请填写新模块完整路径"
+                    clearable
+                    @input="newApiPathInput"
+                  />
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
+                <el-form-item label="web项目路径" prop="pathWeb">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>web项目路径</span>
+                      <el-tooltip effect="dark" content="web项目所在磁盘路径，直接生成代码到项目结构下" placement="top">
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input v-model="generatorInfo.pathWeb" placeholder="请填写路径" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="API模块" prop="apiPrefixModule">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>API模块</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="用于前端创建对应模块的请求客户端，默认随后端模块自动匹配"
+                        placement="top"
                       >
-                        {{ backendModuleStatusText(item.status) }}
-                      </el-tag>
-                    </div>
-                  </el-option>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" v-else>
-              <el-form-item label="新模块名" prop="backendModuleName">
-                <el-input
-                  v-model="generatorInfo.backendModuleName"
-                  placeholder="建议使用 sz-module-demo，非强制"
-                  clearable
-                  @input="newBackendModuleChange"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <div v-if="moduleTargetSummary" class="target-summary">
-            <el-tag size="small" :type="moduleTargetTagType" effect="plain">{{ moduleTargetTagText }}</el-tag>
-            <span>{{ moduleTargetSummary }}</span>
-          </div>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="api项目路径" prop="pathApi">
-                <template #label>
-                  <el-space :size="4">
-                    <span>api项目路径</span>
-                    <el-tooltip effect="dark" content="后端代码生成到该模块的真实磁盘路径" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-select
-                  v-if="generatorInfo.backendTargetType === 'existing'"
-                  v-model="generatorInfo.pathApi"
-                  filterable
-                  placeholder="请选择后端模块路径"
-                  popper-class="generator-path-popper"
-                  @change="apiPathChange"
-                >
-                  <el-option
-                    v-for="item in existingApiPathOptions"
-                    :key="item.path"
-                    class="path-option"
-                    :label="item.path"
-                    :value="item.path"
-                  >
-                    <div class="path-option-title">
-                      <span>{{ item.name }}</span>
-                      <el-tag v-if="item.status" size="small" :type="backendModuleStatusType(item.status)" effect="plain">
-                        {{ backendModuleStatusText(item.status) }}
-                      </el-tag>
-                    </div>
-                    <div class="path-option-value">{{ item.path }}</div>
-                  </el-option>
-                </el-select>
-                <el-input
-                  v-else
-                  v-model="generatorInfo.pathApi"
-                  placeholder="请填写新模块完整路径"
-                  clearable
-                  @input="newApiPathInput"
-                />
-              </el-form-item>
-            </el-col>
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input
+                    v-model="generatorInfo.apiPrefixModule"
+                    placeholder="如 admin、audit、order"
+                    :disabled="generatorInfo.backendTargetType === 'existing'"
+                    clearable
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="API前缀" prop="apiPrefix">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>API前缀</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="最终接口访问前缀，例如 /admin、/audit，可按实际网关或后端配置调整"
+                        placement="top"
+                      >
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input
+                    v-model="generatorInfo.apiPrefix"
+                    placeholder="如 /admin"
+                    :disabled="generatorInfo.backendTargetType === 'existing'"
+                    clearable
+                    @blur="normalizeApiPrefixInput"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
-              <el-form-item label="web项目路径" prop="pathWeb">
-                <template #label>
-                  <el-space :size="4">
-                    <span>web项目路径</span>
-                    <el-tooltip effect="dark" content="web项目所在磁盘路径，直接生成代码到项目结构下" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input v-model="generatorInfo.pathWeb" placeholder="请填写路径" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="API模块" prop="apiPrefixModule">
-                <template #label>
-                  <el-space :size="4">
-                    <span>API模块</span>
-                    <el-tooltip effect="dark" content="用于前端创建对应模块的请求客户端，默认随后端模块自动匹配" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input
-                  v-model="generatorInfo.apiPrefixModule"
-                  placeholder="如 admin、audit、order"
-                  :disabled="generatorInfo.backendTargetType === 'existing'"
-                  clearable
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="API前缀" prop="apiPrefix">
-                <template #label>
-                  <el-space :size="4">
-                    <span>API前缀</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="最终接口访问前缀，例如 /admin、/audit，可按实际网关或后端配置调整"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input
-                  v-model="generatorInfo.apiPrefix"
-                  placeholder="如 /admin"
-                  :disabled="generatorInfo.backendTargetType === 'existing'"
-                  clearable
-                  @blur="normalizeApiPrefixInput"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <h4 class="form-header h4">生成行为</h4>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="模块名" prop="moduleName">
-                <template #label>
-                  <el-space :size="4">
-                    <span>模块名</span>
-                    <el-tooltip effect="dark" content="后端 Java 包下的业务分组名，也会作为旧版前端目录的模块名" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input v-model="generatorInfo.moduleName" placeholder="如 order" clearable @change="moduleNameChange" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="业务名" prop="businessName">
-                <template #label>
-                  <el-space :size="4">
-                    <span>业务名</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="实际业务文件名。如java service：GoodService、vue Form表单Ref：goodRef "
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input v-model="generatorInfo.businessName" placeholder="请填写业务名" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="功能名" prop="functionName">
-                <template #label>
-                  <el-space :size="4">
-                    <span>功能名</span>
-                    <el-tooltip effect="dark" content="展示名。如vue index页面title：编辑'商品信息' " placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-input v-model="generatorInfo.functionName" placeholder="请填写功能名" clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
-              <el-form-item label="是否生成菜单" prop="menuInitType">
-                <template #label>
-                  <el-space :size="4">
-                    <span>生成菜单</span>
-                    <el-tooltip effect="dark" content="代码生成时是否直接生成菜单路由（自动添加到菜单管理列表）" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-radio-group v-model="generatorInfo.menuInitType">
-                  <el-radio value="1"> 是 </el-radio>
-                  <el-radio value="0"> 否 </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
-              <el-form-item label="上级菜单" prop="parentMenuId" v-show="generatorInfo.menuInitType === '1'">
-                <template #label>
-                  <el-space :size="4">
-                    <span>上级菜单</span>
-                    <el-tooltip effect="dark" content="设置当前菜单的上级目录(非按钮类型)" placement="top">
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-tree-select
-                  v-model="generatorInfo.parentMenuId"
-                  :data="parentMenus"
-                  check-strictly
-                  node-key="id"
-                  placeholder="请选择上级"
-                  :render-after-expand="false"
-                  clearable
-                  :default-expand-all="true"
-                  :props="treeProps"
-                  @change="treeSelectChange"
-                  ref="parentTreeRef"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
-              <el-form-item label="生成按钮权限" prop="btnPermissionType" v-show="generatorInfo.menuInitType === '1'">
-                <template #label>
-                  <el-space :size="4">
-                    <span>生成按钮权限</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="代码生成时是否直接生成按钮权限，如：sys.user.query_table。取消生成则不会对按钮进行权限控制。推荐开启。"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-radio-group v-model="generatorInfo.btnPermissionType">
-                  <el-radio value="1"> 是 </el-radio>
-                  <el-radio value="0"> 否 </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
-              <el-form-item label="自动创建数据权限" prop="btnDataScopeType" v-show="generatorInfo.menuInitType === '1'">
-                <template #label>
-                  <el-space :size="4">
-                    <span>自动创建数据权限</span>
-                    <el-tooltip
-                      effect="dark"
-                      content="启用后将自动为菜单生成并开启数据权限控制。大多数 SQL 查询会受该权限影响，但特殊或复杂 SQL 场景下可能导致查询失效，请谨慎使用。"
-                      placement="top"
-                    >
-                      <i :class="'iconfont icon-yiwen'" />
-                    </el-tooltip>
-                  </el-space>
-                  <span>&nbsp;:</span>
-                </template>
-                <el-radio-group v-model="generatorInfo.btnDataScopeType">
-                  <el-radio value="1"> 开启 </el-radio>
-                  <el-radio value="0"> 关闭 </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
+            <h4 class="form-header h4">生成行为</h4>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="模块名" prop="moduleName">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>模块名</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="后端 Java 包下的业务分组名，也会作为旧版前端目录的模块名"
+                        placement="top"
+                      >
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input v-model="generatorInfo.moduleName" placeholder="如 order" clearable @change="moduleNameChange" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="业务名" prop="businessName">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>业务名</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="实际业务文件名。如java service：GoodService、vue Form表单Ref：goodRef "
+                        placement="top"
+                      >
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input v-model="generatorInfo.businessName" placeholder="请填写业务名" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="功能名" prop="functionName">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>功能名</span>
+                      <el-tooltip effect="dark" content="展示名。如vue index页面title：编辑'商品信息' " placement="top">
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-input v-model="generatorInfo.functionName" placeholder="请填写功能名" clearable />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
+                <el-form-item label="是否生成菜单" prop="menuInitType">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>生成菜单</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="代码生成时是否直接生成菜单路由（自动添加到菜单管理列表）"
+                        placement="top"
+                      >
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-radio-group v-model="generatorInfo.menuInitType">
+                    <el-radio value="1"> 是 </el-radio>
+                    <el-radio value="0"> 否 </el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
+                <el-form-item label="上级菜单" prop="parentMenuId" v-show="generatorInfo.menuInitType === '1'">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>上级菜单</span>
+                      <el-tooltip effect="dark" content="设置当前菜单的上级目录(非按钮类型)" placement="top">
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-tree-select
+                    v-model="generatorInfo.parentMenuId"
+                    :data="parentMenus"
+                    check-strictly
+                    node-key="id"
+                    placeholder="请选择上级"
+                    :render-after-expand="false"
+                    clearable
+                    :default-expand-all="true"
+                    :props="treeProps"
+                    @change="treeSelectChange"
+                    ref="parentTreeRef"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12" v-if="generatorInfo.generateType == 'all'">
+                <el-form-item label="生成按钮权限" prop="btnPermissionType" v-show="generatorInfo.menuInitType === '1'">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>生成按钮权限</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="代码生成时是否直接生成按钮权限，如：sys.user.query_table。取消生成则不会对按钮进行权限控制。推荐开启。"
+                        placement="top"
+                      >
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-radio-group v-model="generatorInfo.btnPermissionType">
+                    <el-radio value="1"> 是 </el-radio>
+                    <el-radio value="0"> 否 </el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" v-if="generatorInfo.generateType === 'all' || generatorInfo.generateType === 'server'">
+                <el-form-item label="自动创建数据权限" prop="btnDataScopeType" v-show="generatorInfo.menuInitType === '1'">
+                  <template #label>
+                    <el-space :size="4">
+                      <span>自动创建数据权限</span>
+                      <el-tooltip
+                        effect="dark"
+                        content="启用后将自动为菜单生成并开启数据权限控制。大多数 SQL 查询会受该权限影响，但特殊或复杂 SQL 场景下可能导致查询失效，请谨慎使用。"
+                        placement="top"
+                      >
+                        <i :class="'iconfont icon-yiwen'" />
+                      </el-tooltip>
+                    </el-space>
+                    <span>&nbsp;:</span>
+                  </template>
+                  <el-radio-group v-model="generatorInfo.btnDataScopeType">
+                    <el-radio value="1"> 开启 </el-radio>
+                    <el-radio value="0"> 关闭 </el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </div>
       </div>
     </div>
 
     <template #footer>
-      <el-button type="primary" @click="handleSubmit"> 保存 </el-button>
-      <el-button @click="visible = false"> 取消 </el-button>
+      <span class="dialog-footer">
+        <el-button @click="visible = false">取消</el-button>
+        <el-button :disabled="active === 0" @click="prevStep">上一步</el-button>
+        <el-button v-if="active < 2" type="primary" @click="nextStep">下一步</el-button>
+        <el-button v-else type="primary" @click="handleSubmit">保存</el-button>
+      </span>
     </template>
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import ProTable from '@/components/ProTable/index.vue';
-import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import type {
   GeneratorBackendModuleOption,
   GeneratorBaseInfo,
@@ -688,18 +443,13 @@ import type {
   GeneratorGeneratorInfo
 } from '@/modules/toolbox/types/generator';
 import { getGeneratorInfo, getGeneratorPathOptions } from '@/modules/toolbox/api/generator';
-import {
-  dictShowWayOptions,
-  htmlTypeOptions,
-  javaTypeOptions,
-  queryTypeOptions
-} from '@/modules/toolbox/views/generator/common/Options';
 import { getDictTypeOptions } from '@/api/modules/system/dict';
 import type { DictCategory, DictType, DictOption } from '@/api/types/system/dict';
 import type { MenuTree } from '@/api/types/system/menu';
 import { getMenuTree } from '@/api/modules/system/menu';
-import { computed, nextTick, ref, watchEffect } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { ElMessage } from 'element-plus';
+import FieldConfigStep from '@/modules/toolbox/views/generator/components/FieldConfigStep.vue';
 
 defineOptions({
   name: 'EditForm'
@@ -730,7 +480,6 @@ const generatorInfo = ref<GeneratorGeneratorInfo>({
   btnDataScopeType: '1',
   windowShowType: '0'
 });
-const isShowExcel = ref<boolean>(true);
 const backendModuleOptions = ref<GeneratorBackendModuleOption[]>([]);
 const newApiPathManuallyEdited = ref(false);
 const lastNewModuleCode = ref('');
@@ -779,31 +528,9 @@ const moduleTargetSummary = computed(() => {
   return '该模块已完成接入，可直接作为后端代码生成目标。';
 });
 
-const columns = ref<ColumnProps<GeneratorColumnInfo>[]>([
-  { type: 'sort', width: 75, label: '拖拽排序' },
-  { prop: 'columnName', label: '字段列名' },
-  { prop: 'columnComment', label: '字段描述' },
-  { prop: 'columnType', label: '物理类型' },
-  { prop: 'javaType', label: 'Java类型' },
-  { prop: 'isPk', label: '主键', width: 45 },
-  { prop: 'isIncrement', label: '自增', width: 50 },
-  { prop: 'isUniqueValid', label: '唯一', width: 65 },
-  { prop: 'isRequired', label: '必填', width: 45 },
-  { prop: 'isLogicDel', label: '逻辑删除', width: 90 },
-  { prop: 'isInsert', label: '插入', width: 65 },
-  { prop: 'isEdit', label: '编辑', width: 65 },
-  { prop: 'isList', label: '列表', width: 65 },
-  { prop: 'htmlType', label: '显示类型' },
-  { prop: 'isQuery', label: '查询', width: 65 },
-  { prop: 'isImport', label: '导入', width: 65 },
-  { prop: 'isExport', label: '导出', width: 65 },
-  { prop: 'queryType', label: '查询方式', width: 105 },
-  { prop: 'dictType', label: '字典类型' },
-  { prop: 'dictShowWay', label: '字典显示方式' }
-]);
-
-const active = ref(1);
+const active = ref(0);
 const visible = ref(false);
+const focusFieldIssues = ref(false);
 const paramsProps = ref<View.DefaultParams>({
   title: '',
   row: {},
@@ -852,8 +579,6 @@ const loadParentMenus = () => {
 };
 
 loadParentMenus();
-
-const editProTableRef = ref<ProTableInstance>();
 
 const baseInfo = ref<GeneratorBaseInfo>({
   tableId: 0,
@@ -1163,25 +888,6 @@ const normalizePath = (path?: string) =>
 const dictionaryDisplayTypes = ['select', 'radio', 'radio-group', 'checkbox'];
 const isDictionaryDisplayType = (htmlType?: string) => dictionaryDisplayTypes.includes(htmlType || '');
 
-const htmlTypeChange = (row: GeneratorColumnInfo) => {
-  if (row.htmlType === 'radio-group') {
-    row.htmlType = 'radio';
-  }
-  if (!isDictionaryDisplayType(row.htmlType)) {
-    return;
-  }
-  row.searchType = 'select';
-  if (!row.dictShowWay) {
-    row.dictShowWay = '0';
-  }
-};
-
-const dictTypeChange = (row: GeneratorColumnInfo) => {
-  if (row.dictType && !row.dictShowWay) {
-    row.dictShowWay = '0';
-  }
-};
-
 const validateColumnDictConfig = () => {
   for (const row of columnsInfos.value) {
     if (row.isLogicDel !== '0' || !isDictionaryDisplayType(row.htmlType)) {
@@ -1211,34 +917,22 @@ const validateNewModuleFields = () => {
   });
 };
 
-// 更新列属性的通用函数
-const updateColumnVisibility = (propToUpdate: string, isVisible: boolean) => {
-  const existingColumn = columns.value.find(col => col.prop === propToUpdate);
-  if (existingColumn) {
-    existingColumn.isShow = isVisible;
-  }
+const baseFormRef = ref();
+
+const prevStep = () => {
+  active.value = Math.max(0, active.value - 1);
 };
 
-// 监听多个属性的变化，并执行相同的更新逻辑
-watchEffect(() => {
-  try {
-    const genType = generatorInfo.value.generateType;
-    updateColumnVisibility('isInsert', genType === 'all' || genType === 'server');
-    updateColumnVisibility('isEdit', genType === 'all' || genType === 'server');
-    updateColumnVisibility('isList', genType === 'all' || genType === 'server');
-    updateColumnVisibility('isQuery', genType === 'all' || genType === 'server');
-    updateColumnVisibility('isImport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasImport === '1');
-    updateColumnVisibility('isExport', (genType === 'all' || genType === 'server') && generatorInfo.value.hasExport === '1');
-    updateColumnVisibility('queryType', genType === 'all' || genType === 'server');
-    updateColumnVisibility('htmlType', genType === 'all');
-    // 如果有其他类似的属性，也可以在这里进行处理
-  } catch (error) {
-    console.error('Error in watchEffect:', error);
-    // 根据实际情况进行错误处理，如显示错误提示、回滚变更等
+const nextStep = async () => {
+  if (active.value === 0) {
+    const valid = await baseFormRef.value?.validate().catch(() => false);
+    if (!valid) return;
   }
-});
-
-const baseFormRef = ref();
+  if (active.value === 1 && !validateColumnDictConfig()) {
+    return;
+  }
+  active.value = Math.min(2, active.value + 1);
+};
 const generatorFormRef = ref();
 
 const handleSubmit = () => {
@@ -1327,34 +1021,6 @@ const acceptParams = (params: View.DefaultParams) => {
   visible.value = true;
 };
 
-const typeContent = ref<{
-  [key: string]: {
-    tooltip: string;
-    text: string;
-  };
-}>({
-  all: {
-    tooltip: '【增删改查】 所有组件，包括后端服务和前端视图',
-    text: 'Controller、Service、Mapper、DTO、PO、VO | modules/<业务模块>/views、api、types、register'
-  },
-  server: {
-    tooltip: '【增删改查】 后端服务组件，不包括前端视图',
-    text: 'Controller、Service、Mapper、DTO、PO、VO'
-  },
-  service: {
-    tooltip: '服务层组件',
-    text: 'Service、Mapper、PO'
-  },
-  db: {
-    tooltip: '数据库交互组件，包括数据模型和映射配置',
-    text: 'PO、Mapper'
-  }
-});
-
-const changeRadio = (val: string) => {
-  isShowExcel.value = val === 'all' || val === 'server';
-};
-
 const parentTreeRef = ref();
 
 const treeSelectChange = () => {
@@ -1373,10 +1039,110 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.form-type {
-  margin: 0 0 30px 10px;
+:global(.generator-edit-dialog) {
+  display: flex;
+  flex-direction: column;
+  height: 92vh;
+  max-height: 92vh;
+  margin-bottom: 0;
 }
 
+:global(.generator-edit-dialog .el-dialog__header) {
+  flex: 0 0 auto;
+  padding: 14px 20px;
+  margin-right: 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+:global(.generator-edit-dialog .el-dialog__body) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px 16px 0;
+  overflow: hidden;
+}
+
+:global(.generator-edit-dialog .el-dialog__footer) {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.edit-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.edit-steps {
+  flex: 0 0 auto;
+  padding: 0 360px;
+}
+
+.edit-steps :deep(.el-step__icon) {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.edit-steps :deep(.el-step__title) {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.edit-steps :deep(.el-step__main) {
+  margin-top: 0;
+}
+
+.edit-shell.is-field-step .edit-steps :deep(.el-step__title) {
+  line-height: 18px;
+}
+
+.edit-shell.is-field-step .edit-summary {
+  min-height: 24px;
+  margin: 3px 0 8px;
+}
+
+.edit-content {
+  flex: 1;
+  min-height: 0;
+  padding: 0 0 12px;
+  overflow-y: auto;
+}
+
+.edit-content.is-field-content {
+  overflow: hidden;
+}
+
+.base-step {
+  padding: 14px 10px 0;
+}
+
+.generator-step {
+  padding: 0 10px;
+}
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.edit-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 32px;
+  margin: 8px 0 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.summary-label {
+  margin-right: 6px;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
 .generator-form {
   padding: 0 12px;
 }
@@ -1399,24 +1165,6 @@ defineExpose({
   content: '';
   border-radius: 2px;
   background: var(--el-color-primary);
-}
-
-.custom-block.tip {
-  padding: 8px 16px;
-  background-color: var(--div-bg-box);
-  border-radius: 4px;
-  border-left: 5px solid var(--el-color-primary);
-  margin: 20px 20px 20px 0;
-}
-
-.column-table-header-yiwen {
-  line-height: 1;
-  font-weight: normal;
-}
-
-.dict-required-tip {
-  margin-left: 6px;
-  white-space: nowrap;
 }
 
 .module-option-row {
@@ -1443,7 +1191,7 @@ defineExpose({
   align-items: flex-start;
   gap: 8px;
   min-height: 26px;
-  margin: -4px 20px 16px 190px;
+  margin: 8px 20px 16px 0;
   padding: 2px 0;
   color: var(--el-text-color-secondary);
   font-size: 12px;
