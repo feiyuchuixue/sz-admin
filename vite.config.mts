@@ -30,9 +30,11 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const adminApiBase = normalizeApiBase(env.VITE_ADMIN_API_BASE, '/api/admin');
   const generatorApiBase = normalizeApiBase(env.VITE_GENERATOR_API_BASE, '/api/generator');
   const auditApiBase = normalizeApiBase(env.VITE_AUDIT_API_BASE, '/api/audit');
+  const apiContextPath = normalizeApiBase(env.VITE_API_CONTEXT_PATH || env.VITE_MODULE_API_BASE, '/api');
   const proxyTarget = env.VITE_API_PROXY_TARGET;
   const proxy = proxyTarget
     ? {
+        [apiContextPath]: createApiProxy(proxyTarget),
         [adminApiBase]: createApiProxy(proxyTarget),
         [generatorApiBase]: createApiProxy(proxyTarget),
         [auditApiBase]: createApiProxy(proxyTarget)

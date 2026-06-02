@@ -1,4 +1,4 @@
-import type { Component } from 'vue';
+﻿import type { Component } from 'vue';
 
 /**
  * 模块定义：一组高内聚的业务能力，可包含页面组件、菜单种子等。
@@ -44,6 +44,11 @@ class ModuleRegistry {
       return;
     }
     this.modules.set(module.name, module);
+  }
+
+  /** 判断模块是否已注册 */
+  has(name: string): boolean {
+    return this.modules.has(name);
   }
 
   /** 返回所有已注册模块的只读列表 */

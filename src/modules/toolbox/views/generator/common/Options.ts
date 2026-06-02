@@ -92,7 +92,7 @@ export const htmlTypeOptions: Options[] = [
     value: 'select'
   },
   {
-    label: 'datetime ',
+    label: 'datetime',
     value: 'datetime'
   },
   {
@@ -104,23 +104,23 @@ export const htmlTypeOptions: Options[] = [
     value: 'jodit-editor'
   },
   {
-    label: 'radio-group [未完待续]',
-    value: 'radio-group'
+    label: 'radio',
+    value: 'radio'
   },
   {
-    label: 'checkbox [未完待续]',
+    label: 'checkbox',
     value: 'checkbox'
   },
   {
-    label: 'date [未完待续]',
+    label: 'date',
     value: 'date'
   },
   {
-    label: 'time [未完待续]',
+    label: 'time',
     value: 'time'
   },
   {
-    label: 'imageUpload [未完待续]',
+    label: 'imageUpload',
     value: 'imageUpload'
   }
 ];

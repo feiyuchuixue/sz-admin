@@ -14,6 +14,12 @@ export type GeneratorInfo = {
   tplCategory: string;
   packageName: string;
   moduleName: string;
+  backendTargetType?: string;
+  backendModuleName?: string;
+  apiPrefixModule?: string;
+  apiPrefix?: string;
+  frontendLayout?: string;
+  frontendModuleName?: string;
   businessName: string;
   functionName: string;
   functionAuthor: string;
@@ -47,6 +53,7 @@ export type GeneratorColumnInfo = {
   columnId: number;
   columnName: string;
   columnType: string;
+  dictShowWay: string;
   dictType: string;
   htmlType: string;
   isAutofill: string;
@@ -64,6 +71,7 @@ export type GeneratorColumnInfo = {
   javaTypePackage: string;
   options: string;
   queryType: string;
+  searchType: string;
   specialPackages: string;
   tableId: number;
   upCamelField: string;
@@ -73,6 +81,12 @@ export type GeneratorGeneratorInfo = {
   tplCategory?: string;
   packageName: string;
   moduleName: string;
+  backendTargetType: string;
+  backendModuleName: string;
+  apiPrefixModule: string;
+  apiPrefix: string;
+  frontendLayout: string;
+  frontendModuleName: string;
   businessName: string;
   functionName: string;
   options: string;
@@ -93,6 +107,13 @@ export type GeneratorGeneratorInfo = {
 export type GeneratorPreviewInfo = {
   name: string;
   code: string;
+  content?: string;
+  diff?: string;
+  relativePath?: string;
+  fullPath?: string;
+  projectName?: string;
+  operationType?: 'CREATE_FILE' | 'MODIFY_FILE' | 'SKIP_EXISTS' | 'SCRIPT';
+  message?: string;
   language: string;
   alias: string;
 };
@@ -100,6 +121,35 @@ export type GeneratorPreviewInfo = {
 export type GeneratorCheckInfo = {
   checkedApiPath: boolean;
   checkedWebPath: boolean;
+  checkedBackendModule: boolean;
+  checkedDataScope: boolean;
   pathApi: string;
   pathWeb: string;
+  errors: string[];
+  warnings: string[];
+};
+
+export type GeneratorPathOption = {
+  label: string;
+  path: string;
+};
+
+export type GeneratorBackendModuleOption = {
+  moduleName: string;
+  moduleCode: string;
+  path: string;
+  packageName: string;
+  apiPrefixModule: string;
+  apiPrefix: string;
+  status: 'ready' | 'pending' | 'unavailable';
+  recommended: boolean;
+  missingItems: string[];
+};
+
+export type GeneratorPathOptions = {
+  defaultApiPath: string;
+  defaultWebPath: string;
+  apiOptions: GeneratorPathOption[];
+  webOptions: GeneratorPathOption[];
+  backendModuleOptions: GeneratorBackendModuleOption[];
 };

@@ -170,6 +170,21 @@ function getExt(name: string) {
   const i = name.lastIndexOf('.');
   return i >= 0 ? name.slice(i).toLowerCase() : '';
 }
+function isAcceptedFile(rawFile: File, accept: string) {
+  const ext = getExt(rawFile.name);
+  const mimeType = (rawFile.type || '').toLowerCase();
+  return accept
+    .split(',')
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean)
+    .some(item => {
+      if (item === '*') return true;
+      if (item.startsWith('.')) return item === ext;
+      if (item.endsWith('/*')) return mimeType.startsWith(item.slice(0, -1));
+      if (item.includes('/')) return mimeType === item;
+      return item === ext.slice(1);
+    });
+}
 function preserveNormalize(raw: any): IResourceUploadResult {
   const accessUrl = raw?.accessUrl ?? raw?.url ?? '';
   const originName = raw?.originName || raw?.filename || raw?.name || (accessUrl ? accessUrl.split('/').pop() || '' : '');
@@ -442,9 +457,7 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
     uploadCycleActive = true; // 有新上传加入
     return true;
   }
-  const ext = getExt(rawFile.name);
-  const accepts = props.accept.split(',').map(s => s.trim().toLowerCase());
-  if (!accepts.includes(ext)) {
+  if (!isAcceptedFile(rawFile, props.accept)) {
     notifyWarn(`仅支持 ${props.accept} 格式的文件上传！`);
     return false;
   }

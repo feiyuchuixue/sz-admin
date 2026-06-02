@@ -176,9 +176,20 @@ const codeGene = (row: GeneratorInfo) => {
   }
   checkDisk(row.tableName)
     .then(record => {
-      if (!record.data.checkedApiPath || !record.data.checkedWebPath) {
+      if (
+        !record.data.checkedApiPath ||
+        !record.data.checkedWebPath ||
+        !record.data.checkedBackendModule ||
+        !record.data.checkedDataScope ||
+        record.data.errors?.length
+      ) {
         checkDiskVisible.value = true;
         let context = '';
+        if (record.data.errors?.length) {
+          context += record.data.errors
+            .map(item => `<div style="color: var(--el-color-error)">--${sanitizeHtml(item)}</div>`)
+            .join('<br/>');
+        }
         if (!record.data.checkedApiPath) {
           context +=
             '<div style="color: var(--el-color-error)">--JAVA项目路径不存在</div><br/><div style="font-size: 12px;font-weight: bold;color: var(--el-color-warning)">' +
@@ -203,7 +214,7 @@ const codeGene = (row: GeneratorInfo) => {
       }
       codeGenerator(row.tableName).then(res => {
         generatorVisible.value = true;
-        generatorCodeInfos.value = res.data;
+        generatorCodeInfos.value = [...(record.data.warnings || []), ...res.data];
         ElMessage.success({ message: '生成成功！' });
       });
     })

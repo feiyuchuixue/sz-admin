@@ -4,6 +4,7 @@ import type {
   GeneratorCheckInfo,
   GeneratorForm,
   GeneratorInfo,
+  GeneratorPathOptions,
   GeneratorPreviewInfo,
   GeneratorQuery
 } from '@/modules/toolbox/types/generator';
@@ -87,4 +88,11 @@ export const previewCode = (tableName: string) => {
  */
 export const checkDisk = (tableName: string) => {
   return generatorHttp.get<GeneratorCheckInfo>(`/check/${tableName}`);
+};
+
+/**
+ * 查询代码生成路径和后端模块候选
+ */
+export const getGeneratorPathOptions = () => {
+  return generatorHttp.get<GeneratorPathOptions>('/path/options');
 };
