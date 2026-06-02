@@ -1,0 +1,55 @@
+﻿name: Docker Sz-Admin Official CI
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Build & Push sz-admin:latest
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: sz-admin
+      ACR_DOMAIN: registry.cn-beijing.aliyuncs.com
+      ACR_ZONE: sz-dev
+      VERSION: latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.5'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend project
+        run: pnpm run build
+
+      - name: Resolve image metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_ref="${ACR_DOMAIN}/${ACR_ZONE}/${APP_NAME}:${VERSION}"
+          echo "image_ref=${image_ref}" >> "$GITHUB_OUTPUT"
+          echo "本次构建官方镜像: ${image_ref}"
+
+      - name: Build Docker image
+        run: docker build -t ${{ steps.meta.outputs.image_ref }} .
+
+      - name: Login to ACR
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login --username=${{ secrets.ACR_USERNAME }} ${{ env.ACR_DOMAIN }} --password-stdin
+
+      - name: Push Docker image to ACR
+        run: docker push ${{ steps.meta.outputs.image_ref }}
