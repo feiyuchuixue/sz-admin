@@ -224,7 +224,7 @@
               <span>{{ scope?.column.label }}</span>
               <el-tooltip
                 effect="dark"
-                content="前端根据当前字段配置自动生成的提示，仅用于定位特殊配置，不参与保存参数。"
+                content="后端智能推断返回的字段提示，仅用于解释默认配置和定位需要处理的字段。"
                 placement="top"
               >
                 <i :class="'iconfont icon-yiwen'" />
@@ -271,7 +271,7 @@
 
 <script setup lang="ts">
 import type { DictCategory } from '@/api/types/system/dict';
-import type { GeneratorColumnInfo, GeneratorGeneratorInfo } from '@/modules/toolbox/types/generator';
+import type { GeneratorColumnInfo, GeneratorColumnSmartHint, GeneratorGeneratorInfo } from '@/modules/toolbox/types/generator';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import ProTable from '@/components/ProTable/index.vue';
 import FieldDetailPanel from '@/modules/toolbox/views/generator/components/FieldDetailPanel.vue';
@@ -405,6 +405,10 @@ watch(canSort, () => {
   tableKey.value += 1;
 });
 
+watch(tableKey, () => {
+  syncCurrentTableRow(selectedColumn.value);
+});
+
 watch(
   () => [props.generatorInfo.hasImport, props.generatorInfo.hasExport],
   () => {
@@ -428,15 +432,35 @@ watch(
   }
 );
 
-watch(filteredColumns, rows => {
-  if (!rows.length) {
-    selectedColumnId.value = undefined;
-    return;
-  }
-  if (!rows.some(row => row.columnId === selectedColumnId.value)) {
-    selectedColumnId.value = rows[0].columnId;
-  }
-});
+watch(
+  filteredColumns,
+  rows => {
+    if (!rows.length) {
+      selectedColumnId.value = undefined;
+      return;
+    }
+    if (!rows.some(row => row.columnId === selectedColumnId.value)) {
+      selectedColumnId.value = rows[0].columnId;
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  selectedColumn,
+  row => {
+    syncCurrentTableRow(row);
+  },
+  { immediate: true, flush: 'post' }
+);
+
+watch(
+  fieldTableRef,
+  () => {
+    syncCurrentTableRow(selectedColumn.value);
+  },
+  { flush: 'post' }
+);
 
 function isDictionaryDisplayType(htmlType?: string) {
   return dictionaryDisplayTypes.includes(htmlType || '');
@@ -457,39 +481,17 @@ function dictTypeChange(row: GeneratorColumnInfo) {
 }
 
 function getFieldHint(row: GeneratorColumnInfo): FieldHint {
-  if (row.isLogicDel === '1') {
-    return {
-      label: '逻辑删除',
-      type: 'info',
-      description: '逻辑删除字段通常不参与页面展示和查询配置，仅保留删除标识相关生成配置。'
-    };
-  }
-  if (isDictionaryDisplayType(row.htmlType) && !row.dictType) {
-    return {
-      label: '字典缺失',
-      type: 'danger',
-      description: '当前显示类型依赖字典数据，请在右侧选择字典类型后再进入下一步。'
-    };
-  }
-  if (row.htmlType === 'fileUpload' || row.htmlType === 'imageUpload') {
-    return {
-      label: '上传字段',
-      type: 'warning',
-      description: '上传字段需要确认 Java 类型、前端上传控件和附件存储能力是否匹配。'
-    };
-  }
-  if (row.columnName === 'create_id' || row.columnName === 'dept_scope') {
-    return {
-      label: '权限字段',
-      type: 'info',
-      description: '该字段常用于创建人或数据权限范围，请确认是否需要在列表、表单或查询中展示。'
-    };
-  }
+  const hint = firstSmartHint(row, 'danger') || firstSmartHint(row, 'warning') || firstSmartHint(row, 'info');
+  if (hint) return { label: hint.label, type: hint.type, description: hint.message };
   return {
     label: '正常',
     type: 'success',
-    description: '未发现需要额外处理的字段配置。'
+    description: '后端智能推断未发现需要额外处理的字段配置。'
   };
+}
+
+function firstSmartHint(row: GeneratorColumnInfo, type: GeneratorColumnSmartHint['type']) {
+  return row.smartHints?.find(item => item.type === type);
 }
 
 function matchKeyword(row: GeneratorColumnInfo, normalizedKeyword: string) {
@@ -521,11 +523,18 @@ function getAutofillLabel(autofillType?: string) {
 
 function selectColumn(row: GeneratorColumnInfo) {
   selectedColumnId.value = row.columnId;
+  syncCurrentTableRow(row, true);
+}
+
+function syncCurrentTableRow(row?: GeneratorColumnInfo, shouldScroll = false) {
+  if (!row) return;
   nextTick(() => {
     const table = fieldTableRef.value?.element;
     const rowIndex = filteredColumns.value.findIndex(item => item.columnId === row.columnId);
     table?.setCurrentRow?.(row);
-    table?.setScrollTop?.(Math.max(rowIndex * 40 - 80, 0));
+    if (shouldScroll && rowIndex >= 0) {
+      table?.setScrollTop?.(Math.max(rowIndex * 40 - 80, 0));
+    }
   });
 }
 
@@ -627,7 +636,9 @@ function toggleRowTargetByValue(row: GeneratorColumnInfo, target: BulkTarget, va
 }
 
 function toggleVisibleFields(target: BulkTarget, checked: boolean) {
-  filteredColumns.value.forEach(row => setTargetEnabled(row, target, checked));
+  filteredColumns.value.forEach(row => {
+    setTargetEnabled(row, target, checked);
+  });
   const action = checked ? '加入' : '移出';
   ElMessage.success(`已将当前列表 ${filteredColumns.value.length} 个字段${action}${targetLabel(target)}`);
 }

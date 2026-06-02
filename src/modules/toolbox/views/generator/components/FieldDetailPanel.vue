@@ -92,8 +92,8 @@
           <section v-if="isExcelConfigVisible" class="field-section">
             <div class="section-title">Excel 字段</div>
             <div class="switch-grid">
-              <el-checkbox v-if="hasImport" v-model="modelValue.isImport" true-value="1" false-value="0">导入</el-checkbox>
-              <el-checkbox v-if="hasExport" v-model="modelValue.isExport" true-value="1" false-value="0">导出</el-checkbox>
+              <el-checkbox v-if="hasImport" v-model="modelValue.isImport" true-value="1" false-value="0"> 导入 </el-checkbox>
+              <el-checkbox v-if="hasExport" v-model="modelValue.isExport" true-value="1" false-value="0"> 导出 </el-checkbox>
             </div>
           </section>
 
