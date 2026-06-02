@@ -57,10 +57,12 @@
         </div>
         <el-scrollbar class="tree-scroll">
           <el-tree
+            ref="previewTreeRef"
             :data="treeData"
             node-key="id"
             default-expand-all
             highlight-current
+            :current-node-key="selectedTreeNodeId"
             :expand-on-click-node="false"
             @node-click="handleNodeClick"
           >
@@ -113,7 +115,13 @@
             </div>
             <div v-if="selectedItem.message" class="detail-message">{{ selectedItem.message }}</div>
           </div>
-          <HighCode :code="selectedCode" :language="selectedLanguage" :title="selectedItem.name" class="code-box" />
+          <HighCode
+            :code="selectedCode"
+            :language="selectedLanguage"
+            :title="selectedItem.name"
+            :language-label="selectedLanguageLabel"
+            class="code-box"
+          />
         </template>
         <el-empty v-else description="暂无可预览文件" />
       </section>
@@ -161,6 +169,7 @@ const codeList = ref<GeneratorPreviewInfo[]>([]);
 const keyword = ref('');
 const operationFilter = ref<OperationFilter>('ALL');
 const selectedItem = ref<GeneratorPreviewInfo>();
+const previewTreeRef = ref();
 
 const parameter = ref<PreviewParameterProps>({
   tableName: ''
@@ -248,6 +257,21 @@ const selectedDisplayPath = computed(() => {
   return selectedItem.value ? resolveDisplayPath(selectedItem.value, selectedScope.value) : '';
 });
 
+const selectedTreeNodeId = computed(() => {
+  return selectedItem.value ? getItemNodeId(selectedItem.value) : '';
+});
+
+const selectedLanguageLabel = computed(() => {
+  const language = selectedLanguage.value || 'text';
+  if (language === 'typescript') return 'TypeScript';
+  if (language === 'javascript') return 'JavaScript';
+  if (language === 'diff') return 'Diff';
+  if (language === 'xml') return 'XML';
+  if (language === 'java') return 'Java';
+  if (language === 'vue') return 'Vue';
+  return language.toUpperCase();
+});
+
 watch(filteredItems, items => {
   if (!items.length) {
     selectedItem.value = undefined;
@@ -256,6 +280,12 @@ watch(filteredItems, items => {
   if (!selectedItem.value || !items.some(item => item.relativePath === selectedItem.value?.relativePath)) {
     selectedItem.value = pickDefaultItem(items);
   }
+});
+
+watch(selectedTreeNodeId, id => {
+  nextTick(() => {
+    previewTreeRef.value?.setCurrentKey?.(id || undefined);
+  });
 });
 
 const getCode = () => {
@@ -460,12 +490,26 @@ const isPackageSegment = (label: string) => {
 };
 
 const pickDefaultItem = (items: GeneratorPreviewInfo[]) => {
-  return (
-    items.find(item => item.operationType === 'MODIFY_FILE') ||
-    items.find(item => item.operationType === 'CREATE_FILE') ||
-    items.find(item => item.operationType === 'SCRIPT') ||
-    items[0]
-  );
+  const treeItems = flattenTreeItems(buildTree(items));
+  return treeItems.find(isSelectablePreviewItem) || treeItems[0] || items.find(isSelectablePreviewItem) || items[0];
+};
+
+const flattenTreeItems = (nodes: PreviewTreeNode[]): GeneratorPreviewInfo[] => {
+  return nodes.flatMap(node => {
+    if (node.item) return [node.item];
+    return node.children ? flattenTreeItems(node.children) : [];
+  });
+};
+
+const isSelectablePreviewItem = (item: GeneratorPreviewInfo) => {
+  if (item.operationType === 'SKIP_EXISTS') return false;
+  return Boolean(item.content || item.code || item.diff || item.message);
+};
+
+const getItemNodeId = (item: GeneratorPreviewInfo) => {
+  const scope = resolveScope(item);
+  const displayPath = resolveDisplayPath(item, scope);
+  return `${scope}:${displayPath.split('/').filter(Boolean).join('/')}`;
 };
 
 const handleNodeClick = (node: PreviewTreeNode) => {

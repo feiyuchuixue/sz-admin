@@ -1,22 +1,28 @@
 <template>
   <div class="hljs-container">
-    <div class="hljs-header" :codetype="title">
-      <div class="hljs-copy">
-        <el-button type="primary" link @click="handleCopy" :icon="DocumentCopy" class="hljs-copy">
+    <div class="hljs-header">
+      <div class="hljs-title">
+        <span class="hljs-window-dot" />
+        <span class="hljs-file-name" :title="title">{{ title || 'code' }}</span>
+        <span class="hljs-language">{{ languageLabel || normalizedLanguage }}</span>
+      </div>
+      <div class="hljs-actions">
+        <el-button type="primary" link @click="handleCopy" :icon="DocumentCopy">
           {{ copyButtonText }}
         </el-button>
-        <el-button type="primary" link @click="handleDownload" :icon="Download" class="hljs-copy">
+        <el-button type="primary" link @click="handleDownload" :icon="Download">
           {{ downloadButtonText }}
         </el-button>
       </div>
     </div>
-    <div class="hljs-wrapper" v-code>
+    <div v-if="code" class="hljs-wrapper" v-code>
       <highlightjs :language="language" :autodetect="false" :code="code" />
     </div>
+    <el-empty v-else class="hljs-empty" description="暂无代码内容" :image-size="72" />
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { DocumentCopy, Download } from '@element-plus/icons-vue';
 import vCode from './line';
 
@@ -26,7 +32,8 @@ defineOptions({
 const props = withDefaults(defineProps<HighCodeProps>(), {
   language: 'java',
   code: '',
-  title: ''
+  title: '',
+  languageLabel: ''
 });
 const copyButtonText = ref<string>('复制');
 const downloadButtonText = ref<string>('下载');
@@ -35,7 +42,10 @@ export interface HighCodeProps {
   language: string;
   code: string;
   title: string;
+  languageLabel?: string;
 }
+
+const normalizedLanguage = computed(() => (props.language || 'text').toUpperCase());
 
 const handleCopy = async () => {
   try {
