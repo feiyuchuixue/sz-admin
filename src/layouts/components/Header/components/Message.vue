@@ -80,7 +80,7 @@ const getTodoList = () => {
 };
 
 const handleMessage = (data: any) => {
-  const notice = JSON.parse(data);
+  const notice = typeof data === 'string' ? JSON.parse(data) : data || {};
   ElNotification({
     title: notice.title || '',
     message: notice.content || '',
@@ -101,6 +101,7 @@ const handleView = (item: MessageRow) => {
 };
 
 const getData = () => {
+  getUnreadCount();
   if (activeName.value === 'msg') {
     getMsgList();
   } else {
