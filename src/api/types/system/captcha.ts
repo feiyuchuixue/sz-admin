@@ -15,5 +15,4 @@ export type CaptchaVerifyImageParams = {
   requestId: string;
   moveEncrypted: string;
   iv: string;
-  startTime: number;
 };

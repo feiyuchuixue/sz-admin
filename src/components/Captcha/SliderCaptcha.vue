@@ -79,7 +79,6 @@ const emit = defineEmits(['success', 'close']);
 
 let startX = 0;
 let startLeft = 0;
-let startTime = 0;
 let currentSliderLeft = TRACK_PADDING;
 
 const acceptParams = () => {
@@ -186,7 +185,6 @@ const startDrag = (clientX: number) => {
   isDragging.value = true;
   startX = clientX;
   startLeft = currentSliderLeft;
-  startTime = Date.now();
 };
 
 const onMouseMove = (e: MouseEvent) => {
@@ -238,7 +236,6 @@ const endDrag = async () => {
     const encX = await aesEncrypt(submitX + '', slideData.secretKey);
     await verifyImageCode({
       requestId: slideData.requestId,
-      startTime,
       moveEncrypted: encX.encryptedData,
       iv: encX.iv
     });
@@ -250,14 +247,13 @@ const endDrag = async () => {
   }
 };
 
-const verifyImageCode = async (params: { requestId: string; startTime: number; moveEncrypted: string; iv: string }) => {
+const verifyImageCode = async (params: { requestId: string; moveEncrypted: string; iv: string }) => {
   try {
     const { code } = await verifyImageCodeApi(params);
-    const duration = ((Date.now() - params.startTime) / 1000).toFixed(2);
     if (code === CODE_SUCCESS) {
       slideData.isSuccess = true;
       overlayVisible.value = true;
-      overlayMessage.value = `验证通过，耗时 ${duration}s`;
+      overlayMessage.value = '验证通过';
       setTimeout(() => {
         emit('success');
         closeSlider();
