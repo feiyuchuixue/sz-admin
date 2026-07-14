@@ -5,11 +5,10 @@ import piniaPersistConfig from '@/stores/helper/persist';
 import type { TabsMenuProps } from '@/stores/interface/tabs';
 import { ref } from 'vue';
 
-const keepAliveStore = useKeepAliveStore();
-
 export const useTabsStore = defineStore(
   'tabs',
   () => {
+    const keepAliveStore = useKeepAliveStore();
     const tabsMenuList = ref<TabsMenuProps[]>([]);
 
     // Add Tabs
