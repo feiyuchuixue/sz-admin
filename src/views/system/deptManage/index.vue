@@ -121,7 +121,7 @@ const formatParams = (params: SysDeptQuery) => {
 // 打开 drawer(新增、查看、编辑)
 const sysDeptRef = ref<InstanceType<typeof SysDeptForm>>();
 const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
-  let formData = {};
+  let formData;
   if (!isAdd) {
     const record = await getSysDeptDetailApi({ id: row?.id });
     formData = record?.data;

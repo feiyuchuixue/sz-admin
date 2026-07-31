@@ -181,7 +181,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, nextTick, defineExpose } from 'vue';
+import { ref, reactive, computed, nextTick } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { Folder, Menu, CopyDocument } from '@element-plus/icons-vue';
 import { getRoleMenus } from '@/api/modules/system/role';

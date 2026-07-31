@@ -255,7 +255,9 @@ searchColumnsData.forEach((column, index) => {
 
 // 列设置 ==> 过滤掉不需要设置的列
 const colRef = ref();
-const colSetting = tableColumns.filter(item => !columnTypes.includes(item.type!) && item.prop !== 'operation' && item.isShow);
+const colSetting = (tableColumns as ColumnProps[]).filter(
+  item => !columnTypes.includes(item.type!) && item.prop !== 'operation' && item.isShow
+);
 const openColSetting = () => colRef.value.openColSetting();
 
 // 定义 emit 事件

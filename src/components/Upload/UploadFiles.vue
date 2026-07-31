@@ -87,7 +87,7 @@
 
 <script setup lang="ts">
 import { Close, Document, Download, UploadFilled, Loading } from '@element-plus/icons-vue';
-import { ref, watch, nextTick, onBeforeUnmount, defineExpose } from 'vue';
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import { uploadResource } from '@/api/modules/system/upload';
 import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
 import type { IResourceUploadResult } from '@/api/types/system/upload';

@@ -75,9 +75,9 @@ const activeTab = ref('element');
 
 // 图标搜索
 const search = ref('');
-const elementIcons = Object.keys(Icons).map(key => {
-  return Icons[key as keyof typeof Icons].name;
-});
+const elementIcons = Object.keys(Icons)
+  .map(key => Icons[key as keyof typeof Icons].name)
+  .filter((name): name is string => typeof name === 'string');
 
 const svgIcons: string[] = [];
 const svgIconsFiles = import.meta.glob('@/assets/icons/**/*.svg');

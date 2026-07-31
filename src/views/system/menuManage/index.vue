@@ -140,7 +140,7 @@ const switchLoading = ref(false);
 // 打开 drawer(新增、查看、编辑)
 const menuFormRef = ref<InstanceType<typeof MenuForm>>();
 const openAddEdit = async (title: string, row: any = {}, isAdd = true) => {
-  let orig = {};
+  let orig;
   if (isAdd) {
     let pid = row.id || 0;
     const sort = presort(row, pid);
