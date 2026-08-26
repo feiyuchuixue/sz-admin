@@ -12,6 +12,13 @@ import type { Config } from 'jodit/types/config';
 import { useUserStore } from '@/stores/modules/user';
 import merge from 'lodash.merge';
 import { ADMIN_API_BASE } from '@/api/client';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
+import {
+  RICH_TEXT_IMAGE_EXTENSIONS,
+  getResourceUploadMessage,
+  isResourceUploadResponseSuccess,
+  isRichTextImageFilename
+} from './uploader';
 
 defineOptions({
   name: 'JoditEditor'
@@ -231,6 +238,12 @@ const defaultConfig: () => DeepPartial<Config> = () => ({
   colorPickerDefaultTab: 'background',
   imageDefaultWidth: 300,
   toolbarAdaptive: false,
+  cleanHTML: {
+    sanitizer: sanitizeHtml
+  },
+  link: {
+    deriveUrlFromText: true
+  },
   uploader: createUploader(props.sceneCode)
 });
 
@@ -244,17 +257,16 @@ const createUploader = (sceneCode: string): any => ({
   headers: { Authorization: `Bearer ${userStore.token}` },
   method: 'POST',
   data: { sceneCode },
-  isSuccess(res: any) {
-    return res;
-  },
-  imagesExtensions: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp', 'bmp'],
+  isSuccess: isResourceUploadResponseSuccess,
+  getMessage: getResourceUploadMessage,
+  imagesExtensions: [...RICH_TEXT_IMAGE_EXTENSIONS],
   defaultHandlerSuccess(data: any) {
     //此处参数的值默认是接口返回的data值
     console.log('defaultHandlerSuccess', data);
     data.forEach((item: any) => {
       const filename = item.originName;
       const url = item.accessUrl;
-      const isImage = /\.(jpe?g|png|gif|bmp|webp|svg)$/i.test(filename);
+      const isImage = isRichTextImageFilename(filename);
       if (isImage) {
         this.s.insertImage(url);
       } else {

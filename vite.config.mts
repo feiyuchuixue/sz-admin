@@ -1,17 +1,12 @@
 ﻿// vite.config.mts
-import { resolve } from 'path';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, ConfigEnv, UserConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import vueDevTools from 'vite-plugin-vue-devtools';
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import viteCompression from 'vite-plugin-compression';
 // @ts-expect-error package.json is imported for build-time version injection.
 import pkg from './package.json';
-
-// 由于我们使用的是 ESM，不再需要 const path = require('node:path');
-// 直接使用 import { resolve } from 'path'; 即可
 
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const root = process.cwd();
@@ -48,11 +43,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       vue(),
       vueJsx(),
       vueDevTools(),
-      // 使用 svg 图标
-      createSvgIconsPlugin({
-        iconDirs: [resolve(process.cwd(), 'src/assets/icons')],
-        symbolId: 'icon-[dir]-[name]'
-      }),
       // 配置 gzip 压缩插件
       viteCompression({
         algorithm: 'gzip', // 使用 gzip 压缩

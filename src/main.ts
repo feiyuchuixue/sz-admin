@@ -24,9 +24,6 @@ import directives from '@/directives/index';
 
 // errorHandler
 import errorHandler from '@/utils/errorHandler';
-// svg icons
-import 'virtual:svg-icons-register';
-
 // highlight 高亮
 import 'highlight.js/styles/atom-one-dark.css';
 import 'highlight.js/lib/common';
