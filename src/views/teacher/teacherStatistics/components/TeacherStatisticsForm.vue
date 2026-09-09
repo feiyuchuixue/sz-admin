@@ -67,7 +67,10 @@
           :file-size="3"
           scene-code="teacher.attachment"
           path-segments="template,teacher"
+          :biz-id="resourceBizId"
+          :download-api="downloadTeacherStatisticsResourceApi"
           @all-success="handleAllSuccess"
+          @uploading-change="uploading = $event"
         />
       </el-form-item>
       <el-form-item label="内容" prop="contentHtml">
@@ -81,17 +84,19 @@
     </el-form>
     <template #footer>
       <el-button @click="visible = false"> 取消 </el-button>
-      <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
+      <el-button type="primary" :loading="uploading" :disabled="uploading" @click="handleSubmit"> 确定 </el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, ref, reactive } from 'vue';
+import { computed, defineAsyncComponent, ref, reactive } from 'vue';
 import { type ElForm, ElMessage } from 'element-plus';
 import { useDictOptions } from '@/hooks/useDictOptions';
-import type { IResourceUploadResult, ResourceUploadResult } from '@/api/types/system/upload';
+import type { ResourceRef } from '@/api/types/system/upload';
+import { normalizeResourceFiles } from '@/components/Upload/resourceFiles';
 import { useDialogWidth } from '@/hooks/useDialogWidth';
+import { downloadTeacherStatisticsResourceApi } from '@/api/modules/teacher/teacherStatistics';
 
 const UploadFiles = defineAsyncComponent(() => import('@/components/Upload/UploadFiles.vue'));
 const JoditEditor = defineAsyncComponent(() => import('@/components/JoditEditor/index.vue'));
@@ -118,7 +123,12 @@ const paramsProps = ref<View.DefaultParams>({
   getTableList: undefined
 });
 
-const fileUrls = ref<IResourceUploadResult[] | string[]>([]);
+const fileUrls = ref<ResourceRef[]>([]);
+const uploading = ref(false);
+const resourceBizId = computed(() => {
+  const id = paramsProps.value.row?.id;
+  return id ? String(id) : undefined;
+});
 
 // 接收父组件传过来的参数
 const acceptParams = (params: View.DefaultParams) => {
@@ -130,10 +140,14 @@ const acceptParams = (params: View.DefaultParams) => {
 // 提交数据（新增/编辑）
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const handleSubmit = () => {
+  if (uploading.value) {
+    ElMessage.warning('文件仍在上传，请稍候');
+    return;
+  }
   ruleFormRef.value!.validate(async valid => {
     if (!valid) return;
     try {
-      paramsProps.value.row.url = ((fileUrls.value as ResourceUploadResult[]) ?? []).filter(Boolean);
+      paramsProps.value.row.url = normalizeResourceFiles(fileUrls.value);
       await paramsProps.value.api!(paramsProps.value.row);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
@@ -144,7 +158,7 @@ const handleSubmit = () => {
   });
 };
 
-function handleAllSuccess(list: IResourceUploadResult[]) {
+function handleAllSuccess(list: ResourceRef[]) {
   console.log('全部上传成功，共', list.length, '条：', list);
 }
 

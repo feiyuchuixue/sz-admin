@@ -20,7 +20,7 @@ export type TeacherStatisticsQuery = IPageQuery & {
 
 // 编辑form表单
 export type TeacherStatisticsForm = {
-  id?: number;
+  id?: string;
   year?: string;
   month?: string;
   duringTime?: string;
@@ -37,7 +37,7 @@ export type TeacherStatisticsForm = {
 
 // list或detail返回结构
 export type TeacherStatisticsRow = {
-  id?: number;
+  id?: string;
   year?: string;
   month?: string;
   duringTime?: string;
@@ -50,9 +50,9 @@ export type TeacherStatisticsRow = {
   checkTime?: string;
   lastSyncTime?: string;
   remark?: string;
-  createId?: number;
+  createId?: string;
   createTime?: string;
-  updateId?: number;
+  updateId?: string;
   updateTime?: string;
   url?: ResourceRef[];
 };

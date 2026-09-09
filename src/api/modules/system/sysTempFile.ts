@@ -49,9 +49,17 @@ export const removeSysTempFileApi = (params: { ids: (string | number)[] }) => {
  * @param params
  * @returns {*}
  */
-export const getSysTempFileDetailApi = (params: { id: number }) => {
+export const getSysTempFileDetailApi = (params: { id: string }) => {
   const { id } = params;
   return adminHttp.get<SysTempFileRow>(`/sys-temp-file/${id}`);
+};
+
+export const downloadSysTempFileResourceApi = (bizId: string, resourceId: string) => {
+  return adminHttp.downloadWithHeader(`/sys-temp-file/${bizId}/resources/${resourceId}/download`);
+};
+
+export const previewSysTempFileResourceApi = (bizId: string, resourceId: string) => {
+  return adminHttp.downloadWithHeader(`/sys-temp-file/${bizId}/resources/${resourceId}/preview`);
 };
 
 /**
@@ -60,4 +68,12 @@ export const getSysTempFileDetailApi = (params: { id: number }) => {
  */
 export const getSysTempFileHistoryListApi = (params: SysTempFileHistoryQuery) => {
   return adminHttp.get<IPage<SysTempFileHistory>>(`/sys-temp-file-history/history`, params);
+};
+
+export const downloadSysTempFileHistoryResourceApi = (bizId: string, resourceId: string) => {
+  return adminHttp.downloadWithHeader(`/sys-temp-file-history/${bizId}/resources/${resourceId}/download`);
+};
+
+export const previewSysTempFileHistoryResourceApi = (bizId: string, resourceId: string) => {
+  return adminHttp.downloadWithHeader(`/sys-temp-file-history/${bizId}/resources/${resourceId}/preview`);
 };

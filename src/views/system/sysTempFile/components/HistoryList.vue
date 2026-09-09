@@ -17,7 +17,12 @@
         :init-param="initParam"
       >
         <template #url="{ row }">
-          <FileDownloadList :files="row?.url" />
+          <FileDownloadList
+            :files="row?.url"
+            :biz-id="String(row.id)"
+            :download-api="downloadSysTempFileHistoryResourceApi"
+            :preview-api="previewSysTempFileHistoryResourceApi"
+          />
         </template>
       </ProTable>
     </el-dialog>
@@ -29,7 +34,11 @@ import ProTable from '@/components/ProTable/index.vue';
 import type { Dict } from '@/api/types/system/dict';
 import type { ColumnProps, ProTableInstance } from '@/components/ProTable/interface';
 import { reactive, ref } from 'vue';
-import { getSysTempFileHistoryListApi } from '@/api/modules/system/sysTempFile';
+import {
+  downloadSysTempFileHistoryResourceApi,
+  getSysTempFileHistoryListApi,
+  previewSysTempFileHistoryResourceApi
+} from '@/api/modules/system/sysTempFile';
 import type { SysTempFileHistory, SysTempFileRow, SysTempFileHistoryQuery } from '@/api/types/system/sysTempFile';
 import { useDictOptions } from '@/hooks/useDictOptions';
 import FileDownloadList from '@/components/Upload/FileDownloadList.vue';
@@ -43,7 +52,7 @@ const info = ref<SysTempFileHistory>();
 
 // 接收父组件传过来的参数
 const show = (params: SysTempFileRow) => {
-  initParam.sysTempFileId = params.id as number;
+  initParam.sysTempFileId = String(params.id);
   info.value = params;
   visible.value = true;
 };
@@ -73,7 +82,7 @@ const columns: ColumnProps<Dict>[] = [
 ];
 
 // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
-const initParam = reactive({ sysTempFileId: 0 });
+const initParam = reactive({ sysTempFileId: '' });
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTableRef = ref<ProTableInstance>();

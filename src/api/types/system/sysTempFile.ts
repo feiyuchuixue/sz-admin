@@ -1,4 +1,5 @@
 import type { IPageQuery } from '@/api/types';
+import type { ResourceRef } from '@/api/types/system/upload';
 
 // 查询条件
 export type SysTempFileQuery = IPageQuery & {
@@ -7,43 +8,43 @@ export type SysTempFileQuery = IPageQuery & {
 
 // 历史记录查询条件
 export type SysTempFileHistoryQuery = IPageQuery & {
-  sysTempFileId: number;
+  sysTempFileId: string;
 };
 
 // 编辑form表单
 export type SysTempFileForm = {
-  id?: number;
-  sysFileId?: number;
+  id?: string;
+  sysFileId?: string;
   tempName?: string;
-  url?: string;
+  url?: ResourceRef[];
   remark?: string;
   alias?: string;
 };
 
 // list或detail返回结构
 export type SysTempFileRow = {
-  id?: number;
-  sysFileId?: number;
+  id?: string;
+  sysFileId?: string;
   tempName?: string;
-  url?: string;
+  url?: ResourceRef[];
   remark?: string;
   delFlag?: string;
-  createId?: number;
+  createId?: string;
   createTime?: string;
-  updateId?: number;
+  updateId?: string;
   updateTime?: string;
   alias?: string;
 };
 
 // 历史记录
 export type SysTempFileHistory = {
-  id?: number;
-  sysTempFileId?: number;
-  sysFileId?: number;
+  id?: string;
+  sysTempFileId?: string;
+  sysFileId?: string;
   tempName?: string;
-  url?: string;
+  url?: ResourceRef[];
   remark?: string;
   delFlag?: string;
-  createId?: number;
+  createId?: string;
   createTime?: string;
 };

@@ -27,7 +27,12 @@
       </template>
 
       <template #url="{ row }">
-        <FileDownloadList :files="row?.url" />
+        <FileDownloadList
+          :files="row?.url"
+          :biz-id="String(row.id)"
+          :download-api="downloadSysTempFileResourceApi"
+          :preview-api="previewSysTempFileResourceApi"
+        />
       </template>
       <template #history="{ row }">
         <span>
@@ -62,7 +67,9 @@ import {
   removeSysTempFileApi,
   updateSysTempFileApi,
   getSysTempFileListApi,
-  getSysTempFileDetailApi
+  getSysTempFileDetailApi,
+  downloadSysTempFileResourceApi,
+  previewSysTempFileResourceApi
 } from '@/api/modules/system/sysTempFile';
 import { useHandleData } from '@/hooks/useHandleData';
 import SysTempFileForm from '@/views/system/sysTempFile/components/SysTempFileForm.vue';

@@ -44,9 +44,17 @@ export const removeTeacherStatisticsApi = (params: { ids: (string | number)[] })
  * @param params
  * @returns {*}
  */
-export const getTeacherStatisticsDetailApi = (params: { id: number }) => {
+export const getTeacherStatisticsDetailApi = (params: { id: string }) => {
   const { id } = params;
   return adminHttp.get<TeacherStatisticsRow>(`/teacher-statistics/${id}`);
+};
+
+export const downloadTeacherStatisticsResourceApi = (bizId: string, resourceId: string) => {
+  return adminHttp.downloadWithHeader(`/teacher-statistics/${bizId}/resources/${resourceId}/download`);
+};
+
+export const previewTeacherStatisticsResourceApi = (bizId: string, resourceId: string) => {
+  return adminHttp.downloadWithHeader(`/teacher-statistics/${bizId}/resources/${resourceId}/preview`);
 };
 
 /**

@@ -30,7 +30,14 @@
         </el-button>
       </template>
       <template #url="{ row }">
-        <file-download-list :files="row?.url" :align="'left'" :max-rows="3" />
+        <file-download-list
+          :files="row?.url"
+          :biz-id="String(row.id)"
+          :download-api="downloadTeacherStatisticsResourceApi"
+          :preview-api="previewTeacherStatisticsResourceApi"
+          :align="'left'"
+          :max-rows="3"
+        />
       </template>
       <template #operation="{ row }">
         <el-button
@@ -66,6 +73,8 @@ import {
   getTeacherStatisticsDetailApi,
   importTeacherStatisticsExcelApi,
   exportTeacherStatisticsExcelApi,
+  downloadTeacherStatisticsResourceApi,
+  previewTeacherStatisticsResourceApi,
   remoteTeacherStaticsSearchApi
 } from '@/api/modules/teacher/teacherStatistics';
 import { useHandleData } from '@/hooks/useHandleData';
