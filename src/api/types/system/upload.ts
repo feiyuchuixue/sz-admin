@@ -35,11 +35,11 @@ export type ResourceUploadResult = {
   objectKey: string;
   originName: string;
   eTag: string;
-  accessUrl: string;
+  accessUrl?: string | null;
   contentType: string;
   size: number;
   sceneCode?: string;
-  resourceId: number;
+  resourceId: string;
 };
 
 /**
@@ -50,8 +50,10 @@ export type ResourceRef = {
   originName: string;
   contentType: string;
   sceneCode?: string;
-  accessUrl?: string;
-  resourceId?: number;
+  accessUrl?: string | null;
+  resourceId?: string;
+  eTag?: string;
+  size?: number;
 };
 
 export type IResourceUploadResult = ResourceUploadResult | null;
