@@ -97,6 +97,47 @@
             </div>
           </section>
 
+          <section v-if="isResourceConfigVisible" class="field-section">
+            <div class="section-title">资源用途</div>
+            <el-form-item label="资源场景">
+              <el-select
+                v-model="resourceSceneCode"
+                aria-label="资源场景"
+                placeholder="请选择已配置的资源场景"
+                filterable
+                size="small"
+                :loading="resourceScenesLoading"
+                :disabled="!resourceOptions"
+              >
+                <el-option v-if="!resourceSceneRegistered" :label="resourceSceneCode" :value="resourceSceneCode" disabled />
+                <el-option
+                  v-for="(name, code) in resourceScenes"
+                  :key="code"
+                  :label="name === code ? code : `${name} (${code})`"
+                  :value="code"
+                />
+              </el-select>
+              <div class="form-tip">由开发者配置，生成的上传组件和后端资源校验共同使用该场景。</div>
+            </el-form-item>
+            <div v-if="!resourceOptions" class="form-tip is-danger">
+              字段扩展配置格式异常，请检查原配置，避免覆盖其他上传设置。
+            </div>
+            <div v-else-if="resourceScenesError" class="form-tip is-danger">资源场景加载失败，当前配置保持不变。</div>
+            <div v-else-if="resourceScenes && !resourceSceneRegistered" class="form-tip is-danger">
+              当前场景未在运行配置中注册，请先补齐配置再使用，或选择已有场景。
+            </div>
+            <div v-if="resourceOptions && resourceSceneCode === 'system.protected'" class="form-tip">
+              当前使用通用受保护场景，文件管理无法区分具体业务用途。正式业务建议选择专用场景。
+            </div>
+            <div class="form-tip">
+              新增场景需在后端配置名称、存储方式和访问模式，默认使用
+              PROTECTED；配置生效后重新加载选项。业务记录关联仍由业务表维护。
+            </div>
+            <el-button type="primary" link size="small" :loading="resourceScenesLoading" @click="loadResourceScenes"
+              >重新加载场景</el-button
+            >
+          </section>
+
           <section class="field-section" v-if="isFrontendOutput && modelValue.isLogicDel !== '1'">
             <div class="section-title">前端展示</div>
             <el-form-item label="显示类型">
@@ -161,6 +202,7 @@
 <script setup lang="ts">
 import type { DictCategory } from '@/api/types/system/dict';
 import type { GeneratorColumnInfo } from '@/modules/toolbox/types/generator';
+import { getSysResourceScenesApi } from '@/api/modules/system/resource';
 import {
   dictShowWayOptions,
   htmlTypeOptions,
@@ -168,7 +210,7 @@ import {
   queryTypeOptions
 } from '@/modules/toolbox/views/generator/common/Options';
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 type FieldHint = { label: string; type: 'success' | 'warning' | 'danger' | 'info'; description: string };
 
@@ -194,6 +236,58 @@ const emit = defineEmits<{
 
 const isServerOutput = computed(() => ['all', 'server'].includes(props.generateType || ''));
 const isFrontendOutput = computed(() => props.generateType === 'all');
+const isResourceConfigVisible = computed(
+  () =>
+    isServerOutput.value &&
+    props.modelValue?.isLogicDel !== '1' &&
+    (['fileUpload', 'imageUpload'].includes(props.modelValue?.htmlType || '') ||
+      props.modelValue?.javaType === 'List<ResourceRef>')
+);
+const resourceScenes = ref<Record<string, string>>();
+const resourceScenesLoading = ref(false);
+const resourceScenesError = ref(false);
+const resourceOptions = computed<Record<string, unknown> | undefined>(() => {
+  const options = props.modelValue?.options;
+  try {
+    const value = typeof options === 'string' ? JSON.parse(options || '{}') : options || {};
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+  } catch {
+    return undefined;
+  }
+});
+const resourceSceneCode = computed({
+  get: () => String(resourceOptions.value?.['upload-files.sceneCode'] || 'system.protected'),
+  set: (value: string) => {
+    if (!props.modelValue || !resourceOptions.value || !Object.prototype.hasOwnProperty.call(resourceScenes.value || {}, value))
+      return;
+    props.modelValue.options = { ...resourceOptions.value, 'upload-files.sceneCode': value };
+  }
+});
+const resourceSceneRegistered = computed(() =>
+  Object.prototype.hasOwnProperty.call(resourceScenes.value || {}, resourceSceneCode.value)
+);
+
+async function loadResourceScenes() {
+  if (resourceScenesLoading.value) return;
+  resourceScenesLoading.value = true;
+  resourceScenesError.value = false;
+  try {
+    resourceScenes.value = (await getSysResourceScenesApi()).data;
+  } catch {
+    resourceScenesError.value = true;
+  } finally {
+    resourceScenesLoading.value = false;
+  }
+}
+
+watch(
+  isResourceConfigVisible,
+  visible => {
+    if (visible && !resourceScenes.value && !resourceScenesError.value) void loadResourceScenes();
+  },
+  { immediate: true }
+);
+
 const isQueryConfigVisible = computed(
   () => isServerOutput.value && props.modelValue?.isLogicDel !== '1' && props.modelValue?.isQuery === '1'
 );
