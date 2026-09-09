@@ -4,7 +4,7 @@
       <h4 class="title">简介</h4>
       <span class="text">
         <el-link type="primary" href="https://github.com/feiyuchuixue" target="_blank">Sz Admin</el-link>，一个基于 Spring Boot
-        3、JDK21、Vue 3 和 Element-Plus
+        4、JDK 25、Vue 3 和 Element-Plus
         的开源后台管理框架，致力于为您提供一个流畅、直观且功能强大的开发框架。它不仅融合了最新的技术趋势，而且通过精心设计，确保了系统的简洁性和高效，让使用者可以专注业务。
       </span>
     </div>
