@@ -11,6 +11,7 @@
     :before-upload="beforeUpload"
     :on-exceed="handleExceed"
     :on-success="handleSuccess"
+    :on-error="handleError"
     :on-remove="handleRemove"
   >
     <div class="note-box">
@@ -45,20 +46,20 @@
           <span v-if="file.status === 'uploading'" class="file-progress-text"> {{ Math.round(file.percentage || 0) }}% </span>
 
           <template v-if="file.status === 'success'">
-            <el-tooltip :content="downloadingMap[file.url!] ? '下载中...' : '下载'" placement="top" :show-after="120">
+            <el-tooltip :content="downloadingMap[downloadKey(file)] ? '下载中...' : '下载'" placement="top" :show-after="120">
               <el-icon
                 class="el-icon--download"
-                :class="{ loading: downloadingMap[file.url!] }"
-                @click="!downloadingMap[file.url!] && handleDownload(file)"
+                :class="{ loading: downloadingMap[downloadKey(file)] }"
+                @click="!downloadingMap[downloadKey(file)] && handleDownload(file)"
               >
-                <component :is="downloadingMap[file.url!] ? Loading : Download" />
+                <component :is="downloadingMap[downloadKey(file)] ? Loading : Download" />
               </el-icon>
             </el-tooltip>
 
             <el-icon
               class="el-icon--remove"
-              :class="{ disabled: downloadingMap[file.url!] }"
-              @click="!downloadingMap[file.url!] && handleRemove(file)"
+              :class="{ disabled: downloadingMap[downloadKey(file)] }"
+              @click="!downloadingMap[downloadKey(file)] && handleRemove(file)"
             >
               <Close />
             </el-icon>
@@ -89,8 +90,17 @@
 import { Close, Document, Download, UploadFilled, Loading } from '@element-plus/icons-vue';
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import { uploadResource } from '@/api/modules/system/upload';
-import { ElNotification, type UploadFile, type UploadProps, type UploadRequestOptions, type UploadUserFile } from 'element-plus';
-import type { IResourceUploadResult } from '@/api/types/system/upload';
+import {
+  ElMessage,
+  ElNotification,
+  type UploadFile,
+  type UploadProps,
+  type UploadRequestOptions,
+  type UploadUserFile
+} from 'element-plus';
+import type { ResourceRef, ResourceUploadResult } from '@/api/types/system/upload';
+import { useResourceDownload, type ResourceResponseLoader } from '@/hooks/useResourceDownload';
+import { normalizeResourceFiles, resolveUploadDownloadMode } from './resourceFiles';
 import type { AxiosProgressEvent } from 'axios';
 
 defineOptions({ name: 'UploadFiles' });
@@ -103,7 +113,9 @@ type Props = {
   limit?: number;
   fileSize?: number;
   accept?: string;
-  modelValue?: IResourceUploadResult[] | string[];
+  modelValue?: ResourceRef[] | string[];
+  bizId?: string;
+  downloadApi?: ResourceResponseLoader;
   sceneCode?: string; // 上传场景编码
   bizKey?: string; // 命名规则为 BIZ_KEY 时的业务标识 ==> 非必传
   pathSegments?: string; // 路径分段，逗号分割，BIZ/BIZ_DATE 策略时生效，如 "userId,dept" ==> 非必传
@@ -125,7 +137,7 @@ const props = withDefaults(defineProps<Props>(), {
   fileSize: 5,
   accept: '',
   modelValue: () => [],
-  sceneCode: 'system.template',
+  sceneCode: 'system.protected',
   flushDelay: 80,
   debug: false,
   emitUploading: false,
@@ -136,16 +148,18 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  'update:modelValue': [IResourceUploadResult[]];
-  change: [value: IResourceUploadResult | null];
-  'all-success': [list: IResourceUploadResult[]];
+  'update:modelValue': [ResourceRef[]];
+  change: [value: ResourceRef | null];
+  'all-success': [list: ResourceRef[]];
+  'uploading-change': [uploading: boolean];
 }>();
 
 /* ------------ State ------------ */
 const _fileList = ref<UploadUserFile[]>([]);
-const _resultMap = ref<Map<string, IResourceUploadResult>>(new Map());
+const _resultMap = ref<Map<string, ResourceRef>>(new Map());
 const downloadingMap = ref<Record<string, boolean>>({});
-let internalSnapshot: IResourceUploadResult[] = [];
+const localPreviewUrls = new Map<string, string>();
+let internalSnapshot: ResourceRef[] = [];
 
 /* ------------ Flags ------------ */
 let isProcessingResults = false;
@@ -153,7 +167,7 @@ let isInternalEmit = false;
 let initialHydrated = false; // 是否已完成首次回显
 let uploadCycleActive = false; // 当前上传周期是否激活
 let hasNewUploadSuccess = false; // 本周期是否有至少一个成功上传
-const pendingSuccessResults = new Map<string, { file: UploadFile; response: IResourceUploadResult }>();
+const pendingSuccessResults = new Map<string, { file: UploadFile; response: ResourceUploadResult }>();
 let flushTimer: number | null = null;
 
 /* ------------ All-success 记忆签名 ------------ */
@@ -185,26 +199,26 @@ function isAcceptedFile(rawFile: File, accept: string) {
       return item === ext.slice(1);
     });
 }
-function preserveNormalize(raw: any): IResourceUploadResult {
-  const accessUrl = raw?.accessUrl ?? raw?.url ?? '';
+function preserveNormalize(raw: any): ResourceRef {
+  const accessUrl = raw?.accessUrl ?? raw?.url ?? null;
   const originName = raw?.originName || raw?.filename || raw?.name || (accessUrl ? accessUrl.split('/').pop() || '' : '');
   const eTag = raw?.eTag || raw?.etag || '';
   return {
     ...(props.preserveRaw ? raw : {}),
-    accessUrl,
+    accessUrl: typeof accessUrl === 'string' && !accessUrl.startsWith('blob:') ? accessUrl : null,
     originName,
     eTag,
     objectKey: raw?.objectKey ?? '',
     contentType: raw?.contentType ?? '',
     size: raw?.size ?? 0,
-    resourceId: raw?.resourceId ?? 0
-  } as IResourceUploadResult;
+    ...(raw?.resourceId == null || raw?.resourceId === '' ? {} : { resourceId: String(raw.resourceId) })
+  } as ResourceRef;
 }
 function buildStableUid(
-  source: { resourceId?: number; accessUrl?: string; url?: string; originName?: string; filename?: string },
+  source: { resourceId?: string; accessUrl?: string | null; url?: string; originName?: string; filename?: string },
   index: number
 ) {
-  if (source.resourceId && source.resourceId > 0) return 'rid-' + source.resourceId;
+  if (source.resourceId) return 'rid-' + source.resourceId;
   const base = (source.accessUrl || source.url || source.originName || source.filename || 'item').replace(/\s+/g, '_');
   return 'u:' + base + '#i:' + index;
 }
@@ -222,8 +236,8 @@ function isSameList(a: any, b: any) {
   for (let i = 0; i < a.length; i++) if (!shallowMetaEqual(a[i], b[i])) return false;
   return true;
 }
-function exportResultList(): IResourceUploadResult[] {
-  const out: IResourceUploadResult[] = [];
+function exportResultList(): ResourceRef[] {
+  const out: ResourceRef[] = [];
   _fileList.value.forEach(f => {
     const uid = String((f as any).uid);
     const r = _resultMap.value.get(uid);
@@ -232,11 +246,11 @@ function exportResultList(): IResourceUploadResult[] {
       out.push(preserveNormalize({ accessUrl: '', originName: f.name, size: (f as any).size ?? 0, uploading: true }));
     }
   });
-  return out;
+  return normalizeResourceFiles(out);
 }
 
 /* ------------ All-success ------------ */
-function computeAllSuccessSignature(list: IResourceUploadResult[]): string {
+function computeAllSuccessSignature(list: ResourceRef[]): string {
   return list.map(r => `${r!.accessUrl}#${r!.resourceId}#${r!.originName}`).join('|') + `|len:${list.length}`;
 }
 function isAllSuccess(): boolean {
@@ -307,10 +321,17 @@ function processPendingResults() {
         logDebug('文件已移除，忽略成功回调 uid=', uid);
         continue;
       }
-      const norm = preserveNormalize(response)!;
+      const norm = preserveNormalize(response);
       const vf = _fileList.value[idx];
       vf.name = norm.originName;
-      vf.url = norm.accessUrl;
+      revokeLocalPreview(uid);
+      if (file.raw?.type?.startsWith('image/')) {
+        const localPreviewUrl = URL.createObjectURL(file.raw);
+        localPreviewUrls.set(uid, localPreviewUrl);
+        vf.url = localPreviewUrl;
+      } else {
+        vf.url = norm.accessUrl || '';
+      }
       vf.status = 'success';
 
       const old = _resultMap.value.get(uid);
@@ -324,13 +345,14 @@ function processPendingResults() {
     internalEmit(out);
     logDebug('批处理完成 成功数=', out.length);
     tryEmitAllSuccess('batch');
+    emitUploadingState();
   } finally {
     isProcessingResults = false;
   }
 }
 
 /* ------------ 内部 emit ------------ */
-function internalEmit(list: IResourceUploadResult[]) {
+function internalEmit(list: ResourceRef[]) {
   isInternalEmit = true;
   emit('update:modelValue', list.slice());
   internalSnapshot = list.slice();
@@ -374,18 +396,18 @@ watch(
 
     if (isObj) {
       (newVal as any[]).forEach((raw, i) => {
-        const norm = preserveNormalize(raw)!;
+        const norm = preserveNormalize(raw);
         const uid = buildStableUid(norm, i);
-        const file: UploadUserFile = { name: norm.originName, url: norm.accessUrl, status: 'success' };
+        const file: UploadUserFile = { name: norm.originName, url: norm.accessUrl || '', status: 'success' };
         (file as any).uid = uid;
         _fileList.value.push(file);
         _resultMap.value.set(uid, norm);
       });
     } else {
       (newVal as string[]).filter(Boolean).forEach((u, i) => {
-        const norm = preserveNormalize({ accessUrl: u, originName: u.split('/').pop() || '' })!;
+        const norm = preserveNormalize({ accessUrl: u, originName: u.split('/').pop() || '', objectKey: u });
         const uid = buildStableUid(norm, i);
-        const file: UploadUserFile = { name: norm.originName, url: norm.accessUrl, status: 'success' };
+        const file: UploadUserFile = { name: norm.originName, url: norm.accessUrl || '', status: 'success' };
         (file as any).uid = uid;
         _fileList.value.push(file);
         _resultMap.value.set(uid, norm);
@@ -425,7 +447,7 @@ const uploadFileRequest = async (options: UploadRequestOptions) => {
 };
 
 /* ------------ 成功回调 ------------ */
-const handleSuccess = (response: IResourceUploadResult | undefined, file: UploadFile) => {
+const handleSuccess = (response: ResourceUploadResult | undefined, file: UploadFile) => {
   if (!response) {
     logDebug('成功回调无 response uid=', file.uid);
     return;
@@ -435,11 +457,14 @@ const handleSuccess = (response: IResourceUploadResult | undefined, file: Upload
   scheduleFlush();
 };
 
+const handleError = () => emitUploadingState();
+
 /* ------------ 删除 ------------ */
 const handleRemove = (file: UploadFile) => {
   const uid = String((file as any).uid);
   _fileList.value = _fileList.value.filter(f => String((f as any).uid) !== uid);
   _resultMap.value.delete(uid);
+  revokeLocalPreview(uid);
   pendingSuccessResults.delete(uid);
   const out = exportResultList();
   internalEmit(out);
@@ -455,6 +480,7 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
   }
   if (!props.accept || props.accept === '*') {
     uploadCycleActive = true; // 有新上传加入
+    emit('uploading-change', true);
     return true;
   }
   if (!isAcceptedFile(rawFile, props.accept)) {
@@ -462,91 +488,61 @@ const beforeUpload: UploadProps['beforeUpload'] = rawFile => {
     return false;
   }
   uploadCycleActive = true;
+  emit('uploading-change', true);
   return true;
 };
 const handleExceed = () => notifyWarn(`当前最多只能上传 ${props.limit} 份文件，请移除后上传！`);
 
 /* ------------ 下载 ------------ */
-function isPreviewLike(name: string) {
-  return /\.(png|jpe?g|gif|bmp|webp|svg|pdf|txt)$/i.test(name);
-}
-function shouldForceFetch(file: UploadFile) {
-  const url = file.url || '';
-  let cross = false;
-  try {
-    const u = new URL(url, location.href);
-    cross = u.origin !== location.origin;
-  } catch {
-    console.log('无法解析 URL，强制下载', url);
-  }
-  const name = (file.name || url).toLowerCase();
-  return cross || isPreviewLike(name);
-}
-function extractFileNameFromCD(cd?: string | null): string | undefined {
-  if (!cd) return;
-  const starMatch = /filename\*\s*=\s*([^;]+)/i.exec(cd);
-  if (starMatch) {
-    let value = starMatch[1].trim().replace(/^"(.*)"$/, '$1');
-    const rfc5987 = /^([^']*)'[^']*'(.*)$/.exec(value);
-    if (rfc5987) {
-      try {
-        return decodeURIComponent(rfc5987[2]);
-      } catch {
-        console.log('无法解码 RFC5987 编码的文件名');
-      }
-    } else {
-      try {
-        return decodeURIComponent(value);
-      } catch {
-        console.log('无法解码 URL 编码的文件名');
-      }
-      return value;
-    }
-  }
-  const normalMatch = /filename\s*=\s*([^;]+)/i.exec(cd);
-  if (normalMatch) return normalMatch[1].trim().replace(/^"(.*)"$/, '$1');
-}
-async function forceBlobDownload(url: string, filename?: string) {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error(`下载失败: ${res.status}`);
-  const cdName = extractFileNameFromCD(res.headers.get('Content-Disposition'));
-  const finalName = filename || cdName || url.split('/').pop() || 'download';
-  const blob = await res.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = objectUrl;
-  a.style.display = 'none';
-  a.download = finalName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+const { downloadResource } = useResourceDownload();
+function downloadKey(file: UploadFile) {
+  return String(file.uid);
 }
 async function handleDownload(file: UploadFile) {
-  const rawUrl = file.url;
-  if (!rawUrl) return;
-  if (downloadingMap.value[rawUrl]) return;
+  const key = downloadKey(file);
+  const resource = _resultMap.value.get(key);
+  if (!resource || downloadingMap.value[key]) return;
 
-  downloadingMap.value[rawUrl] = true;
+  downloadingMap.value[key] = true;
   try {
-    // 后端已返回可直接访问的地址，无需前端转换
-    if (shouldForceFetch(file)) {
-      await forceBlobDownload(rawUrl, file.name);
-    } else {
+    const mode = resolveUploadDownloadMode(resource, Boolean(props.downloadApi && props.bizId));
+    if (mode === 'direct') {
       const a = document.createElement('a');
       a.style.display = 'none';
-      a.href = rawUrl;
-      a.download = file.name || rawUrl.split('/').pop() || 'download';
+      a.href = resource.accessUrl!;
+      a.download = resource.originName || 'download';
       document.body.appendChild(a);
       a.click();
       a.remove();
+    } else if (mode === 'business') {
+      await downloadResource({
+        loader: props.downloadApi!,
+        bizId: props.bizId!,
+        resourceId: resource.resourceId!,
+        fallbackName: resource.originName
+      });
+    } else {
+      ElMessage.warning('请先保存业务记录，再下载该文件');
     }
   } catch (e) {
     logDebug('[download error]', e);
-    window.open(rawUrl, '_blank');
+    ElMessage.error((e as Error)?.message || '下载失败');
   } finally {
-    downloadingMap.value[rawUrl] = false;
+    downloadingMap.value[key] = false;
   }
+}
+
+function revokeLocalPreview(uid: string) {
+  const url = localPreviewUrls.get(uid);
+  if (!url) return;
+  URL.revokeObjectURL(url);
+  localPreviewUrls.delete(uid);
+}
+
+function emitUploadingState() {
+  nextTick(() =>
+    emit('uploading-change', pendingSuccessResults.size > 0 || _fileList.value.some(file => file.status === 'uploading'))
+  );
 }
 
 /* ------------ 进度包装 ------------ */
@@ -559,8 +555,8 @@ class CustomUploadProgressEvent extends ProgressEvent {
 }
 
 /* ------------ 对外暴露 ------------ */
-function getAllUploadResults(): IResourceUploadResult[] {
-  const ordered: IResourceUploadResult[] = [];
+function getAllUploadResults(): ResourceRef[] {
+  const ordered: ResourceRef[] = [];
   _fileList.value.forEach(f => {
     const uid = String((f as any).uid);
     const r = _resultMap.value.get(uid);
@@ -589,6 +585,8 @@ defineExpose({
 /* ------------ 生命周期 ------------ */
 onBeforeUnmount(() => {
   resetPending();
+  localPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+  localPreviewUrls.clear();
 });
 </script>
 

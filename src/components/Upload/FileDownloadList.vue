@@ -1,11 +1,16 @@
 <template>
   <div class="file-download-list" :class="'align-' + align">
     <template v-if="visibleFiles.length">
-      <div class="file-row" v-for="file in visibleFiles" :key="file.url || file.name" :class="{ 'is-image': isImage(file) }">
+      <div
+        class="file-row"
+        v-for="file in visibleFiles"
+        :key="file.resourceId || file.objectKey"
+        :class="{ 'is-image': isImage(file) }"
+      >
         <el-icon class="file-icon"><Document /></el-icon>
 
-        <span class="file-name" :title="file.name || getFileName(file.url)">
-          {{ file.name || getFileName(file.url) }}
+        <span class="file-name" :title="file.originName">
+          {{ file.originName }}
           <span v-if="isImage(file)" class="img-preview-tag">图片</span>
         </span>
 
@@ -37,8 +42,7 @@
       :z-index="viewerZIndex"
       hide-on-click-modal
       teleported
-      @close="viewerVisible = false"
-      @switch="onViewerSwitch"
+      @close="closeViewer"
     />
 
     <Teleport to="body">
@@ -47,7 +51,7 @@
           <span class="bar-accent"></span>
           <span class="bar-text">
             {{ currentImageName }}
-            <template v-if="imageFiles.length > 1"> （{{ currentIndex + 1 }}/{{ imageFiles.length }}） </template>
+            <template v-if="imageCount > 1"> （{{ currentIndex + 1 }}/{{ imageCount }}） </template>
           </span>
         </div>
       </transition>
@@ -57,23 +61,20 @@
 
 <script setup lang="ts">
 import { Document, Download, View } from '@element-plus/icons-vue';
-import { ref, computed, watch, nextTick } from 'vue';
-import type { ResourceUploadResult } from '@/api/types/system/upload';
-import { useUrlDownload } from '@/hooks/useUrlDownload';
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
+import type { ResourceRef } from '@/api/types/system/upload';
+import { useResourceDownload, type ResourceResponseLoader } from '@/hooks/useResourceDownload';
+import { normalizeResourceFiles } from './resourceFiles';
 import { ElMessage } from 'element-plus';
 
 defineOptions({ name: 'FileDownloadList' });
 
-/** 内部归一化结构，屏蔽新旧字段差异 */
-type NormalizedFile = {
-  url: string;
-  name: string;
-  contentType?: string;
-};
-
 const props = withDefaults(
   defineProps<{
-    files?: ResourceUploadResult[] | string[];
+    files?: ResourceRef[];
+    bizId?: string;
+    downloadApi?: ResourceResponseLoader;
+    previewApi?: ResourceResponseLoader;
     align?: 'left' | 'center' | 'right';
     maxRows?: number;
   }>(),
@@ -83,81 +84,95 @@ const props = withDefaults(
 const align = props.align || 'left';
 const maxRows = props.maxRows ?? 0;
 
-const fileList = computed<NormalizedFile[]>(() => {
-  if (!props.files || !props.files.length) return [];
-  if (typeof props.files[0] === 'string') {
-    return (props.files as string[]).map(url => ({
-      url,
-      name: url.split('/').pop() ?? url,
-      contentType: undefined
-    }));
-  }
-  return (props.files as ResourceUploadResult[]).map(f => ({
-    url: f.accessUrl,
-    name: f.originName || f.accessUrl?.split('/').pop() || f.accessUrl,
-    contentType: f.contentType
-  }));
-});
+const fileList = computed<ResourceRef[]>(() => normalizeResourceFiles(props.files));
 
-function getFileName(url: string) {
-  return url?.split('/').pop() || url;
-}
-function isImage(file: NormalizedFile) {
+function isImage(file: ResourceRef) {
   if (file.contentType?.startsWith('image/')) return true;
-  return /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(file.url || '');
+  return /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(file.originName || file.objectKey);
 }
 
 /* 折叠显示逻辑 */
 const expanded = ref(false);
 const needCollapse = computed(() => maxRows > 0 && fileList.value.length > maxRows);
-const visibleFiles = computed<NormalizedFile[]>(() =>
+const visibleFiles = computed<ResourceRef[]>(() =>
   !needCollapse.value ? fileList.value : expanded.value ? fileList.value : fileList.value.slice(0, maxRows)
 );
 
-function handleDownload(file: NormalizedFile) {
-  useUrlDownload({ url: file.url, filename: file.name }).catch(err => {
-    ElMessage.error(err?.message || '下载失败');
-  });
+const { downloadResource, previewResource } = useResourceDownload();
+
+async function handleDownload(file: ResourceRef) {
+  try {
+    if (props.downloadApi && props.bizId && file.resourceId) {
+      await downloadResource({
+        loader: props.downloadApi,
+        bizId: props.bizId,
+        resourceId: file.resourceId,
+        fallbackName: file.originName
+      });
+      return;
+    }
+    if (file.accessUrl) {
+      const anchor = document.createElement('a');
+      anchor.href = file.accessUrl;
+      anchor.download = file.originName || 'download';
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.click();
+      return;
+    }
+    ElMessage.warning('该资源需从已保存的业务记录访问');
+  } catch (error) {
+    ElMessage.error((error as Error)?.message || '下载失败');
+  }
 }
 
-/* ---------------- 图片预览逻辑 ---------------- */
-
-/**
- * imageFiles：只包含图片类型，保存 rawUrl 和 name
- */
-const imageFiles = computed(() =>
-  fileList.value
-    .filter(f => isImage(f))
-    .map(f => ({
-      rawUrl: f.url,
-      name: f.name
-    }))
-);
-
-/**
- * 供 el-image-viewer 使用的 url 列表：
- * 后端已通过 resolveUrl 回填新鲜的 accessUrl，前端直接使用
- */
-const imageUrls = computed(() => imageFiles.value.map(img => img.rawUrl));
+const imageCount = computed(() => fileList.value.filter(isImage).length);
+const viewerUrl = ref('');
+const imageUrls = computed(() => (viewerUrl.value ? [viewerUrl.value] : []));
 
 const viewerVisible = ref(false);
 const currentIndex = ref(0);
-const currentImageName = computed(() => imageFiles.value[currentIndex.value]?.name || '');
+const currentImageName = ref('');
+let managedPreview: Awaited<ReturnType<typeof previewResource>> | null = null;
 
 const viewerZIndex = 5000;
 const barZIndex = ref(viewerZIndex + 1);
 
-/**
- * 打开预览：找到当前文件在 imageFiles 中的索引，直接打开 viewer
- */
-function openViewer(file: NormalizedFile) {
-  const idx = imageFiles.value.findIndex(img => img.rawUrl === file.url);
-  currentIndex.value = idx < 0 ? 0 : idx;
-  viewerVisible.value = true;
+async function openViewer(file: ResourceRef) {
+  releaseManagedPreview();
+  try {
+    if (props.previewApi && props.bizId && file.resourceId) {
+      managedPreview = await previewResource({
+        loader: props.previewApi,
+        bizId: props.bizId,
+        resourceId: file.resourceId,
+        fallbackName: file.originName
+      });
+      viewerUrl.value = managedPreview.url;
+    } else if (file.accessUrl) {
+      viewerUrl.value = file.accessUrl;
+    } else {
+      ElMessage.warning('该资源需从已保存的业务记录预览');
+      return;
+    }
+    currentIndex.value = 0;
+    currentImageName.value = file.originName;
+    viewerVisible.value = true;
+  } catch (error) {
+    ElMessage.error((error as Error)?.message || '预览失败');
+  }
 }
 
-function onViewerSwitch(newIndex: number) {
-  currentIndex.value = newIndex;
+function releaseManagedPreview() {
+  managedPreview?.revoke();
+  managedPreview = null;
+}
+
+function closeViewer() {
+  viewerVisible.value = false;
+  viewerUrl.value = '';
+  currentImageName.value = '';
+  releaseManagedPreview();
 }
 watch(viewerVisible, v => {
   if (v) {
@@ -171,6 +186,7 @@ watch(viewerVisible, v => {
     });
   }
 });
+onBeforeUnmount(releaseManagedPreview);
 </script>
 
 <style scoped lang="scss">

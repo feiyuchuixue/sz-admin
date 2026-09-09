@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts" name="UploadImg">
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, onBeforeUnmount } from 'vue';
 import { generateUUID } from '@/utils';
 import { uploadResource } from '@/api/modules/system/upload';
 import { ElNotification, formContextKey, formItemContextKey } from 'element-plus';
@@ -138,11 +138,16 @@ const self_disabled = computed(() => {
   return props.disabled || formContext?.disabled;
 });
 
-// 上传后的本地预览地址（accessUrl），仅在本次上传会话中有效，优先于外部传入值
+// 上传后的本地 blob 预览，仅在组件生命周期内有效，不进入持久化字段。
 const localPreviewUrl = ref('');
 
-// 预览地址优先级：本地上传后的 accessUrl > 外部传入的 previewUrl > imageUrl（向下兼容）
-const previewUrl = computed(() => localPreviewUrl.value || props.previewUrl || props.imageUrl || '');
+// 预览地址优先级：本地 blob > 后端派生 URL。imageUrl 是 objectKey，不可直接作为浏览器地址。
+const previewUrl = computed(() => localPreviewUrl.value || props.previewUrl || '');
+
+const setLocalPreview = (blob: Blob) => {
+  if (localPreviewUrl.value.startsWith('blob:')) URL.revokeObjectURL(localPreviewUrl.value);
+  localPreviewUrl.value = URL.createObjectURL(blob);
+};
 
 /**
  * @description 图片上传
@@ -163,10 +168,9 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
     });
     // 存 objectKey（入库字段）
     emit('update:imageUrl', data.objectKey);
-    // 本地立即预览：无论外部是否绑定 preview-url，都能正确回显
-    localPreviewUrl.value = data.accessUrl;
-    // 若外部绑定了 preview-url，同步更新
-    emit('update:previewUrl', data.accessUrl);
+    setLocalPreview(options.file);
+    // previewUrl 只用于显示；父组件提交时不得把它写入 logo/avatar。
+    emit('update:previewUrl', data.accessUrl || localPreviewUrl.value);
     emit('change', data);
     if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
   } catch (error) {
@@ -178,6 +182,7 @@ const handleHttpUpload = async (options: UploadRequestOptions) => {
  * @description 删除图片
  * */
 const deleteImg = () => {
+  if (localPreviewUrl.value.startsWith('blob:')) URL.revokeObjectURL(localPreviewUrl.value);
   localPreviewUrl.value = '';
   emit('update:imageUrl', '');
   emit('update:previewUrl', '');
@@ -298,8 +303,8 @@ const confirmCrop = () => {
         pathSegments: props.pathSegments
       });
       emit('update:imageUrl', data.objectKey);
-      localPreviewUrl.value = data.accessUrl;
-      emit('update:previewUrl', data.accessUrl);
+      setLocalPreview(rawFile);
+      emit('update:previewUrl', data.accessUrl || localPreviewUrl.value);
       emit('change', data);
       if (formItemContext?.prop) formContext?.validateField([formItemContext.prop as string]);
       cropDialogVisible.value = false;
@@ -312,6 +317,10 @@ const confirmCrop = () => {
     }
   });
 };
+
+onBeforeUnmount(() => {
+  if (localPreviewUrl.value.startsWith('blob:')) URL.revokeObjectURL(localPreviewUrl.value);
+});
 </script>
 
 <style scoped lang="scss">

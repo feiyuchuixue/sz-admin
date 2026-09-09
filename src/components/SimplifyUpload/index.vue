@@ -120,7 +120,7 @@ const handleSuccess = (res: IResultData<ResourceUploadResult>, file: UploadFile)
   const { uid } = file;
   const index = fileList.value.findIndex(item => item.uid === uid);
   if (index !== -1) {
-    fileList.value[index].url = res.data.accessUrl;
+    fileList.value[index].url = res.data.accessUrl || '';
     fileList.value[index].name = res.data.originName;
     emitChange();
   }

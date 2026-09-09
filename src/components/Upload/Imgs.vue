@@ -155,7 +155,7 @@ const emit = defineEmits<{
 }>();
 const uploadSuccess = async (response: IResourceUploadResult | undefined, uploadFile: UploadFile) => {
   if (!response) return;
-  uploadFile.url = response.accessUrl;
+  uploadFile.url = response.accessUrl || '';
   emit('update:fileList', _fileList.value);
   emit('change', response);
   // 调用 el-form 内部的校验方法（可自动校验）
