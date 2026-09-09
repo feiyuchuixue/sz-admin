@@ -13,12 +13,13 @@ export type UserQuery = IPageQuery & {
 };
 
 export type UserForm = {
-  id?: number;
+  id?: string;
   username?: string;
   pwd?: string;
   phone: string;
   nickname: string;
   logo: string;
+  logoUrl?: string | null;
   age: number;
   sex: number;
   idCard: string;
@@ -29,11 +30,12 @@ export type UserForm = {
 };
 
 export type UserInfo = {
-  id?: number;
+  id?: string;
   username: string;
   phone: string;
   nickname: string;
   logo: string;
+  logoUrl?: string | null;
   age: number;
   sex: number;
   idCard: string;
@@ -49,7 +51,7 @@ export type UserInfo = {
 
 export type UserRoleForm = {
   roleIds: number[];
-  userId: number;
+  userId: string;
 };
 
 export type UserRoleData = {
@@ -80,7 +82,7 @@ export type UserTagOptions = {
 
 // 用户基本资料（对应后端 UserProfileVO，/sys-user/profile）
 export type UserProfileVO = {
-  id: number;
+  id: string;
   username: string;
   nickname: string;
   sex: number;
@@ -88,6 +90,7 @@ export type UserProfileVO = {
   phone: string;
   email: string;
   avatar: string;
+  avatarUrl?: string | null;
 };
 
 // 个人资料更新表单（对应后端 SysUserProfileUpdateDTO）

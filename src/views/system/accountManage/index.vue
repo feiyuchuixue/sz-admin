@@ -57,7 +57,7 @@
         </template>
 
         <template #nickname="{ row }">
-          <el-avatar v-if="row.logo" :src="row.logo" alt="用户" :size="32" class="avatar-list-style" />
+          <el-avatar v-if="row.logoUrl" :src="row.logoUrl" alt="用户" :size="32" class="avatar-list-style" />
           <span style="vertical-align: middle">{{ row?.nickname }}</span>
         </template>
         <template #operation="{ row }">

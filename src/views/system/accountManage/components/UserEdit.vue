@@ -67,6 +67,7 @@
         <el-form-item label="头像" prop="logo">
           <UploadImg
             v-model:image-url="paramsProps.row.logo"
+            v-model:preview-url="paramsProps.row.logoUrl"
             @change="fileChange"
             scene-code="admin.user.logo"
             width="135px"
@@ -127,7 +128,8 @@ const handleSubmit = () => {
       return ElMessage.warning({ message: '预览环境，禁止编辑用户信息，请谅解！' });
     }
     try {
-      const data = paramsProps.value.row;
+      const data = { ...paramsProps.value.row };
+      delete data.logoUrl;
       await paramsProps.value.api!(data);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();

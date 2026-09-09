@@ -69,6 +69,7 @@
         <el-form-item label="头像" prop="logo">
           <UploadImg
             v-model:image-url="paramsProps.row.logo"
+            v-model:preview-url="paramsProps.row.logoUrl"
             @change="fileChange"
             scene-code="admin.user.logo"
             width="135px"
@@ -132,7 +133,9 @@ const handleSubmit = () => {
   ruleFormRef.value!.validate(async (valid: boolean) => {
     if (!valid) return;
     try {
-      await paramsProps.value.api!(paramsProps.value.row);
+      const payload = { ...paramsProps.value.row };
+      delete payload.logoUrl;
+      await paramsProps.value.api!(payload);
       ElMessage.success({ message: `${paramsProps.value.title}成功！` });
       paramsProps.value.getTableList!();
       emit('submit');

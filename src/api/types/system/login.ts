@@ -20,7 +20,7 @@ export type LoginInfo = {
 };
 
 export type UserInfo = {
-  id?: number;
+  id?: string;
   username: string;
   phone?: string;
   nickname?: string;

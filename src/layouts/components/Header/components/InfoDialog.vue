@@ -120,7 +120,7 @@ const contactDialogRef = ref<InstanceType<typeof ContactDialog>>();
 const profile = computed(() => userStore.profile);
 
 // 头像预览地址（profile 返回的是可访问 URL，存在 avatar 字段）
-const avatarPreviewUrl = computed(() => profile.value?.avatar || '');
+const avatarPreviewUrl = computed(() => profile.value?.avatarUrl || '');
 
 // 表单数据
 const formData = reactive({
@@ -225,7 +225,7 @@ const openDialog = () => {
 
 // profile 变化时（如外部刷新）同步更新预览
 watch(
-  () => profile.value?.avatar,
+  () => profile.value?.avatarUrl,
   () => {
     if (!hasChanges.value) initForm();
   }

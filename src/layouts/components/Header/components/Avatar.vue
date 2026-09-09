@@ -65,12 +65,12 @@ const preloadImage = (url: string): Promise<void> => {
 };
 
 /**
- * 根据用户 profile 中的 avatar 设置头像：
+ * 根据用户 profile 中的 avatarUrl 设置头像：
  * - 如果是默认头像：直接使用本地 defaultAvatar
  * - 如果有自定义 avatar：先通过 getOssPreviewUrl 做一次私有地址转换，再预加载
  */
 const resolveAvatar = async () => {
-  const rawAvatar = userStore.profile?.avatar;
+  const rawAvatar = userStore.profile?.avatarUrl;
 
   // 无头像或就是默认头像：直接使用默认
   if (!rawAvatar || rawAvatar === defaultAvatar) {
@@ -122,7 +122,7 @@ resolveAvatar();
 
 // 如果 profile 中的 avatar 发生变化（比如修改个人资料后），自动刷新头像
 watch(
-  () => userStore.profile?.avatar,
+  () => userStore.profile?.avatarUrl,
   () => {
     resolveAvatar();
   }
