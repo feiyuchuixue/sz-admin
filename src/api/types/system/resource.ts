@@ -8,16 +8,18 @@ export type SysResourceQuery = IPageQuery & {
 
 // 列表返回结构
 export type SysResourceRow = {
-  id?: number;
+  id?: string;
   sceneCode?: string;
   objectKey?: string;
+  sceneName?: string;
+  serveMode?: 'DIRECT' | 'PRESIGNED' | 'PROTECTED' | '' | null;
   originName?: string;
   size?: number;
   contentType?: string;
   storageType?: string;
   eTag?: string;
   bizKey?: string;
-  accessUrl?: string;
-  createId?: number;
+  accessUrl?: string | null;
+  createId?: string;
   createTime?: string;
 };
