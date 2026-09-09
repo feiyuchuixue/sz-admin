@@ -23,11 +23,3 @@ export const querySelector = (params: SelectorQuery) => {
 export const getPrivateUrl = (params: OssTransform) => {
   return adminHttp.get<string>(`/common/oss/objects/private-url`, params);
 };
-
-/**
- * 鏂囦欢涓嬭浇
- * @param params
- */
-export const fileDownload = (params: { url: string }) => {
-  return adminHttp.downloadWithHeader(`/common/files/download`, params);
-};
