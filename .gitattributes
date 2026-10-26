@@ -1,0 +1,5 @@
+# Normalize all text files in the Git index and check them out with LF.
+* text=auto eol=lf
+
+# Keep script files explicitly pinned to LF.
+*.sh text eol=lf
