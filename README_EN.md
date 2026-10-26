@@ -130,7 +130,7 @@ admin / sz123456
 | Technology | Description |
 | --- | --- |
 | Vue 3.5.x | Frontend framework. |
-| Vite 7.3.x | Frontend development and build tool. |
+| Vite 7.3.7 | Frontend development and build tool. |
 | TypeScript 5.9.x | Type safety and maintainability. |
 | Element Plus 2.14.x | UI component library. |
 | Pinia 3.x | State management. |
@@ -190,7 +190,7 @@ sz-admin/
 | Maven | 3.8+, 3.9.x recommended |
 | Database | MySQL 8.0.17+ or PostgreSQL 16+ |
 | Redis | 7.x |
-| Node.js | >= 20.19.0, 20.19.5 recommended |
+| Node.js | >= 24.22.1 and < 25, 24.22.1 recommended |
 | pnpm | 10.17.1 |
 
 ## Quick Start
