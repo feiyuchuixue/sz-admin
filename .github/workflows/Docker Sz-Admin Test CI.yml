@@ -30,16 +30,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Set up Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.5'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          node-version: '24.22.1'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
         env:

@@ -36,19 +36,22 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # 2. 配置 Node.js 环境
-      - name: Set up Node.js 20.x
+      # 2. 安装 pnpm 包管理工具
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      # 3. 配置 Node.js 环境
+      - name: Set up Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.5'
-
-      # 3. 安装 pnpm 包管理工具
-      - name: Install pnpm globally
-        run: npm install -g pnpm
+          node-version: '24.22.1'
+          cache: 'pnpm'
 
       # 4. 安装依赖
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       # 5. 构建前端项目
       - name: Build frontend project

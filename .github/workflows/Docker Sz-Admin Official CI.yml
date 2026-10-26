@@ -24,10 +24,10 @@ jobs:
         with:
           version: 10.17.1
 
-      - name: Set up Node.js 20.x
+      - name: Set up Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.5'
+          node-version: '24.22.1'
           cache: 'pnpm'
 
       - name: Install dependencies
