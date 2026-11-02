@@ -43,7 +43,7 @@
     >
       <!-- 默认插槽 -->
       <slot />
-      <template v-for="item in tableColumns" :key="item">
+      <template v-for="(item, index) in tableColumns" :key="item.prop ?? item.type ?? index">
         <!-- selection || radio || index || expand || sort -->
         <el-table-column
           v-if="item.type && columnTypes.includes(item.type)"

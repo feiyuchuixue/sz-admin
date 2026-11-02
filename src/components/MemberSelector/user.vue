@@ -67,7 +67,7 @@ import { querySelectorApi } from '@/components/MemberSelector/api/selector';
 import type { IPage } from '@/api/types';
 import type { SelectorQuery, UserItem } from '@/components/MemberSelector/type/selector';
 import { nextTick, onMounted, reactive, ref } from 'vue';
-import type { ElTable } from 'element-plus';
+import type { TableInstance } from 'element-plus';
 
 defineOptions({
   name: 'UserChoose'
@@ -90,7 +90,7 @@ const treeProps = {
 const treeData = ref<any[]>([]);
 const treeSelected = ref(-1);
 
-const userTableRef = ref<InstanceType<typeof ElTable>>();
+const userTableRef = ref<TableInstance>();
 const tableData = ref<any[]>([]);
 const pageable = reactive({ pageNum: 1, pageSize: 10, total: 0 });
 const keyword = ref<string>('');

@@ -16,7 +16,7 @@
 </template>
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue';
-import type { ElTable } from 'element-plus';
+import type { TableInstance } from 'element-plus';
 import { querySelectorApi } from '@/components/MemberSelector/api/selector';
 import type { DepartmentItem } from '@/components/MemberSelector/type/selector';
 
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<DepartmentChooseProps>(), {
   selected: () => []
 });
 
-const departmentTableRef = ref<InstanceType<typeof ElTable>>();
+const departmentTableRef = ref<TableInstance>();
 const tableData = ref<DepartmentItem[]>([]);
 const isSyncingSelection = ref(false);
 const flatTableData = computed(() => {

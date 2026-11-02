@@ -77,7 +77,6 @@ beforeEach(() => {
 afterEach(() => {
   app?.unmount();
   document.body.innerHTML = '';
-  vi.unstubAllGlobals();
 });
 
 const sceneInput = () => host.querySelector<HTMLInputElement>('input[aria-label="资源场景"]');

@@ -1,7 +1,10 @@
 export function extractDownloadFilename(contentDisposition?: string | null): string | undefined {
   if (!contentDisposition) return undefined;
 
-  const encoded = /filename\*\s*=\s*([^;]+)/i.exec(contentDisposition)?.[1]?.trim().replace(/^"(.*)"$/, '$1');
+  const encoded = /filename\*\s*=\s*([^;]+)/i
+    .exec(contentDisposition)?.[1]
+    ?.trim()
+    .replace(/^"(.*)"$/, '$1');
   if (encoded) {
     const value = /^([^']*)'[^']*'(.*)$/.exec(encoded)?.[2] ?? encoded;
     try {

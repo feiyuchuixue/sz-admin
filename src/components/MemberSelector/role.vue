@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, reactive, ref } from 'vue';
-import type { ElTable } from 'element-plus';
+import type { TableInstance } from 'element-plus';
 import { querySelectorApi } from '@/components/MemberSelector/api/selector';
 import type { RoleItem, SelectorQuery } from '@/components/MemberSelector/type/selector';
 import type { IPage } from '@/api/types';
@@ -48,7 +48,7 @@ const props = withDefaults(defineProps<RoleChooseProps>(), {
   selected: () => []
 });
 
-const roleTableRef = ref<InstanceType<typeof ElTable>>();
+const roleTableRef = ref<TableInstance>();
 const tableData = ref<any[]>([]);
 const pageable = reactive({ pageNum: 1, pageSize: 10, total: 0 });
 const keyword = ref<string>('');
